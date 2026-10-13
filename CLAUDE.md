@@ -25,7 +25,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - `supabase/migrations/0001_produtos.sql`: schema, tabela e os 10 produtos iniciais.
 
 ## Produção
-https://sm.testesana.com.br, na VPS (`76.13.226.25`), pasta `/opt/apps/studio-sm`, container `studio-sm` em `127.0.0.1:3036`, nginx do sistema na frente.
+https://sm.projetosdaana.com.br (provisório, com HTTPS) e https://sm.testesana.com.br (definitivo, aguardando DNS), na VPS (`76.13.226.25`), pasta `/opt/apps/studio-sm`, container `studio-sm` em `127.0.0.1:3036`, nginx do sistema na frente.
 
 Subir ou atualizar: enviar os arquivos por `rsync` e rodar `docker compose up -d --build`. Trocou variável no `.env.local`: `docker compose up -d --force-recreate` (o `restart` mantém o valor antigo).
 
