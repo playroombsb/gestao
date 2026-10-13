@@ -126,11 +126,11 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
               <div key={p.id}
                 className={`relative grid grid-cols-3 items-start gap-x-2.5 gap-y-3 border border-line border-l-4 bg-paper px-3.5 py-3 focus-within:outline md:items-center md:gap-3 focus-within:outline-2 focus-within:outline-red md:grid-cols-[28px_minmax(0,2.4fr)_repeat(3,minmax(0,1fr))_minmax(0,1.1fr)_34px] ${
                   ok ? "border-l-red" : "border-l-line-soft"}`}>
-                <span className={`absolute left-3.5 top-3 text-[13px] font-extrabold md:static ${ok ? "text-red" : "text-muted"}`}>
+                <span className={`absolute left-3.5 top-[19px] text-[13px] font-extrabold md:static ${ok ? "text-red" : "text-muted"}`}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <div className="col-span-3 flex min-w-0 flex-col pl-6 pr-10 md:col-span-1 md:px-0">
-                  <span className="label md:hidden">Produto / serviço</span>
+                <div className="col-span-3 flex min-w-0 flex-col md:col-span-1">
+                  <span className="label flex min-h-[34px] items-center pl-7 md:hidden">Produto / serviço</span>
                   <input id={`nome-${p.id}`} className="campo font-bold" value={p.nome} placeholder="Nome do produto"
                     aria-label="Nome do produto" onChange={(e) => alterar(p.id, { nome: e.target.value })} />
                   {p.descricao && <span className="mt-1 text-[12.5px] text-muted">{p.descricao}</span>}
