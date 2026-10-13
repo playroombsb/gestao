@@ -2,11 +2,9 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { adicionar, remover, salvar } from "@/app/actions";
-import {
-  CAMPOS, QUADRANTES, brl, lucro, mediana, mostrar, naoSei, parseNum, preenchido, quadrante, respondido,
-} from "@/lib/calc";
+import { CAMPOS, brl, lucro, mostrar, naoSei, parseNum, preenchido, respondido, resumo } from "@/lib/calc";
 import type { Campo, Produto, ProdutoPatch } from "@/lib/types";
-import Matriz from "./Matriz";
+import Resultados from "./Resultados";
 
 type Status = { t: string; tom?: "ok" | "erro" };
 
@@ -65,18 +63,7 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
     setStatus(r.ok ? { t: "Salvo", tom: "ok" } : { t: r.erro, tom: "erro" });
   }
 
-  const calc = useMemo(() => {
-    const feitos = itens.filter((p) => p.nome.trim() && preenchido(p));
-    let rec = 0, luc = 0, vol = 0;
-    for (const p of feitos) { rec += p.ticket! * p.vendas!; luc += lucro(p); vol += p.vendas!; }
-    const mm = mediana(feitos.map((p) => p.margem!));
-    const mv = mediana(feitos.map((p) => p.vendas!));
-    const ranking = [...feitos].sort((a, b) => lucro(b) - lucro(a));
-    const max = Math.max(1, ...ranking.map((p) => Math.abs(lucro(p))));
-    const resp = itens.filter(respondido).length;
-    const lacunas = itens.filter((p) => p.nome.trim() && naoSei(p).length);
-    return { feitos, rec, luc, vol, mm, mv, ranking, max, resp, lacunas };
-  }, [itens]);
+  const calc = useMemo(() => resumo(itens), [itens]);
 
   async function copiar() {
     const f = (p: Produto, k: Campo, fmt: (n: number) => string) =>
@@ -92,8 +79,8 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
   }
 
   return (
-    <main className="mx-auto flex max-w-[1080px] flex-col gap-11 px-5 pb-16 pt-8">
-      <header className="flex flex-col gap-3 border-b-2 border-red pb-7">
+    <main className="mx-auto flex max-w-[1080px] flex-col gap-9 px-4 pb-16 pt-6 md:gap-11 md:px-5 md:pt-8">
+      <header className="flex flex-col gap-3 border-b-2 border-red pb-6 md:pb-7">
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-red">Studio - SM · Playroom · Brasília</p>
         <h1 className="text-balance text-[clamp(36px,7vw,62px)] font-extrabold leading-none tracking-[-0.035em]">
           O que <span className="text-red">paga</span> a casa
@@ -109,14 +96,15 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
       <section className="flex flex-col gap-4" aria-labelledby="t-in">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 id="t-in" className="text-[22px] font-bold tracking-tight">Preencha os números</h2>
-          <span aria-live="polite" className={`text-xs font-semibold uppercase tracking-wider ${
-            status.tom === "erro" ? "text-red" : status.tom === "ok" ? "text-ink" : "text-muted"}`}>{status.t}</span>
         </div>
-        <div className="flex items-center gap-3 text-[13px] text-muted">
-          <span>{calc.resp} de {itens.length} respondidos</span>
+        {/* No celular fica preso no topo: a pessoa vê o progresso e o "Salvo" enquanto preenche. */}
+        <div className="sticky top-0 z-10 -mx-4 flex items-center gap-3 border-b border-line bg-bg/95 px-4 py-2.5 text-[13px] text-muted backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+          <span className="shrink-0">{calc.resp} de {itens.length} respondidos</span>
           <div className="h-1 max-w-[240px] flex-1 bg-line">
             <div className="anima h-full bg-red" style={{ width: `${itens.length ? (calc.resp / itens.length) * 100 : 0}%` }} />
           </div>
+          <span aria-live="polite" className={`ml-auto shrink-0 text-xs font-semibold uppercase tracking-wider ${
+            status.tom === "erro" ? "text-red" : status.tom === "ok" ? "text-ink" : "text-muted"}`}>{status.t}</span>
         </div>
 
         <div aria-hidden className="hidden grid-cols-[28px_minmax(0,2.4fr)_repeat(3,minmax(0,1fr))_minmax(0,1.1fr)_34px] gap-3 px-3.5 md:grid">
@@ -135,22 +123,22 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
             const ok = respondido(p);
             return (
               <div key={p.id}
-                className={`relative grid grid-cols-2 items-center gap-3 border border-line border-l-4 bg-paper py-3 pl-3.5 pr-[52px] focus-within:outline focus-within:outline-2 focus-within:outline-red md:grid-cols-[28px_minmax(0,2.4fr)_repeat(3,minmax(0,1fr))_minmax(0,1.1fr)_34px] md:pr-3.5 ${
+                className={`relative grid grid-cols-3 items-start gap-x-2.5 gap-y-3 border border-line border-l-4 bg-paper px-3.5 py-3 focus-within:outline md:items-center md:gap-3 focus-within:outline-2 focus-within:outline-red md:grid-cols-[28px_minmax(0,2.4fr)_repeat(3,minmax(0,1fr))_minmax(0,1.1fr)_34px] ${
                   ok ? "border-l-red" : "border-l-line-soft"}`}>
                 <span className={`absolute left-3.5 top-3 text-[13px] font-extrabold md:static ${ok ? "text-red" : "text-muted"}`}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <div className="col-span-2 flex min-w-0 flex-col pl-6 md:col-span-1 md:pl-0">
+                <div className="col-span-3 flex min-w-0 flex-col pl-6 pr-10 md:col-span-1 md:px-0">
                   <span className="label md:hidden">Produto / serviço</span>
                   <input id={`nome-${p.id}`} className="campo font-bold" value={p.nome} placeholder="Nome do produto"
                     aria-label="Nome do produto" onChange={(e) => alterar(p.id, { nome: e.target.value })} />
                   {p.descricao && <span className="mt-1 text-[12.5px] text-muted">{p.descricao}</span>}
                 </div>
-                {CAMPOS.map(({ k, label }) => {
+                {CAMPOS.map(({ k, label, mobile }) => {
                   const ns = p[`${k}_ns`];
                   return (
                     <div key={k} className="flex min-w-0 flex-col">
-                      <span className="label md:hidden">{label}</span>
+                      <span className="label whitespace-nowrap md:hidden">{mobile}</span>
                       <input key={`${p.id}-${k}-${ns}`} id={`${k}-${p.id}`} inputMode="decimal"
                         className={`campo text-right font-semibold tabular-nums ${ns ? "italic font-bold text-red" : ""}`}
                         defaultValue={ns ? "Não sei" : mostrar(p[k])} readOnly={ns} placeholder="0"
@@ -161,23 +149,23 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
                           alterar(p.id, { [`${k}_ns`]: !ns, ...(ns ? {} : { [k]: null }) } as ProdutoPatch, true);
                           if (ns) setTimeout(() => document.getElementById(`${k}-${p.id}`)?.focus(), 30);
                         }}
-                        className={`mt-1.5 self-start border-[1.5px] px-2 py-0.5 text-[11px] font-semibold md:self-end ${
+                        className={`mt-2 min-h-[40px] self-stretch border-[1.5px] px-1 text-[13px] font-semibold md:mt-1.5 md:min-h-0 md:self-end md:px-2 md:py-0.5 md:text-[11px] ${
                           ns ? "border-ink bg-ink text-white" : "border-line-soft text-muted hover:border-red hover:text-red focus-visible:border-red focus-visible:text-red focus-visible:outline-none"}`}>
                         {ns ? "Sei sim" : "Não sei"}
                       </button>
                     </div>
                   );
                 })}
-                <div className="flex min-w-0 flex-col">
+                <div className="col-span-3 flex min-w-0 items-baseline justify-between gap-3 border-t border-line-soft pt-2.5 md:col-span-1 md:block md:border-0 md:pt-0">
                   <span className="label md:hidden">Lucro / mês</span>
-                  <span className={`tabular-nums md:text-right ${preenchido(p) ? "font-extrabold" : "font-medium text-[#b3a7a5]"}`}>
+                  <span className={`block tabular-nums md:text-right ${preenchido(p) ? "font-extrabold" : "font-medium text-[#b3a7a5]"}`}>
                     {preenchido(p) ? brl(lucro(p)) : naoSei(p).length ? "faltam dados" : "falta preencher"}
                   </span>
                 </div>
                 <button type="button" onClick={() => apagar(p.id)} aria-label={`Remover ${p.nome}`}
-                  className={`absolute right-2 top-2 h-8 border-[1.5px] md:static ${armado === p.id
-                    ? "border-red bg-red px-1.5 text-[11px] font-bold text-white"
-                    : "w-8 border-transparent text-lg text-muted hover:border-red hover:text-red"}`}>
+                  className={`absolute right-1.5 top-1.5 h-11 border-[1.5px] md:static md:h-8 ${armado === p.id
+                    ? "border-red bg-red px-2.5 text-[12px] font-bold text-white md:px-1.5 md:text-[11px]"
+                    : "w-11 border-transparent text-xl text-muted hover:border-red hover:text-red md:w-8 md:text-lg"}`}>
                   {armado === p.id ? "Remover?" : "×"}
                 </button>
               </div>
@@ -187,108 +175,17 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
 
         <div className="flex flex-wrap gap-2.5">
           <button type="button" onClick={novo}
-            className="border-2 border-red bg-red px-[18px] py-[11px] text-[13px] font-bold tracking-wide text-white hover:brightness-110">
+            className="min-h-[48px] flex-1 border-2 border-red bg-red px-[18px] py-[11px] text-[13px] font-bold tracking-wide text-white hover:brightness-110 sm:min-h-0 sm:flex-none">
             + Adicionar produto
           </button>
           <button type="button" onClick={copiar}
-            className="border-2 border-ink px-[18px] py-[11px] text-[13px] font-bold tracking-wide hover:bg-ink hover:text-white">
+            className="min-h-[48px] flex-1 border-2 border-ink px-[18px] py-[11px] text-[13px] font-bold tracking-wide hover:bg-ink hover:text-white sm:min-h-0 sm:flex-none">
             {copiado ?? "Copiar resumo"}
           </button>
         </div>
       </section>
 
-      {/* Lacunas */}
-      <section className="flex flex-col gap-4" aria-labelledby="t-gap">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 id="t-gap" className="text-[22px] font-bold tracking-tight">A levantar</h2>
-          <p className="text-[13px] text-muted">Tudo que foi marcado como &ldquo;não sei&rdquo;. Vira lista de tarefas antes de decidir.</p>
-        </div>
-        <ul className="flex flex-col gap-0.5">
-          {calc.lacunas.length ? calc.lacunas.map((p) => (
-            <li key={p.id} className="flex flex-wrap justify-between gap-4 border-l-[3px] border-red bg-red-soft px-3.5 py-3">
-              <b>{p.nome}</b><span className="text-muted">{naoSei(p).join(", ")}</span>
-            </li>
-          )) : (
-            <li className="border-l-[3px] border-line px-3.5 py-3 text-muted">Nada marcado como &ldquo;não sei&rdquo; até agora.</li>
-          )}
-        </ul>
-      </section>
-
-      {/* Totais */}
-      <section className="flex flex-col gap-4" aria-labelledby="t-tot">
-        <h2 id="t-tot" className="text-[22px] font-bold tracking-tight">Visão do mês</h2>
-        <div className="grid grid-cols-2 gap-0.5 bg-line md:grid-cols-4">
-          {[
-            ["Faturamento", brl(calc.rec), false],
-            ["Lucro", brl(calc.luc), true],
-            ["Margem ponderada", (calc.rec ? Math.round((calc.luc / calc.rec) * 100) : 0) + "%", false],
-            ["Vendas no mês", Math.round(calc.vol).toLocaleString("pt-BR"), false],
-          ].map(([l, v, hl]) => (
-            <div key={l as string} className={`flex flex-col gap-1.5 px-4 py-[18px] ${hl ? "bg-red text-white" : "bg-paper"}`}>
-              <small className={`text-[10.5px] font-bold uppercase tracking-[0.14em] ${hl ? "text-white/85" : "text-muted"}`}>{l}</small>
-              <b className="text-[26px] font-extrabold tracking-tight tabular-nums">{v}</b>
-            </div>
-          ))}
-        </div>
-        <p className="text-[13px] text-muted">Considera só os produtos com os três números preenchidos.</p>
-      </section>
-
-      {/* Ranking */}
-      <section className="flex flex-col gap-4" aria-labelledby="t-rank">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 id="t-rank" className="text-[22px] font-bold tracking-tight">Ranking por lucro mensal</h2>
-          <p className="text-[13px] text-muted">Lucro = ticket × margem × vendas no mês</p>
-        </div>
-        <div className="flex flex-col gap-3">
-          {calc.ranking.length ? calc.ranking.map((p, i) => {
-            const l = lucro(p);
-            const q = quadrante(p, calc.mm, calc.mv);
-            const pill = { carro: "border-red bg-red text-white", premium: "border-red text-red", caixa: "border-ink text-ink", repensar: "border-muted text-muted" }[q];
-            return (
-              <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 gap-y-1.5 md:grid-cols-[minmax(0,1.5fr)_minmax(0,3fr)_auto]">
-                <div className="truncate font-semibold">
-                  {p.nome}
-                  <span className={`ml-2 inline-block border-[1.5px] px-1.5 py-px align-[1px] text-[10px] font-bold uppercase tracking-wider ${pill}`}>{QUADRANTES[q]}</span>
-                </div>
-                <div className="order-3 col-span-2 h-4 bg-line md:order-none md:col-span-1">
-                  <div className={`anima h-full ${l < 0 ? "bg-muted" : i === 0 ? "bg-red" : "bg-ink"}`} style={{ width: `${(Math.abs(l) / calc.max) * 100}%` }} />
-                </div>
-                <div className="min-w-[12ch] text-right text-[13px] font-semibold tabular-nums">
-                  {brl(l)} · {calc.luc > 0 ? Math.round((l / calc.luc) * 100) : 0}%
-                </div>
-              </div>
-            );
-          }) : (
-            <div className="border-[1.5px] border-dashed border-line p-6 text-sm text-muted">
-              O ranking aparece aqui assim que o primeiro produto tiver ticket, margem e vendas preenchidos.
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Matriz */}
-      <section className="flex flex-col gap-4" aria-labelledby="t-mx">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 id="t-mx" className="text-[22px] font-bold tracking-tight">Matriz margem × giro</h2>
-          <p className="text-[13px] text-muted">Cortes na mediana dos produtos. Tamanho do ponto = lucro mensal.</p>
-        </div>
-        <div className="grid items-start gap-7 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-          <Matriz itens={calc.feitos} mm={calc.mm} mv={calc.mv} />
-          <div className="flex flex-col gap-4">
-            {[
-              ["border-red", "Carro-chefe", "Margem alta e giro alto. Proteger, divulgar, nunca deixar faltar."],
-              ["border-red-deep", "Nicho premium", "Margem alta, pouco giro. Empurrar com pacote, upsell ou evento dedicado."],
-              ["border-ink", "Gerador de caixa", "Giro alto, margem baixa. Traz gente e fluxo; testar reajuste de preço ou custo."],
-              ["border-muted", "Repensar", "Margem e giro baixos. Reformular, juntar com outro produto ou cortar."],
-            ].map(([b, t, d]) => (
-              <div key={t} className={`border-l-[3px] pl-3 ${b}`}>
-                <h3 className="text-sm font-bold">{t}</h3>
-                <p className="text-[13px] text-muted">{d}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Resultados calc={calc} />
     </main>
   );
 }

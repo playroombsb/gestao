@@ -8,7 +8,8 @@ const COR: Record<Quadrante, string> = {
   repensar: "#9a8f8d",
 };
 
-export default function Matriz({ itens, mm, mv }: { itens: Produto[]; mm: number; mv: number }) {
+/** `compacto` desenha a versão de celular: quadro mais estreito e alto, textos no mesmo tamanho real. */
+export default function Matriz({ itens, mm, mv, compacto = false }: { itens: Produto[]; mm: number; mv: number; compacto?: boolean }) {
   if (itens.length < 2) {
     return (
       <div className="border-[1.5px] border-dashed border-line p-6 text-sm text-muted">
@@ -17,7 +18,8 @@ export default function Matriz({ itens, mm, mv }: { itens: Produto[]; mm: number
     );
   }
 
-  const W = 560, H = 400, L = 56, R = 24, T = 24, B = 48;
+  const [W, H, L, R, T, B] = compacto ? [360, 400, 40, 12, 24, 46] : [560, 400, 56, 24, 24, 48];
+  const maxNome = compacto ? 15 : 24;
   const maxM = Math.max(100, ...itens.map((o) => o.margem!));
   const vs = itens.map((o) => Math.max(1, o.vendas!));
   const lo = Math.log10(Math.min(...vs) / 1.5);
@@ -25,7 +27,7 @@ export default function Matriz({ itens, mm, mv }: { itens: Produto[]; mm: number
   const x = (v: number) => L + ((Math.log10(Math.max(1, v)) - lo) / (hi - lo || 1)) * (W - L - R);
   const y = (m: number) => T + (1 - m / maxM) * (H - T - B);
   const pmax = Math.max(1, ...itens.map((o) => Math.abs(lucro(o))));
-  const raio = (o: Produto) => 6 + Math.sqrt(Math.abs(lucro(o)) / pmax) * 18;
+  const raio = (o: Produto) => 6 + Math.sqrt(Math.abs(lucro(o)) / pmax) * (compacto ? 13 : 18);
 
   const ticks: number[] = [];
   for (let e = Math.floor(lo); e <= Math.ceil(hi); e++)
@@ -40,8 +42,8 @@ export default function Matriz({ itens, mm, mv }: { itens: Produto[]; mm: number
   const ordenados = [...itens].sort((a, b) => lucro(b) - lucro(a));
 
   return (
-    <div className="overflow-x-auto border border-line bg-paper">
-      <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full min-w-[340px]" role="img"
+    <div className="border border-line bg-paper">
+      <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" role="img"
         aria-label="Matriz de margem por giro dos produtos" fontFamily="inherit" fontSize={11}>
         <rect x={mx} y={T} width={W - R - mx} height={my - T} fill="#fbe6e9" />
         {[0, 25, 50, 75, 100].filter((m) => m <= maxM).map((m) => (
@@ -67,8 +69,8 @@ export default function Matriz({ itens, mm, mv }: { itens: Produto[]; mm: number
           const cx = x(Math.max(1, o.vendas!));
           const cy = y(Math.min(maxM, Math.max(0, o.margem!)));
           const r = raio(o);
-          const dir = cx > W * 0.62;
-          const nome = o.nome.length > 24 ? o.nome.slice(0, 23) + "…" : o.nome;
+          const dir = cx > W * (compacto ? 0.5 : 0.62);
+          const nome = o.nome.length > maxNome ? o.nome.slice(0, maxNome - 1) + "…" : o.nome;
           return (
             <g key={o.id}>
               <circle cx={cx} cy={cy} r={r} fill={COR[quadrante(o, mm, mv)]} fillOpacity={0.9} stroke="#fff" strokeWidth={1.5} />

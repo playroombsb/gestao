@@ -18,3 +18,9 @@ export function chaveValida(k: string | undefined | null) {
   const certa = process.env.ACCESS_KEY;
   return Boolean(certa && k && k === certa);
 }
+
+/** O painel de leitura abre com a chave de edição ou com a PAINEL_KEY (só leitura). */
+export function chavePainelValida(k: string | undefined | null) {
+  const leitura = process.env.PAINEL_KEY;
+  return chaveValida(k) || Boolean(leitura && k && k === leitura);
+}

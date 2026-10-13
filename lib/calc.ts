@@ -1,9 +1,9 @@
 import type { Campo, Produto } from "./types";
 
-export const CAMPOS: { k: Campo; label: string; curto: string }[] = [
-  { k: "ticket", label: "Ticket médio R$", curto: "ticket médio" },
-  { k: "margem", label: "Margem %", curto: "margem" },
-  { k: "vendas", label: "Vendas / mês", curto: "vendas por mês" },
+export const CAMPOS: { k: Campo; label: string; mobile: string; curto: string }[] = [
+  { k: "ticket", label: "Ticket médio R$", mobile: "Ticket R$", curto: "ticket médio" },
+  { k: "margem", label: "Margem %", mobile: "Margem %", curto: "margem" },
+  { k: "vendas", label: "Vendas / mês", mobile: "Vendas/mês", curto: "vendas por mês" },
 ];
 
 const isNum = (x: unknown): x is number => typeof x === "number" && Number.isFinite(x);
@@ -42,6 +42,21 @@ export function quadrante(p: Produto, mm: number, mv: number): Quadrante {
   const hv = p.vendas! >= mv;
   return hm && hv ? "carro" : hm ? "premium" : hv ? "caixa" : "repensar";
 }
+
+/** Tudo que as telas mostram a partir da lista de produtos. */
+export function resumo(itens: Produto[]) {
+  const feitos = itens.filter((p) => p.nome.trim() && preenchido(p));
+  let rec = 0, luc = 0, vol = 0;
+  for (const p of feitos) { rec += p.ticket! * p.vendas!; luc += lucro(p); vol += p.vendas!; }
+  const mm = mediana(feitos.map((p) => p.margem!));
+  const mv = mediana(feitos.map((p) => p.vendas!));
+  const ranking = [...feitos].sort((a, b) => lucro(b) - lucro(a));
+  const max = Math.max(1, ...ranking.map((p) => Math.abs(lucro(p))));
+  const resp = itens.filter(respondido).length;
+  const lacunas = itens.filter((p) => p.nome.trim() && naoSei(p).length);
+  return { feitos, rec, luc, vol, mm, mv, ranking, max, resp, lacunas };
+}
+export type Resumo = ReturnType<typeof resumo>;
 
 /** "1.234,5" ou "1234.5" -> número; vazio -> null */
 export function parseNum(s: string): number | null {

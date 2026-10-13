@@ -1,9 +1,9 @@
 "use server";
 
+import { COLS, normalizar } from "@/lib/dados";
 import { chaveValida, db } from "@/lib/supabase";
 import type { Produto, ProdutoPatch } from "@/lib/types";
 
-const COLS = "id,nome,descricao,ticket,margem,vendas,ticket_ns,margem_ns,vendas_ns,ordem";
 const PERMITIDOS: (keyof ProdutoPatch)[] = [
   "nome", "descricao", "ticket", "margem", "vendas", "ticket_ns", "margem_ns", "vendas_ns", "ordem",
 ];
@@ -40,21 +40,4 @@ export async function remover(k: string, id: string): Promise<Res<null>> {
   if (!chaveValida(k)) return negar();
   const { error } = await db().from("produtos").delete().eq("id", id);
   return error ? { ok: false, erro: "Não foi possível remover." } : { ok: true, data: null };
-}
-
-// Supabase devolve numeric como string em alguns casos
-function normalizar(r: Record<string, unknown>): Produto {
-  const n = (v: unknown) => (v === null || v === undefined || v === "" ? null : Number(v));
-  return {
-    id: String(r.id),
-    nome: String(r.nome ?? ""),
-    descricao: String(r.descricao ?? ""),
-    ticket: n(r.ticket),
-    margem: n(r.margem),
-    vendas: n(r.vendas),
-    ticket_ns: Boolean(r.ticket_ns),
-    margem_ns: Boolean(r.margem_ns),
-    vendas_ns: Boolean(r.vendas_ns),
-    ordem: Number(r.ordem ?? 0),
-  };
 }
