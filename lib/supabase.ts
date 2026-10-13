@@ -14,9 +14,11 @@ export function db() {
   });
 }
 
+/** Sem ACCESS_KEY no ambiente o acesso é aberto: qualquer pessoa com o endereço vê e edita. */
 export function chaveValida(k: string | undefined | null) {
   const certa = process.env.ACCESS_KEY;
-  return Boolean(certa && k && k === certa);
+  if (!certa) return true;
+  return Boolean(k && k === certa);
 }
 
 /** O painel de leitura abre com a chave de edição ou com a PAINEL_KEY (só leitura). */

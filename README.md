@@ -24,4 +24,4 @@ npm run dev
 ```
 
 ## Segurança
-Quem tem o link edita. Para revogar, troque `ACCESS_KEY` no `.env.local` da VPS e rode `docker compose up -d --force-recreate`. A chave `service_role` fica só no servidor.
+Com `ACCESS_KEY` vazia, quem tem o endereço edita. Para fechar, preencha `ACCESS_KEY` no `.env.local` da VPS e rode `docker compose up -d --force-recreate`. A chave `service_role` fica só no servidor.

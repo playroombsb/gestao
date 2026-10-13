@@ -6,11 +6,11 @@ Ferramenta de estratégia de produtos para o Playroom (casa de BDSM em Brasília
 Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Docker na VPS.
 
 ## Como funciona o acesso
-- Ninguém precisa de conta. Quem tem o link `/?k=<ACCESS_KEY>` vê e edita.
+- Ninguém precisa de conta. Em produção o acesso é aberto (decisão da Ana em 13/10/2026): `ACCESS_KEY` fica vazia e o endereço puro abre o preenchimento e o `/painel`. Se `ACCESS_KEY` for preenchida, só o link `/?k=<ACCESS_KEY>` vê e edita.
 - O navegador nunca fala com o Supabase. Toda leitura e escrita passa pelas server actions em `app/actions.ts`, que conferem a chave e usam a `service_role`.
 - A tabela `studio_sm.produtos` (schema próprio no projeto único do Supabase) tem RLS ligado e nenhuma policy, então a chave anon não acessa nada.
 - `/painel?k=<chave>` é o painel só de leitura (respostas por produto, totais, ranking, matriz), atualiza a cada 30 s. Abre com a `ACCESS_KEY` ou com a `PAINEL_KEY`; a `PAINEL_KEY` não abre o preenchimento.
-- Para cortar o acesso de alguém: troque `ACCESS_KEY` no `.env.local` da VPS, recrie o container e mande o link novo.
+- Para fechar o acesso: preencha `ACCESS_KEY` no `.env.local` da VPS, recrie o container e mande o link novo.
 
 ## Mapa
 - `app/page.tsx`: valida a chave e carrega os produtos.
