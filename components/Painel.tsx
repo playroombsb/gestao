@@ -86,9 +86,9 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
         <h1 className="text-balance text-[clamp(36px,7vw,62px)] font-extrabold leading-none tracking-[-0.035em]">
           O que <span className="text-red">paga</span> a casa
         </h1>
-        <p className="max-w-[62ch] text-base text-ink/80">
+        <p className="text-base text-ink/80">
           Para cada produto ou serviço, preencha três números: o ticket médio, a margem de lucro e quantas vendas
-          acontecem por mês (ou quantas você estima). Se não souber algum, clique em &ldquo;Não sei&rdquo;. O resto a
+          acontecem por mês (ou quantas você estima). Se não souber algum, clique em &ldquo;Não sei&rdquo;. Nada é obrigatório: preencha só o que quiser. O resto a
           página calcula sozinha, e tudo fica salvo.
         </p>
       </header>
@@ -160,7 +160,7 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
                 <div className="col-span-3 flex min-w-0 items-baseline justify-between gap-3 border-t border-line-soft pt-2.5 md:col-span-1 md:block md:border-0 md:pt-0">
                   <span className="label md:hidden">Lucro / mês</span>
                   <span className={`block tabular-nums md:text-right ${preenchido(p) ? "font-extrabold" : "font-medium text-[#b3a7a5]"}`}>
-                    {preenchido(p) ? brl(lucro(p)) : naoSei(p).length ? "faltam dados" : "falta preencher"}
+                    {preenchido(p) ? brl(lucro(p)) : "sem cálculo"}
                   </span>
                 </div>
                 <button type="button" onClick={() => apagar(p.id)} aria-label={`Remover ${p.nome}`}

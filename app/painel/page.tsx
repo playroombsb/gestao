@@ -51,7 +51,7 @@ export default async function Page({ searchParams }: { searchParams: { k?: strin
         <h1 className="text-balance text-[clamp(32px,7vw,62px)] font-extrabold leading-none tracking-[-0.035em]">
           O que ela <span className="text-red">respondeu</span>
         </h1>
-        <p className="max-w-[62ch] text-base text-ink/80">
+        <p className="text-base text-ink/80">
           Página só de leitura. Mostra o que foi preenchido em cada produto e o que esses números dizem. Atualiza
           sozinha a cada 30 segundos.
         </p>
@@ -99,7 +99,7 @@ export default async function Page({ searchParams }: { searchParams: { k?: strin
                     {p.descricao && <span className="mt-0.5 block text-[12.5px] text-muted">{p.descricao}</span>}
                   </div>
                   <span className={`shrink-0 text-[10px] font-bold uppercase tracking-wider md:hidden ${ok ? "text-red" : "text-muted"}`}>
-                    {ok ? "Respondido" : "Pendente"}
+                    {ok ? "Respondido" : "Em aberto"}
                   </span>
                 </div>
                 {CAMPOS.map(({ k, mobile }) => (
