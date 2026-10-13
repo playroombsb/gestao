@@ -59,6 +59,7 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
     }
     setArmado(null);
     setItens((xs) => xs.filter((p) => p.id !== id));
+    setStatus({ t: "Salvando…" });
     const r = await remover(chave, id);
     setStatus(r.ok ? { t: "Salvo", tom: "ok" } : { t: r.erro, tom: "erro" });
   }
