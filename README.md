@@ -4,7 +4,7 @@ Mix de produtos do Playroom: ticket médio, margem e giro viram lucro mensal, ra
 
 ## Subir em 4 passos
 
-1. **Supabase**: crie um projeto e rode `supabase/migrations/0001_produtos.sql` no SQL Editor (ou `supabase db push`). Isso cria a tabela e os 10 produtos.
+1. **Supabase**: no projeto único, rode `supabase/migrations/0001_produtos.sql` no SQL Editor. Isso cria o schema `studio_sm`, a tabela e os 10 produtos. O schema precisa estar na lista `pgrst.db_schemas` do role `authenticator`.
 2. **Chave do link**: gere uma chave longa, por exemplo `openssl rand -hex 16`.
 3. **Variáveis** (copie `.env.example` para `.env.local` e preencha também na Vercel):
    - `SUPABASE_URL`

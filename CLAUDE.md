@@ -8,7 +8,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Verc
 ## Como funciona o acesso
 - Ninguém precisa de conta. Quem tem o link `/?k=<ACCESS_KEY>` vê e edita.
 - O navegador nunca fala com o Supabase. Toda leitura e escrita passa pelas server actions em `app/actions.ts`, que conferem a chave e usam a `service_role`.
-- A tabela `produtos` tem RLS ligado e nenhuma policy, então a chave anon não acessa nada.
+- A tabela `studio_sm.produtos` (schema próprio no projeto único do Supabase) tem RLS ligado e nenhuma policy, então a chave anon não acessa nada.
 - Para cortar o acesso de alguém: troque `ACCESS_KEY` na Vercel e mande o link novo.
 
 ## Mapa
@@ -17,7 +17,11 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Verc
 - `components/Painel.tsx`: tela inteira (preenchimento, "A levantar", totais, ranking, matriz). Salva 700 ms após a pessoa parar de digitar.
 - `components/Matriz.tsx`: gráfico SVG margem × vendas (log), cortes na mediana.
 - `lib/calc.ts`: regras de cálculo puras. Lucro = ticket × margem% × vendas.
-- `supabase/migrations/0001_produtos.sql`: tabela e os 10 produtos iniciais.
+- `lib/supabase.ts`: cliente `service_role` apontando para o schema `studio_sm`, com `cache: "no-store"`.
+- `supabase/migrations/0001_produtos.sql`: schema, tabela e os 10 produtos iniciais.
+
+## Produção
+https://sm.testesana.com.br (Vercel).
 
 ## Identidade
 Fundo claro `#f5f2f1`, cartões brancos, texto preto `#0d0a0a`, vermelho `#c8102e` só como acento. Fonte Inter. Tokens em `tailwind.config.ts`.
