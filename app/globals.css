@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+.label {
+  @apply text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted;
+}
+
+.campo {
+  @apply w-full min-w-0 border-0 border-b-[1.5px] border-line-soft bg-transparent px-0.5 py-1.5 text-ink outline-none placeholder:font-normal placeholder:text-[#b3a7a5] focus:border-red;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .anima {
+    transition: width 0.35s ease;
+  }
+}
