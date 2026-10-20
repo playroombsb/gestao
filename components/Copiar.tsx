@@ -13,9 +13,9 @@ export default function Copiar({ valor, rotulo }: { valor: string; rotulo: strin
   return (
     <div className="flex min-w-0 flex-wrap items-stretch gap-2">
       <input readOnly value={valor} aria-label={rotulo} onFocus={(e) => e.target.select()}
-        className="min-h-[44px] min-w-0 flex-1 border-[1.5px] border-line bg-bg px-3 font-mono text-[12px] outline-none focus:border-red" />
+        className="caixa flex-1 bg-bg font-mono md:!text-[13px]" />
       <button type="button" onClick={copiar}
-        className="min-h-[44px] border-2 border-ink px-4 text-[13px] font-bold hover:bg-ink hover:text-white">
+        className="btn-2">
         {ok ?? "Copiar"}
       </button>
     </div>

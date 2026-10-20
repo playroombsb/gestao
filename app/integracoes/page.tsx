@@ -19,13 +19,13 @@ const quando = (iso: string) =>
 
 function Cartao({ nome, estado, resumo, children }: { nome: string; estado: Estado; resumo: string; children?: React.ReactNode }) {
   return (
-    <section aria-label={nome} className={`flex flex-col gap-4 border border-line border-l-4 bg-paper p-5 md:p-6 ${estado === "atencao" ? "border-l-red" : estado === "ativa" ? "border-l-ink" : "border-l-line-soft"}`}>
+    <section aria-label={nome} className="cartao flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 className="text-[20px] font-bold tracking-tight">{nome}</h2>
-          <p className="text-sm text-ink/80">{resumo}</p>
+          <h2 className="titulo-secao">{nome}</h2>
+          <p className="text-[14px] text-ink/80">{resumo}</p>
         </div>
-        <span className={`shrink-0 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${SELO[estado][1]}`}>{SELO[estado][0]}</span>
+        <span className={`shrink-0 selo ${SELO[estado][1]}`}>{SELO[estado][0]}</span>
       </div>
       {children}
     </section>
@@ -33,7 +33,7 @@ function Cartao({ nome, estado, resumo, children }: { nome: string; estado: Esta
 }
 
 const Passos = ({ itens }: { itens: React.ReactNode[] }) => (
-  <ol className="flex list-decimal flex-col gap-1.5 pl-5 text-sm">{itens.map((t, i) => <li key={i}>{t}</li>)}</ol>
+  <ol className="flex list-decimal flex-col gap-1.5 pl-5 text-[14px]">{itens.map((t, i) => <li key={i}>{t}</li>)}</ol>
 );
 
 export default async function Page() {
@@ -67,31 +67,31 @@ export default async function Page() {
               <>Na coluna da esquerda, em <strong>Outras agendas</strong>, clique em <strong>+</strong> e depois em <strong>Do URL</strong>.</>,
               <>Cole o link acima e clique em <strong>Adicionar agenda</strong>. Ela aparece como &ldquo;Playroom&rdquo;.</>,
             ]} />
-            <p className="bg-bg px-3 py-2.5 text-[12px] text-muted">
+            <p className="rounded-lg bg-bg px-3 py-2.5 text-[13px] text-muted">
               O Google atualiza agendas assinadas sozinho, a cada algumas horas. Quem tiver esse link vê os apelidos da agenda: não mande para ninguém de fora.
             </p>
           </>
-        ) : <p className="text-sm text-muted">Falta configurar AGENDA_ICS_TOKEN no servidor.</p>}
+        ) : <p className="text-[14px] text-muted">Falta configurar AGENDA_ICS_TOKEN no servidor.</p>}
       </Cartao>
 
       <Cartao nome="Site: formulário de aplicações" estado={appToken ? "ativa" : "desligada"}
         resumo="Cada envio do formulário do site cai em Aplicações como &ldquo;Nova&rdquo;.">
-        <dl className="grid gap-4 text-sm sm:grid-cols-3">
-          <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted">Endereço</dt><dd className="break-all font-mono text-[12px]">{base}/api/aplicacoes</dd></div>
-          <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted">Token</dt><dd className="font-semibold">{appToken ? "configurado no servidor" : "falta configurar"}</dd></div>
-          <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted">Última recebida</dt><dd className="font-semibold">{appEm ? quando(appEm) : "nenhuma ainda"}</dd></div>
+        <dl className="grid gap-4 text-[14px] sm:grid-cols-3">
+          <div><dt className="rotulo">Endereço</dt><dd className="break-all font-mono text-[13px]">{base}/api/aplicacoes</dd></div>
+          <div><dt className="rotulo">Token</dt><dd className="font-semibold">{appToken ? "configurado no servidor" : "falta configurar"}</dd></div>
+          <div><dt className="rotulo">Última recebida</dt><dd className="font-semibold">{appEm ? quando(appEm) : "nenhuma ainda"}</dd></div>
         </dl>
-        <p className="text-[12px] text-muted">O site manda direto do servidor dele, nunca do navegador, para o token não vazar.</p>
+        <p className="text-[13px] text-muted">O site manda direto do servidor dele, nunca do navegador, para o token não vazar.</p>
       </Cartao>
 
-      <Cartao nome="Instagram" estado={instaHoras < 36 ? "ativa" : "atencao"}
-        resumo={`Coleta diária dos números públicos de @${PERFIL} (seguidores, seguindo e posts), mostrados no Início.`}>
-        <dl className="grid gap-4 text-sm sm:grid-cols-2">
-          <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted">Última coleta</dt><dd className="font-semibold">{instaEm ? quando(instaEm) : "nenhuma"}</dd></div>
-          <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted">Agendada</dt><dd className="font-semibold">todo dia às 9h</dd></div>
+      <Cartao nome="Instagram" estado={instaHoras < 8 * 24 ? "ativa" : "atencao"}
+        resumo={`Coleta semanal dos números públicos de @${PERFIL} (seguidores, seguindo e posts), mostrados no Início.`}>
+        <dl className="grid gap-4 text-[14px] sm:grid-cols-2">
+          <div><dt className="rotulo">Última coleta</dt><dd className="font-semibold">{instaEm ? quando(instaEm) : "nenhuma"}</dd></div>
+          <div><dt className="rotulo">Agendada</dt><dd className="font-semibold">toda segunda às 9h</dd></div>
         </dl>
-        {instaHoras >= 36 && (
-          <p className="bg-red-soft px-3 py-2.5 text-[12px] text-red-deep">
+        {instaHoras >= 8 * 24 && (
+          <p className="rounded-lg bg-red-soft px-3 py-2.5 text-[13px] text-red-deep">
             O Instagram bloqueia a coleta feita do servidor. Para voltar a funcionar sozinha, é preciso um proxy residencial ou rodar a coleta em outro computador.
           </p>
         )}

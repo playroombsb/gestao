@@ -7,7 +7,7 @@ function Botao() {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending}
-      className="mt-2 min-h-[48px] border-2 border-red bg-red px-[18px] text-[13px] font-bold tracking-wide text-white hover:brightness-110 disabled:opacity-60">
+      className="btn-1 mt-2 w-full">
       {pending ? "Entrando…" : "Entrar"}
     </button>
   );
@@ -18,16 +18,16 @@ export default function Entrar() {
   return (
     <form action={enviar} className="flex flex-col gap-5">
       <label className="flex flex-col gap-1">
-        <span className="label">Usuário</span>
+        <span className="rotulo">Usuário</span>
         <input name="usuario" autoComplete="username" autoCapitalize="none" required autoFocus
-          className="campo text-lg font-semibold" />
+          className="caixa" />
       </label>
       <label className="flex flex-col gap-1">
-        <span className="label">Senha</span>
+        <span className="rotulo">Senha</span>
         <input name="senha" type="password" autoComplete="current-password" required
-          className="campo text-lg font-semibold" />
+          className="caixa" />
       </label>
-      <p aria-live="polite" className="min-h-[20px] text-sm font-semibold text-red">{erro}</p>
+      <p aria-live="polite" className="min-h-[20px] text-[14px] font-semibold text-red">{erro}</p>
       <Botao />
     </form>
   );

@@ -6,12 +6,74 @@ body {
   font-feature-settings: "tnum" 1, "cv11" 1;
 }
 
-.label {
-  @apply text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted;
-}
+/*
+  Peças do sistema. Uma escala só para todas as páginas:
+  - Texto: 12 (rótulo, legenda), 13 (secundário), 15 (corpo). Campos usam 16 no celular para o iPhone não dar zoom.
+  - Títulos: página 28 a 40, seção 18, cartão 15.
+  - Alturas: 40 no mouse, 44 no toque (variante toque:, ponteiro grosso).
+  - Cantos: botões e campos 8px, filtros e setas em pílula, cartões 16px.
+*/
+@layer components {
+  .rotulo {
+    @apply text-[12px] font-bold uppercase tracking-[0.12em] text-muted;
+  }
+  .titulo-secao {
+    @apply text-[18px] font-bold tracking-tight;
+  }
 
-.campo {
-  @apply w-full min-w-0 border-0 border-b-[1.5px] border-line-soft bg-transparent px-0.5 py-1.5 text-ink outline-none placeholder:font-normal placeholder:text-[#b3a7a5] focus:border-red;
+  /* Campo sem caixa, para editar texto dentro de cartões */
+  .campo {
+    @apply w-full min-w-0 rounded-none border-0 border-b-[1.5px] border-line-soft bg-transparent px-0.5 py-1.5 text-base text-ink outline-none placeholder:font-normal placeholder:text-apagado focus:border-red md:text-[15px] toque:min-h-[44px];
+  }
+  /* Campo com caixa, para formulários */
+  .caixa {
+    @apply min-h-[40px] w-full min-w-0 rounded-lg border-[1.5px] border-line bg-paper px-3.5 text-base text-ink outline-none placeholder:text-apagado focus:border-ink md:text-[15px] toque:min-h-[44px];
+  }
+
+  .btn {
+    @apply inline-flex min-h-[40px] shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-[14px] font-bold transition-[filter,background-color,color,border-color] duration-150 disabled:opacity-60 toque:min-h-[44px];
+  }
+  .btn-1 {
+    @apply btn bg-red text-white hover:brightness-110;
+  }
+  .btn-2 {
+    @apply btn border-[1.5px] border-ink bg-paper text-ink hover:bg-ink hover:text-white;
+  }
+  .btn-3 {
+    @apply btn px-3 text-muted hover:text-ink;
+  }
+  .btn-perigo {
+    @apply btn bg-red px-3 text-white;
+  }
+  .btn-icone {
+    @apply inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-apagado transition-colors hover:bg-bg hover:text-red toque:h-11 toque:w-11;
+  }
+
+  /* Filtros em pílula */
+  .pilula {
+    @apply inline-flex min-h-[36px] items-center gap-2 rounded-full border-[1.5px] border-line bg-paper px-3.5 text-[13px] font-bold text-ink transition-colors hover:border-ink toque:min-h-[44px];
+  }
+  .pilula[aria-pressed="true"] {
+    @apply border-ink bg-ink text-white;
+  }
+
+  /* Alternador (Kanban/Lista, Todos/Sessões/Aluguéis) */
+  .segmento {
+    @apply inline-flex shrink-0 rounded-full border-[1.5px] border-ink bg-paper p-[3px];
+  }
+  .segmento > button {
+    @apply min-h-[34px] rounded-full px-4 text-[13px] font-bold transition-colors hover:bg-bg toque:min-h-[44px];
+  }
+  .segmento > button[aria-pressed="true"] {
+    @apply bg-ink text-white hover:bg-ink;
+  }
+
+  .cartao {
+    @apply rounded-2xl border border-line-soft bg-paper p-5 shadow-[0_1px_2px_rgba(13,10,10,0.05)] md:p-6;
+  }
+  .selo {
+    @apply inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[12px] font-bold;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

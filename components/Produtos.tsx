@@ -58,31 +58,29 @@ export default function Produtos({ inicial }: { inicial: Produto[] }) {
         </div>
 
         {itens.length === 0 && (
-          <div className="border-[1.5px] border-dashed border-line p-6 text-sm text-muted">Nenhum produto ainda.</div>
+          <div className="rounded-2xl border-[1.5px] border-dashed border-line p-6 text-[14px] text-muted">Nenhum produto ainda.</div>
         )}
 
         {itens.map((p, i) => (
           <article key={p.id}
-            className="grid gap-x-5 gap-y-2 border border-line border-l-4 border-l-red bg-paper p-4 focus-within:outline focus-within:outline-2 focus-within:outline-red md:grid-cols-[32px_minmax(0,1fr)_170px_40px] md:items-start md:p-5">
+            className="cartao grid gap-x-5 gap-y-2 !p-4 focus-within:ring-2 focus-within:ring-red/50 md:!p-5 md:grid-cols-[32px_minmax(0,1fr)_170px_40px] md:items-start">
             <span className="hidden pt-2 text-[13px] font-extrabold text-red md:block">{String(i + 1).padStart(2, "0")}</span>
             <div className="flex min-w-0 flex-col gap-1">
-              <input id={`nome-${p.id}`} className="campo text-[18px] font-bold" value={p.nome} placeholder="Nome do produto"
+              <input id={`nome-${p.id}`} className="campo font-semibold md:!text-[16px]" value={p.nome} placeholder="Nome do produto"
                 aria-label="Nome do produto" onChange={(e) => alterar(p.id, { nome: e.target.value })} />
               <textarea ref={ajustar} rows={1} value={p.descricao} placeholder="Descrição"
                 aria-label={`Descrição de ${p.nome || "produto"}`}
-                className="campo resize-none overflow-hidden text-[14px] leading-relaxed text-ink/80"
+                className="campo resize-none overflow-hidden leading-relaxed text-ink/80"
                 onChange={(e) => { ajustar(e.target); alterar(p.id, { descricao: e.target.value }); }} />
             </div>
             <label className="flex flex-col gap-1">
-              <span className="label">Preço (R$)</span>
+              <span className="rotulo">Preço (R$)</span>
               <input key={`preco-${p.id}`} inputMode="decimal" defaultValue={mostrar(p.ticket)} placeholder="0"
-                className="campo text-right text-[18px] font-extrabold tabular-nums"
+                className="campo text-right font-bold tabular-nums md:!text-[16px]"
                 onChange={(e) => alterar(p.id, { ticket: parseNum(e.target.value), ticket_ns: false })} />
             </label>
             <button type="button" onClick={() => apagar(p.id)} aria-label={`Remover ${p.nome || "produto"}`}
-              className={`h-10 justify-self-end border-[1.5px] md:mt-1 ${armado === p.id
-                ? "border-red bg-red px-2 text-[11px] font-bold text-white"
-                : "w-10 border-transparent text-xl text-muted hover:border-red hover:text-red"}`}>
+              className={armado === p.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white" : "btn-icone text-lg"}>
               {armado === p.id ? "Remover?" : "×"}
             </button>
           </article>
@@ -90,7 +88,7 @@ export default function Produtos({ inicial }: { inicial: Produto[] }) {
 
         <div>
           <button type="button" onClick={novo}
-            className="min-h-[48px] w-full border-2 border-red bg-red px-[18px] text-[13px] font-bold tracking-wide text-white hover:brightness-110 sm:min-h-[44px] sm:w-auto">
+            className="btn-1 w-full sm:w-auto">
             + Adicionar produto
           </button>
         </div>

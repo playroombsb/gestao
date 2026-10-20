@@ -11,7 +11,6 @@ import AgendaSemana from "@/components/AgendaSemana";
 export const dynamic = "force-dynamic";
 
 const TZ = "America/Sao_Paulo";
-const ROTULO = "text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted";
 
 function saudacao() {
   const h = Number(new Date().toLocaleString("en-US", { timeZone: TZ, hour: "numeric", hourCycle: "h23" }));
@@ -23,8 +22,8 @@ const mil = (n: number) => n.toLocaleString("pt-BR");
 function Metrica({ rotulo, valor, nota, destaque }: { rotulo: string; valor: string; nota?: string; destaque?: boolean }) {
   return (
     <div className="flex flex-[1_1_140px] flex-col gap-1 bg-paper p-4">
-      <span className={ROTULO}>{rotulo}</span>
-      <span className="text-[26px] font-extrabold tracking-tight tabular-nums">{valor}</span>
+      <span className="rotulo">{rotulo}</span>
+      <span className="text-[24px] font-extrabold tracking-tight tabular-nums">{valor}</span>
       {nota && <span className={`text-[12px] ${destaque ? "font-bold text-red" : "text-muted"}`}>{nota}</span>}
     </div>
   );
@@ -34,16 +33,16 @@ function Instagram({ atual, antes }: { atual: Insta | null; antes: Insta | null 
   const delta = atual?.seguidores != null && antes?.seguidores != null ? atual.seguidores - antes.seguidores : null;
   const dias = atual && antes ? Math.round((Date.parse(atual.coletado_em) - Date.parse(antes.coletado_em)) / 86_400_000) : 0;
   return (
-    <section aria-labelledby="t-insta" className="flex min-w-0 flex-[1_1_320px] flex-col gap-3 border border-line bg-paper p-5 md:p-6">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 id="t-insta" className="text-[20px] font-bold tracking-tight">Instagram</h2>
-        <a href={`https://www.instagram.com/${PERFIL}/`} target="_blank" rel="noreferrer" className="text-[13px] font-semibold text-muted hover:text-red">@{PERFIL}</a>
+    <section aria-labelledby="t-insta" className="cartao flex min-w-0 flex-[1_1_320px] flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <h2 id="t-insta" className="titulo-secao">Instagram</h2>
+        <a href={`https://www.instagram.com/${PERFIL}/`} target="_blank" rel="noreferrer" className="btn-3 -mr-3 font-semibold">@{PERFIL}</a>
       </div>
       {!atual ? (
-        <p className="border-[1.5px] border-dashed border-line p-5 text-sm text-muted">Ainda sem coleta. Os números chegam uma vez por dia.</p>
+        <p className="rounded-xl border-[1.5px] border-dashed border-line p-5 text-[13px] text-muted">Ainda sem coleta. Os números chegam uma vez por semana.</p>
       ) : (
         <>
-          <div className="flex flex-wrap gap-px border border-line-soft bg-line-soft">
+          <div className="flex flex-wrap gap-px overflow-hidden rounded-xl border border-line-soft bg-line-soft">
             <Metrica rotulo="Seguidores" valor={atual.seguidores != null ? mil(atual.seguidores) : "—"}
               nota={delta != null ? `${delta >= 0 ? "+" : ""}${mil(delta)} em ${dias} ${dias === 1 ? "dia" : "dias"}` : "variação aparece após a 2ª coleta"} destaque={!!delta} />
             {atual.posts != null && <Metrica rotulo="Posts" valor={mil(atual.posts)}

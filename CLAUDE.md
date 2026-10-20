@@ -46,7 +46,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 O formulário do site (ainda a fazer) envia servidor a servidor: `POST https://sm.testesana.com.br/api/aplicacoes` com `Authorization: Bearer <APLICACOES_TOKEN>` e JSON `{ "apelido", "contato", "interesse", "respostas": [{ "pergunta", "resposta" }] }`. Qualquer outro campo simples vira resposta. Limite de 20 KB. O token não pode ir para o navegador.
 
 ## Instagram
-`scraper/instagram.py` lê seguidores, seguindo e posts do HTML público do perfil e grava em `studio_sm.instagram`. O perfil é restrito por idade, então curtidas e engajamento não aparecem sem login. Da VPS o Instagram bloqueia (HTTP 429, IP de datacenter); do Mac da Ana funciona. Na VPS há um cron às 12:00 UTC (`docker compose --profile insta run --rm -T insta`, log em `/var/log/studio-sm-insta.log`) que só passa a funcionar com `INSTAGRAM_PROXY` (proxy residencial) no `.env.local`.
+`scraper/instagram.py` lê seguidores, seguindo e posts do HTML público do perfil e grava em `studio_sm.instagram`. O perfil é restrito por idade, então curtidas e engajamento não aparecem sem login. Da VPS o Instagram bloqueia (HTTP 429, IP de datacenter); do Mac da Ana funciona. Na VPS há um cron semanal, segunda às 12:00 UTC = 9h de Brasília (`docker compose --profile insta run --rm -T insta`, log em `/var/log/studio-sm-insta.log`) que só passa a funcionar com `INSTAGRAM_PROXY` (proxy residencial) no `.env.local`.
 
 ## Produção
 https://sm.testesana.com.br, com HTTPS, na VPS (`76.13.226.25`), pasta `/opt/apps/studio-sm`, container `studio-sm` em `127.0.0.1:3036`, nginx do sistema na frente. O sm.projetosdaana.com.br foi desligado em 20/10/2026.
@@ -54,7 +54,14 @@ https://sm.testesana.com.br, com HTTPS, na VPS (`76.13.226.25`), pasta `/opt/app
 Subir ou atualizar: enviar os arquivos por `rsync` e rodar `docker compose up -d --build`. Trocou variável no `.env.local`: `docker compose up -d --force-recreate` (o `restart` mantém o valor antigo).
 
 ## Identidade
-Fundo claro `#f5f2f1`, cartões brancos, texto preto `#0d0a0a`, vermelho `#c8102e` só como acento. Fonte Inter. Tokens em `tailwind.config.ts`.
+Fundo claro `#f5f2f1`, cartões brancos, texto preto `#0d0a0a`, vermelho `#c8102e` só como acento, cinza fraco `apagado` (`#756a68`, passa no contraste). Fonte Inter. Tokens em `tailwind.config.ts`.
+
+Padrão visual (decidido em 20/10/2026, a partir da página de Tarefas): peças em `app/globals.css`, use sempre elas.
+- Botões `btn-1` (vermelho), `btn-2` (contorno), `btn-3` (texto), `btn-perigo`, `btn-icone`; filtros `pilula` com `aria-pressed`; alternador `segmento`; campos `caixa` (formulário) e `campo` (edição direta); `cartao`; `selo`; `rotulo`; `titulo-secao`.
+- Cantos: botões e campos 8px, filtros e setas em pílula, cartões 16px. Sidebar com itens arredondados e gradiente leve.
+- Escala: texto 12/13/15, seção 18, título da página 28 a 40. Campos com 16px no celular (o iPhone dá zoom abaixo disso).
+- Alturas: 40px no mouse, 44px no toque (variante `toque:`, ponteiro grosso).
+- Kanban de Tarefas e CRM: colunas lado a lado só em tela larga; abaixo disso, abas com uma coluna por vez.
 
 ## Regras
 - Textos da interface em português do Brasil, sem travessões.

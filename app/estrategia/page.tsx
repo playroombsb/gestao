@@ -24,7 +24,7 @@ function Produto({ n, nome, sub, voce, children }: {
         {n}
       </span>
       <div>
-        <p className="flex items-center gap-2 text-[22px] font-bold tracking-tight"><span aria-hidden className="text-red">→</span>{nome}</p>
+        <p className="flex items-center gap-2 titulo-secao"><span aria-hidden className="text-red">→</span>{nome}</p>
         {sub && <p className="pl-7 text-[14px] text-muted">{sub}</p>}
       </div>
       <div className="flex min-w-0 flex-col gap-3 text-[15px]">{children}</div>
@@ -49,7 +49,7 @@ export default async function Page() {
 
       {/* 01 */}
       <section aria-labelledby="t-01" className="flex flex-col gap-2">
-        <h2 id="t-01" className="flex items-baseline gap-3 text-[26px] font-bold tracking-tight">
+        <h2 id="t-01" className="flex items-baseline gap-3 text-[22px] font-bold tracking-tight">
           <span className={`${MONO} text-red`}>01</span>Produtos e desafios
         </h2>
         <div className="border-l-[3px] border-red pl-4 md:pl-8">
@@ -63,13 +63,13 @@ export default async function Page() {
               </div>
               <div aria-hidden className="flex gap-1">
                 {MESES.map((m, i) => (
-                  <span key={i} className={`w-7 text-center ${MONO} text-[11px] ${ALTA.has(i) ? "font-bold text-red" : "text-muted"}`}>{m}</span>
+                  <span key={i} className={`w-7 text-center ${MONO} text-[12px] ${ALTA.has(i) ? "font-bold text-red" : "text-muted"}`}>{m}</span>
                 ))}
               </div>
             </div>
             <div className="flex gap-8">
-              <p><span className="block text-[32px] font-extrabold leading-none text-red">25</span><span className="text-[13px] text-muted">sessões · alta</span></p>
-              <p><span className="block text-[32px] font-extrabold leading-none">12</span><span className="text-[13px] text-muted">sessões · baixa</span></p>
+              <p><span className="block text-[28px] font-extrabold leading-none text-red">25</span><span className="text-[13px] text-muted">sessões · alta</span></p>
+              <p><span className="block text-[28px] font-extrabold leading-none">12</span><span className="text-[13px] text-muted">sessões · baixa</span></p>
             </div>
             <p className={`${MONO} text-red`}>↳ alimenta o Personagem Atrativo (03)</p>
           </Produto>
@@ -102,8 +102,8 @@ export default async function Page() {
           <Produto n="Produto 4" nome="Eventos/Festas">
             <div className="flex flex-wrap items-start gap-6">
               <p className="flex-[1_1_220px]"><strong>Desafios:</strong> ansiedade, lugar/espaço, equipe.</p>
-              <p><span className="block text-[32px] font-extrabold leading-none text-red">100h</span><span className="text-[13px] text-muted">média por evento</span></p>
-              <p><span className="block text-[32px] font-extrabold leading-none">2</span><span className="text-[13px] text-muted">eventos por ano</span></p>
+              <p><span className="block text-[28px] font-extrabold leading-none text-red">100h</span><span className="text-[13px] text-muted">média por evento</span></p>
+              <p><span className="block text-[28px] font-extrabold leading-none">2</span><span className="text-[13px] text-muted">eventos por ano</span></p>
             </div>
           </Produto>
 
@@ -115,7 +115,7 @@ export default async function Page() {
 
       {/* 02 */}
       <section aria-labelledby="t-02" className="flex flex-col gap-5 border-t-2 border-ink pt-8">
-        <h2 id="t-02" className="flex items-baseline gap-3 text-[26px] font-bold tracking-tight">
+        <h2 id="t-02" className="flex items-baseline gap-3 text-[22px] font-bold tracking-tight">
           <span className={`${MONO} text-red`}>02</span>Tempo
         </h2>
         <div className="grid gap-6 md:grid-cols-2">
@@ -138,7 +138,7 @@ export default async function Page() {
 
       {/* 03 */}
       <section aria-labelledby="t-03" className="flex flex-col gap-6 border-t-2 border-ink pt-8">
-        <h2 id="t-03" className="flex items-baseline gap-3 text-[26px] font-bold tracking-tight">
+        <h2 id="t-03" className="flex items-baseline gap-3 text-[22px] font-bold tracking-tight">
           <span className={`${MONO} text-red`}>03</span>Funil, público e personagem
         </h2>
         <div className="grid gap-8 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">

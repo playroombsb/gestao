@@ -52,3 +52,16 @@ export function resumoCrm(cs: Contato[], mes = mesAtual()) {
       .sort((a, b) => a.data_hora!.localeCompare(b.data_hora!)),
   };
 }
+
+/** "Outubro de 2026" a partir de AAAA-MM. */
+export function nomeMes(mes: string) {
+  const [a, m] = mes.split("-").map(Number);
+  const t = new Date(Date.UTC(a, m - 1, 15)).toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+/** Soma n meses a AAAA-MM (n pode ser negativo). */
+export function somaMes(mes: string, n: number) {
+  const [a, m] = mes.split("-").map(Number);
+  return new Date(Date.UTC(a, m - 1 + n, 1)).toISOString().slice(0, 7);
+}

@@ -27,27 +27,27 @@ export default function AgendaSemana({ dias, contatos, eventos }: { dias: string
   ].sort((a, b) => a.inicio.localeCompare(b.inicio));
 
   return (
-    <section aria-labelledby="t-agenda" className="flex flex-col gap-3 border border-line bg-paper p-5 md:p-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 id="t-agenda" className="text-[20px] font-bold tracking-tight">Agenda dos próximos 7 dias</h2>
-        <Link href="/calendario" className="text-[13px] font-bold hover:text-red">Abrir calendário</Link>
+    <section aria-labelledby="t-agenda" className="cartao flex flex-col gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="t-agenda" className="titulo-secao">Agenda dos próximos 7 dias</h2>
+        <Link href="/calendario" className="btn-3 -mr-3">Abrir calendário</Link>
       </div>
-      {itens.length === 0 && <p className="text-sm text-muted">Nada agendado nos próximos 7 dias.</p>}
+      {itens.length === 0 && <p className="text-[13px] text-muted">Nada agendado nos próximos 7 dias.</p>}
       <ol className="flex flex-col">
         {dias.map((d) => {
           const doDia = itens.filter((i) => diaBR(i.inicio) === d);
           return (
             <li key={d} className="grid gap-x-4 gap-y-1 border-b border-line-soft py-2.5 last:border-0 sm:grid-cols-[150px_minmax(0,1fr)]">
-              <span className={`text-sm font-bold ${d === dias[0] ? "text-red" : ""}`}>{nomeDia(d, dias[0])}</span>
-              {doDia.length === 0 ? <span className="text-sm text-[#9a8e8c]">livre</span> : (
+              <span className={`text-[14px] font-bold ${d === dias[0] ? "text-red" : ""}`}>{nomeDia(d, dias[0])}</span>
+              {doDia.length === 0 ? <span className="text-[14px] text-apagado">livre</span> : (
                 <ul className="flex flex-col gap-1">
                   {doDia.map((i) => (
                     <li key={i.id}>
-                      <Link href={i.href} className="flex flex-wrap items-center gap-x-3 gap-y-1 hover:text-red">
-                        <span className="w-12 text-sm font-semibold tabular-nums">{horaBR(i.inicio)}</span>
-                        <span className={`px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider ${COR_AGENDA[i.tipo].cor}`}>{COR_AGENDA[i.tipo].um}</span>
-                        <span className="min-w-0 text-sm font-semibold">{i.titulo}</span>
-                        {i.aConfirmar && <span className="text-[11px] font-semibold text-muted">a confirmar</span>}
+                      <Link href={i.href} className="-mx-2 flex min-h-[36px] flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-2 hover:bg-bg toque:min-h-[44px]">
+                        <span className="w-12 text-[14px] font-semibold tabular-nums">{horaBR(i.inicio)}</span>
+                        <span className={`selo ${COR_AGENDA[i.tipo].cor}`}>{COR_AGENDA[i.tipo].um}</span>
+                        <span className="min-w-0 text-[14px] font-semibold">{i.titulo}</span>
+                        {i.aConfirmar && <span className="text-[12px] font-semibold text-muted">a confirmar</span>}
                       </Link>
                     </li>
                   ))}

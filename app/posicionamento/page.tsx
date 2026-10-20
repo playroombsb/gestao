@@ -23,10 +23,10 @@ export default async function Page() {
     <main className={PAGINA}>
       <Cabecalho rotulo="Marketing · Posicionamento" titulo={<>Quem a casa <span className="text-red">é</span></>} />
 
-      <section aria-labelledby="t-arq" className="flex flex-wrap gap-8 bg-ink p-6 text-white md:p-8">
+      <section aria-labelledby="t-arq" className="flex flex-wrap gap-8 rounded-2xl bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_45%,#0d0a0a_80%)] p-6 text-white md:p-8">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-3">
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-side-text">Arquétipo</span>
-          <h2 id="t-arq" className="text-[34px] font-extrabold leading-[1.05] tracking-[-0.03em]">
+          <span className="text-[12px] font-bold uppercase tracking-[0.12em] text-side-text">Arquétipo</span>
+          <h2 id="t-arq" className="text-[28px] font-extrabold leading-[1.05] tracking-[-0.03em]">
             Rebelde <span className="text-red-vivo">com</span> Amante
           </h2>
           <p className="text-[15px] leading-relaxed text-[#e9e2e0]">
@@ -44,11 +44,11 @@ export default async function Page() {
           {NOTAS.map((x) => (
             <div key={x.nome} className="flex items-center gap-2.5 text-[13px]">
               <span className="w-[84px]">{x.nome}</span>
-              <div className="h-2 flex-1 bg-side-line"><div className={`h-2 ${x.cor}`} style={{ width: `${x.n}%` }} /></div>
+              <div className="h-2 flex-1 rounded-full bg-side-line"><div className={`h-2 rounded-full ${x.cor}`} style={{ width: `${x.n}%` }} /></div>
               <span className="w-6 text-right font-bold tabular-nums">{x.n}</span>
             </div>
           ))}
-          <span className="text-[12px] text-side-text">Menos presente: Cara Comum (44). Desempate: Rebelde, 2 de 2.</span>
+          <span className="text-[13px] text-side-text">Menos presente: Cara Comum (44). Desempate: Rebelde, 2 de 2.</span>
         </div>
       </section>
 

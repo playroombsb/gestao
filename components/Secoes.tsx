@@ -52,36 +52,34 @@ export default function Secoes({ pagina, inicial }: { pagina: Pagina; inicial: S
       </div>
 
       {secoes.length === 0 && (
-        <div className="border-[1.5px] border-dashed border-line p-6 text-sm text-muted">
+        <div className="rounded-2xl border-[1.5px] border-dashed border-line p-6 text-[14px] text-muted">
           Nenhuma seção ainda. Use &ldquo;Adicionar seção&rdquo;.
         </div>
       )}
 
       {secoes.map((s, i) => (
         <article key={s.id}
-          className="flex flex-col gap-3 border border-line border-l-4 border-l-red bg-paper px-4 py-4 focus-within:outline focus-within:outline-2 focus-within:outline-red md:px-6 md:py-5">
+          className="cartao flex flex-col gap-2 focus-within:ring-2 focus-within:ring-red/50">
           <div className="flex items-start gap-3">
-            <span className="pt-2.5 text-[13px] font-extrabold text-red">{String(i + 1).padStart(2, "0")}</span>
-            <input id={`titulo-${s.id}`} className="campo text-[20px] font-bold tracking-tight" value={s.titulo}
+            <span className="pt-2 text-[13px] font-extrabold text-red">{String(i + 1).padStart(2, "0")}</span>
+            <input id={`titulo-${s.id}`} className="campo font-bold md:!text-[18px]" value={s.titulo}
               placeholder="Título da seção" aria-label="Título da seção"
               onChange={(e) => alterar(s.id, { titulo: e.target.value })} />
             <button type="button" onClick={() => apagar(s.id)} aria-label={`Remover ${s.titulo || "seção"}`}
-              className={`h-11 shrink-0 border-[1.5px] md:h-9 ${armado === s.id
-                ? "border-red bg-red px-2.5 text-[12px] font-bold text-white"
-                : "w-11 border-transparent text-xl text-muted hover:border-red hover:text-red md:w-9"}`}>
+              className={armado === s.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white" : "btn-icone text-lg"}>
               {armado === s.id ? "Remover?" : "×"}
             </button>
           </div>
           <textarea ref={ajustar} rows={2} value={s.conteudo} placeholder="Escreva aqui…"
             aria-label={`Conteúdo de ${s.titulo || "seção"}`}
-            className="campo resize-none overflow-hidden whitespace-pre-wrap text-[15px] leading-relaxed"
+            className="campo resize-none overflow-hidden whitespace-pre-wrap leading-relaxed"
             onChange={(e) => { ajustar(e.target); alterar(s.id, { conteudo: e.target.value }); }} />
         </article>
       ))}
 
       <div>
         <button type="button" onClick={nova}
-          className="min-h-[48px] w-full border-2 border-ink px-[18px] py-[11px] text-[13px] font-bold tracking-wide hover:bg-ink hover:text-white sm:min-h-0 sm:w-auto">
+          className="btn-2 w-full sm:w-auto">
           + Adicionar seção
         </button>
       </div>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { sessao } from "@/lib/auth";
 import { db } from "@/lib/supabase";
@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// viewport-fit=cover: o menu respeita a área do entalhe e da barra do iPhone (safe-area)
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0d0a0a" };
+
 /** Aplicações ainda não lidas, para o número no menu. Falha aqui não derruba a página. */
 async function contarNovas() {
   const { count } = await db().from("aplicacoes").select("id", { count: "exact", head: true }).eq("status", "nova");
@@ -20,8 +23,8 @@ async function contarNovas() {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const s = await sessao();
-  const novas = s ? await contarNovas().catch(() => 0) : 0;
+  // As duas consultas em paralelo: a contagem é descartada se não houver sessão
+  const [s, novas] = await Promise.all([sessao(), contarNovas().catch(() => 0)]);
   return (
     <html lang="pt-BR" className={inter.variable}>
       <body className="bg-bg font-sans text-ink antialiased">

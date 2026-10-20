@@ -1,6 +1,6 @@
-/** Selo do tipo de atendimento: sessão em preto, aluguel em rosado. */
+import { COR_AGENDA } from "@/lib/agenda";
+
+/** Selo do tipo de atendimento (sessão ou aluguel), nas mesmas cores do calendário. */
 export default function Tipo({ tipo }: { tipo: "sessao" | "aluguel" }) {
-  return tipo === "aluguel"
-    ? <span className="shrink-0 bg-red-soft px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-red-deep">Aluguel</span>
-    : <span className="shrink-0 bg-ink px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-white">Sessão</span>;
+  return <span className={`selo ${COR_AGENDA[tipo].cor}`}>{COR_AGENDA[tipo].um}</span>;
 }
