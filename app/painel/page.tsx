@@ -2,7 +2,7 @@ import Atualizar from "@/components/Atualizar";
 import Resultados from "@/components/Resultados";
 import { CAMPOS, brl, lucro, mostrar, preenchido, respondido, resumo } from "@/lib/calc";
 import { carregarPainel } from "@/lib/dados";
-import { chavePainelValida } from "@/lib/supabase";
+import { exigirLogin } from "@/lib/auth";
 import type { Campo, Produto } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -29,10 +29,8 @@ function Valor({ p, k }: { p: Produto; k: Campo }) {
   return <span className="font-semibold tabular-nums">{FMT[k](p[k]!)}</span>;
 }
 
-export default async function Page({ searchParams }: { searchParams: { k?: string } }) {
-  if (!chavePainelValida(searchParams.k)) {
-    return <Aviso titulo="Este link não abre o painel." texto="Link sem permissão. Peça um link novo." />;
-  }
+export default async function Page() {
+  exigirLogin();
   const dados = await carregarPainel();
   if (!dados) return <Aviso titulo="O painel não carregou." texto="Não foi possível carregar os dados. Tente de novo em instantes." />;
 

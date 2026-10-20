@@ -8,7 +8,7 @@ import Resultados from "./Resultados";
 
 type Status = { t: string; tom?: "ok" | "erro" };
 
-export default function Painel({ chave, inicial }: { chave: string; inicial: Produto[] }) {
+export default function Painel({ inicial }: { inicial: Produto[] }) {
   const [itens, setItens] = useState<Produto[]>(inicial);
   const [status, setStatus] = useState<Status>({ t: "Tudo salvo", tom: "ok" });
   const [armado, setArmado] = useState<string | null>(null);
@@ -17,9 +17,9 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
 
   const gravar = useCallback(async (id: string, patch: ProdutoPatch) => {
     setStatus({ t: "Salvando…" });
-    const r = await salvar(chave, id, patch);
+    const r = await salvar(id, patch);
     setStatus(r.ok ? { t: "Salvo", tom: "ok" } : { t: r.erro, tom: "erro" });
-  }, [chave]);
+  }, []);
 
   const alterar = useCallback((id: string, patch: ProdutoPatch, imediato = false) => {
     setItens((xs) => xs.map((p) => (p.id === id ? { ...p, ...patch } : p)));
@@ -44,7 +44,7 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
   async function novo() {
     const ordem = Math.max(0, ...itens.map((p) => p.ordem)) + 1;
     setStatus({ t: "Salvando…" });
-    const r = await adicionar(chave, ordem);
+    const r = await adicionar(ordem);
     if (!r.ok) return setStatus({ t: r.erro, tom: "erro" });
     setItens((xs) => [...xs, r.data]);
     setStatus({ t: "Salvo", tom: "ok" });
@@ -60,7 +60,7 @@ export default function Painel({ chave, inicial }: { chave: string; inicial: Pro
     setArmado(null);
     setItens((xs) => xs.filter((p) => p.id !== id));
     setStatus({ t: "Salvando…" });
-    const r = await remover(chave, id);
+    const r = await remover(id);
     setStatus(r.ok ? { t: "Salvo", tom: "ok" } : { t: r.erro, tom: "erro" });
   }
 

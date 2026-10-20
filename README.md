@@ -1,27 +1,24 @@
 # Studio - SM
 
-Mix de produtos do Playroom: ticket médio, margem e giro viram lucro mensal, ranking e matriz de decisão. Preenchimento por link, sem login.
+Estratégia do Playroom: números dos produtos (ticket, margem e giro viram lucro mensal, ranking e matriz), estratégia de marca e tarefas do projeto. Acesso com usuário e senha.
 
 ## Subir em 4 passos
 
-1. **Supabase**: no projeto único, rode `supabase/migrations/0001_produtos.sql` no SQL Editor. Isso cria o schema `studio_sm`, a tabela e os 10 produtos. O schema precisa estar na lista `pgrst.db_schemas` do role `authenticator`.
-2. **Chave do link**: gere uma chave longa, por exemplo `openssl rand -hex 16`.
+1. **Supabase**: no projeto único, rode as migrações de `supabase/migrations/` em ordem no SQL Editor. Isso cria o schema `studio_sm`, as tabelas e o conteúdo inicial. O schema precisa estar na lista `pgrst.db_schemas` do role `authenticator`.
+2. **Usuários**: gere o hash da senha com `gerarHash` (`lib/senha.ts`) e insira em `studio_sm.usuarios` (`nome`, `login` minúsculo sem acento, `senha_hash`, `admin`).
 3. **Variáveis** (copie `.env.example` para `.env.local`, na sua máquina e na VPS):
    - `SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - `ACCESS_KEY`
-   - `PAINEL_KEY` (opcional, link só de leitura do painel)
-4. **Deploy** na VPS, em `/opt/apps/studio-sm`: `docker compose up -d --build`. O link para a dona é:
-   `https://sm.testesana.com.br/?k=SUA_ACCESS_KEY`
-   E o painel só de leitura: `https://sm.testesana.com.br/painel?k=SUA_PAINEL_KEY`
+   - `SESSION_SECRET` (`openssl rand -hex 32`)
+4. **Deploy** na VPS, em `/opt/apps/studio-sm`: `docker compose up -d --build`. Endereço: `https://sm.testesana.com.br`.
 
 ## Rodar local
 
 ```bash
 npm install
 npm run dev
-# abra http://localhost:3000/?k=SUA_ACCESS_KEY
+# abra http://localhost:3000 e entre com seu usuário
 ```
 
 ## Segurança
-Com `ACCESS_KEY` vazia, quem tem o endereço edita. Para fechar, preencha `ACCESS_KEY` no `.env.local` da VPS e rode `docker compose up -d --force-recreate`. A chave `service_role` fica só no servidor.
+Sem sessão válida, toda página manda para `/login` e toda server action recusa. A chave `service_role` fica só no servidor. Trocar `SESSION_SECRET` desloga todo mundo; depois de mudar variável no `.env.local` da VPS, rode `docker compose up -d --force-recreate`.

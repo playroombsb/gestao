@@ -14,3 +14,9 @@ export type Produto = {
 };
 
 export type ProdutoPatch = Partial<Omit<Produto, "id">>;
+
+export type Secao = { id: string; titulo: string; conteudo: string; ordem: number };
+export type SecaoPatch = Partial<Omit<Secao, "id">>;
+
+export type Tarefa = { id: string; titulo: string; feita: boolean; ordem: number };
+export type TarefaPatch = Partial<Omit<Tarefa, "id">>;
