@@ -10,9 +10,26 @@ import type { Lancamento } from "@/lib/types";
 import Cabecalho, { BOTAO, PAGINA } from "./Cabecalho";
 import StatusSalvo from "./StatusSalvo";
 
-const CUSTOS = ["Aluguel do imóvel", "Contas", "Faxina", "Materiais", "Marketing", "Ferramentas", "Impostos", "Equipe", "Outros"];
+/*
+  Custo fixo = custo recorrente: lançado uma vez, aparece em todo mês a partir da data dele.
+  Custo variável = só no mês em que foi lançado.
+*/
+
+type Grupo = "receita" | "fixo" | "variavel";
+
+const GRUPOS: { k: Grupo; t: string; titulo: string; dica: string }[] = [
+  { k: "receita", t: "Receita", titulo: "Receitas", dica: "ex: workshop de spanking" },
+  { k: "fixo", t: "Custo fixo", titulo: "Custos fixos", dica: "ex: aluguel do imóvel" },
+  { k: "variavel", t: "Custo variável", titulo: "Custos variáveis", dica: "ex: faxina de sábado" },
+];
+const CATEGORIAS: Record<Exclude<Grupo, "receita">, string[]> = {
+  fixo: ["Aluguel do imóvel", "Condomínio", "Contas", "Internet", "Ferramentas", "Equipe", "Impostos", "Outros"],
+  variavel: ["Faxina", "Materiais", "Marketing", "Lavanderia", "Transporte", "Equipe", "Outros"],
+};
 const ROTULO = "text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted";
 const CAMPO = "w-full min-w-0 border-0 border-b-[1.5px] border-line-soft bg-transparent px-0.5 py-1.5 text-[15px] outline-none focus:border-red";
+
+const grupoDe = (l: Lancamento): Grupo => (l.tipo === "receita" ? "receita" : l.recorrente ? "fixo" : "variavel");
 
 function nomeMes(mes: string) {
   const [a, m] = mes.split("-").map(Number);
@@ -28,69 +45,51 @@ function proximoMes(mes: string) {
 /** Recorrente aparece no mês com o mesmo dia da data original. */
 const diaNoMes = (l: Lancamento, mes: string) => (l.recorrente && !l.data.startsWith(mes) ? `${mes}-${l.data.slice(8)}` : l.data);
 
-function Barras({ titulo, itens, cor }: { titulo: string; itens: [string, number][]; cor: string }) {
-  const max = Math.max(1, ...itens.map(([, v]) => v));
-  return (
-    <section aria-label={titulo} className="flex min-w-0 flex-[1_1_320px] flex-col gap-3 border border-line bg-paper p-5 md:p-6">
-      <h2 className="text-[20px] font-bold tracking-tight">{titulo}</h2>
-      {itens.length === 0 && <p className="text-sm text-muted">Nada lançado neste mês.</p>}
-      {itens.map(([nome, v]) => (
-        <div key={nome} className="flex items-center gap-2.5 text-[13px]">
-          <span className="w-[120px] shrink-0 truncate" title={nome}>{nome}</span>
-          <div className="h-2.5 flex-1 bg-bg"><div className={`h-2.5 ${cor}`} style={{ width: `${(v / max) * 100}%` }} /></div>
-          <span className="w-[86px] shrink-0 text-right font-bold tabular-nums">{brl(v)}</span>
-        </div>
-      ))}
-    </section>
-  );
-}
-
 export default function Financeiro({ mes, anterior, inicial, receitaAnterior, produtos }: {
   mes: string; anterior: string; inicial: Lancamento[]; receitaAnterior: number | null; produtos: string[];
 }) {
   const [itens, setItens] = useState(inicial);
-  const [filtro, setFiltro] = useState<"todos" | "receita" | "custo">("todos");
   const [armado, setArmado] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   // Aqui não há edição com espera; o hook serve só para o "Salvando… / Salvo".
   const { status, rodar } = useAutosave<object>(async () => ({ ok: true }));
 
   const dataPadrao = hoje().startsWith(mes) ? hoje() : `${mes}-01`;
-  const vazio = { tipo: "receita" as "receita" | "custo", data: dataPadrao, descricao: "", categoria: "", valor: "", recorrente: false };
+  const vazio = { grupo: "receita" as Grupo, data: dataPadrao, descricao: "", categoria: "", valor: "", repete: false };
   const [form, setForm] = useState(vazio);
 
   const calc = useMemo(() => {
-    const rec = itens.filter((l) => l.tipo === "receita");
-    const cus = itens.filter((l) => l.tipo === "custo");
+    const de = (g: Grupo) => itens.filter((l) => grupoDe(l) === g);
     const soma = (xs: Lancamento[]) => xs.reduce((s, l) => s + l.valor, 0);
-    const agrupar = (xs: Lancamento[]) => Object.entries(xs.reduce<Record<string, number>>((m, l) => {
+    const receitas = soma(de("receita"));
+    const fixos = soma(de("fixo"));
+    const variaveis = soma(de("variavel"));
+    const porOrigem = Object.entries(de("receita").reduce<Record<string, number>>((m, l) => {
       const k = l.categoria || "Sem categoria";
       m[k] = (m[k] ?? 0) + l.valor;
       return m;
     }, {})).sort((a, b) => b[1] - a[1]);
-    const receitas = soma(rec);
-    const custos = soma(cus);
-    return {
-      receitas, custos, resultado: receitas - custos,
-      fixos: soma(cus.filter((l) => l.recorrente)), variaveis: soma(cus.filter((l) => !l.recorrente)),
-      porOrigem: agrupar(rec), porCategoria: agrupar(cus),
-    };
+    return { de, receitas, fixos, variaveis, resultado: receitas - fixos - variaveis, porOrigem };
   }, [itens]);
 
-  const categorias = form.tipo === "receita"
-    ? [...new Set(["Sessões", "Aluguéis", ...produtos, ...itens.filter((l) => l.tipo === "receita").map((l) => l.categoria)])]
-    : [...new Set([...CUSTOS, ...itens.filter((l) => l.tipo === "custo").map((l) => l.categoria)])];
+  const categorias = form.grupo === "receita"
+    ? [...new Set(["Sessões", "Aluguéis", ...produtos, ...calc.de("receita").map((l) => l.categoria)])]
+    : [...new Set([...CATEGORIAS[form.grupo], ...calc.de(form.grupo).map((l) => l.categoria)])].filter(Boolean);
 
   async function salvarNovo(e: React.FormEvent) {
     e.preventDefault();
     setAviso(null);
     const valor = parseNum(form.valor) ?? 0;
     if (valor <= 0) return setAviso("Informe um valor maior que zero.");
-    const r = await rodar(() => adicionarLancamento({ ...form, valor }));
+    const r = await rodar(() => adicionarLancamento({
+      tipo: form.grupo === "receita" ? "receita" : "custo",
+      recorrente: form.grupo === "fixo" || (form.grupo === "receita" && form.repete),
+      data: form.data, descricao: form.descricao, categoria: form.categoria, valor,
+    }));
     if (!r.ok) return;
     if (r.data.data.startsWith(mes) || (r.data.recorrente && r.data.data < proximoMes(mes))) setItens((xs) => [r.data, ...xs]);
     else setAviso(`Salvo em ${r.data.data.split("-").reverse().join("/")}, fora deste mês.`);
-    setForm({ ...vazio, tipo: form.tipo });
+    setForm({ ...vazio, grupo: form.grupo });
   }
 
   async function apagar(l: Lancamento) {
@@ -105,8 +104,47 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
   }
 
   const variacao = receitaAnterior ? Math.round(((calc.receitas - receitaAnterior) / receitaAnterior) * 100) : null;
-  const lista = itens.filter((l) => filtro === "todos" || l.tipo === filtro)
-    .sort((a, b) => diaNoMes(b, mes).localeCompare(diaNoMes(a, mes)));
+
+  function lista(g: Grupo) {
+    const xs = calc.de(g).sort((a, b) => diaNoMes(b, mes).localeCompare(diaNoMes(a, mes)));
+    const total = xs.reduce((s, l) => s + l.valor, 0);
+    const info = GRUPOS.find((x) => x.k === g)!;
+    return (
+      <section key={g} aria-labelledby={`t-${g}`} className={`flex min-w-0 flex-col gap-2 border border-line border-t-4 bg-paper p-5 md:p-6 ${
+        g === "receita" ? "border-t-ink" : g === "fixo" ? "border-t-red" : "border-t-red-soft"}`}>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id={`t-${g}`} className="text-[20px] font-bold tracking-tight">{info.titulo}</h2>
+          <span className={`text-[18px] font-extrabold tabular-nums ${g === "receita" ? "" : "text-red"}`}>{brl(total)}</span>
+        </div>
+        {g === "fixo" && <p className="text-[12px] text-muted">Lançados uma vez, repetem todo mês a partir da data.</p>}
+        {xs.length === 0 ? (
+          <p className="border-[1.5px] border-dashed border-line p-4 text-sm text-muted">Nada lançado.</p>
+        ) : (
+          <ul className="flex flex-col">
+            {xs.map((l) => (
+              <li key={l.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line-soft py-2.5 last:border-0">
+                <span className="w-12 text-sm tabular-nums text-muted">{diaNoMes(l, mes).slice(8)}/{mes.slice(5)}</span>
+                <span className="min-w-0 flex-1 text-sm">
+                  <span className="font-semibold">{l.descricao || l.categoria || "sem descrição"}</span>
+                  {l.descricao && l.categoria && <span className="ml-1.5 text-[12px] text-muted">· {l.categoria}</span>}
+                  {l.tipo === "receita" && l.recorrente && <span className="ml-1.5 text-[11px] font-semibold text-muted">· todo mês</span>}
+                  {l.contato_id && <Link href={`/crm?c=${l.contato_id}`} className="ml-1.5 text-[11px] font-bold text-muted hover:text-red">· do CRM</Link>}
+                </span>
+                <span className="text-right text-sm font-bold tabular-nums">{brl(l.valor)}</span>
+                {!l.contato_id && (
+                  <button type="button" onClick={() => apagar(l)} aria-label={`Remover ${l.descricao || "lançamento"}`}
+                    className={`h-9 border-[1.5px] ${armado === l.id ? "border-red bg-red px-2 text-[11px] font-bold text-white"
+                      : "w-9 border-transparent text-lg text-muted hover:border-red hover:text-red"}`}>
+                    {armado === l.id ? (l.recorrente ? "Remover de todos os meses?" : "Remover?") : "×"}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    );
+  }
 
   return (
     <main className={PAGINA}>
@@ -120,51 +158,47 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
         } />
 
       <div className="flex flex-wrap gap-px border border-line bg-line">
-        <div className="flex flex-[1_1_200px] flex-col gap-1 bg-paper px-5 py-4">
-          <span className={ROTULO}>Receitas</span>
-          <span className="text-[28px] font-extrabold tabular-nums">{brl(calc.receitas)}</span>
-          <span className="text-[12px] text-muted">{variacao == null ? "sem mês anterior para comparar" : `${variacao >= 0 ? "+" : ""}${variacao}% vs mês anterior`}</span>
-        </div>
-        <div className="flex flex-[1_1_200px] flex-col gap-1 bg-paper px-5 py-4">
-          <span className={ROTULO}>Custos</span>
-          <span className="text-[28px] font-extrabold tabular-nums">{brl(calc.custos)}</span>
-          <span className="text-[12px] text-muted">fixos {brl(calc.fixos)} · variáveis {brl(calc.variaveis)}</span>
-        </div>
-        <div className="flex flex-[1_1_200px] flex-col gap-1 bg-ink px-5 py-4 text-white">
+        {[
+          ["Receitas", calc.receitas, variacao == null ? "sem mês anterior para comparar" : `${variacao >= 0 ? "+" : ""}${variacao}% vs mês anterior`],
+          ["Custos fixos", calc.fixos, "repetem todo mês"],
+          ["Custos variáveis", calc.variaveis, "só deste mês"],
+        ].map(([t, v, nota]) => (
+          <div key={t as string} className="flex flex-[1_1_180px] flex-col gap-1 bg-paper px-5 py-4">
+            <span className={ROTULO}>{t}</span>
+            <span className="text-[26px] font-extrabold tabular-nums">{brl(v as number)}</span>
+            <span className="text-[12px] text-muted">{nota}</span>
+          </div>
+        ))}
+        <div className="flex flex-[1_1_180px] flex-col gap-1 bg-ink px-5 py-4 text-white">
           <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-side-text">Resultado</span>
-          <span className="text-[28px] font-extrabold tabular-nums">{brl(calc.resultado)}</span>
+          <span className="text-[26px] font-extrabold tabular-nums">{brl(calc.resultado)}</span>
           <span className="text-[12px] font-bold text-red-vivo">
             {calc.receitas ? `margem ${Math.round((calc.resultado / calc.receitas) * 100)}%` : "sem receita no mês"}
           </span>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-5">
-        <Barras titulo="Receitas por origem" itens={calc.porOrigem} cor="bg-ink" />
-        <Barras titulo="Custos por categoria" itens={calc.porCategoria} cor="bg-red" />
-      </div>
-
-      <form onSubmit={salvarNovo} aria-labelledby="t-novo" className="flex flex-col gap-4 border border-line border-t-4 border-t-red bg-paper p-5 md:p-6">
+      <form onSubmit={salvarNovo} aria-labelledby="t-novo" className="flex flex-col gap-4 border border-line bg-paper p-5 md:p-6">
         <div className="flex items-center justify-between gap-3">
           <h2 id="t-novo" className="text-[20px] font-bold tracking-tight">Novo lançamento</h2>
           <StatusSalvo status={status} />
         </div>
+        <div role="group" aria-label="Tipo de lançamento" className="flex flex-wrap border-[1.5px] border-ink self-start">
+          {GRUPOS.map((g) => (
+            <button key={g.k} type="button" aria-pressed={form.grupo === g.k} onClick={() => setForm({ ...form, grupo: g.k, categoria: "" })}
+              className={`min-h-[44px] px-4 text-[13px] font-bold ${form.grupo === g.k ? (g.k === "receita" ? "bg-ink text-white" : "bg-red text-white") : "hover:bg-bg"}`}>
+              {g.t}
+            </button>
+          ))}
+        </div>
         <div className="flex flex-wrap items-end gap-x-5 gap-y-4">
-          <div role="group" aria-label="Tipo" className="flex border-[1.5px] border-ink">
-            {(["receita", "custo"] as const).map((t) => (
-              <button key={t} type="button" aria-pressed={form.tipo === t} onClick={() => setForm({ ...form, tipo: t, categoria: "" })}
-                className={`min-h-[44px] px-4 text-[13px] font-bold ${form.tipo === t ? "bg-ink text-white" : "hover:bg-bg"}`}>
-                {t === "receita" ? "Receita" : "Custo"}
-              </button>
-            ))}
-          </div>
           <label className="flex flex-[0_1_160px] flex-col gap-1">
-            <span className={ROTULO}>Data</span>
+            <span className={ROTULO}>{form.grupo === "fixo" ? "A partir de" : "Data"}</span>
             <input type="date" required className={CAMPO} value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} />
           </label>
           <label className="flex flex-[2_1_220px] flex-col gap-1">
             <span className={ROTULO}>Descrição</span>
-            <input className={CAMPO} value={form.descricao} placeholder={form.tipo === "receita" ? "ex: workshop de spanking" : "ex: conta de luz"}
+            <input className={CAMPO} value={form.descricao} placeholder={GRUPOS.find((g) => g.k === form.grupo)!.dica}
               onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
           </label>
           <label className="flex flex-[1_1_180px] flex-col gap-1">
@@ -174,59 +208,41 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
             <datalist id="categorias">{categorias.map((c) => <option key={c} value={c} />)}</datalist>
           </label>
           <label className="flex flex-[0_1_140px] flex-col gap-1">
-            <span className={ROTULO}>Valor (R$)</span>
+            <span className={ROTULO}>{form.grupo === "fixo" ? "Valor por mês (R$)" : "Valor (R$)"}</span>
             <input inputMode="decimal" required className={`${CAMPO} text-right font-bold`} value={form.valor} placeholder="0"
               onChange={(e) => setForm({ ...form, valor: e.target.value })} />
           </label>
-          <label className="flex min-h-[44px] items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.recorrente} onChange={(e) => setForm({ ...form, recorrente: e.target.checked })}
-              className="h-[18px] w-[18px] accent-ink" />
-            Repete todo mês
-          </label>
+          {form.grupo === "receita" && (
+            <label className="flex min-h-[44px] items-center gap-2 text-sm">
+              <input type="checkbox" checked={form.repete} onChange={(e) => setForm({ ...form, repete: e.target.checked })}
+                className="h-[18px] w-[18px] accent-ink" />
+              Repete todo mês
+            </label>
+          )}
           <button type="submit" className={BOTAO}>Salvar</button>
         </div>
         {aviso && <p role="status" className="text-sm font-semibold text-red">{aviso}</p>}
-        <p className="text-[12px] text-muted">Custos que repetem todo mês contam como fixos. Atendimentos realizados no CRM entram aqui sozinhos.</p>
+        <p className="text-[12px] text-muted">Atendimentos realizados no CRM entram sozinhos como receita.</p>
       </form>
 
-      <section aria-labelledby="t-lanc" className="flex flex-col gap-3 border border-line bg-paper p-5 md:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="t-lanc" className="text-[20px] font-bold tracking-tight">Lançamentos do mês</h2>
-          <div role="group" aria-label="Filtrar" className="flex gap-1.5">
-            {([["todos", "Todos"], ["receita", "Receitas"], ["custo", "Custos"]] as const).map(([k, t]) => (
-              <button key={k} type="button" aria-pressed={filtro === k} onClick={() => setFiltro(k)}
-                className={`min-h-[36px] border-[1.5px] px-3 text-[12px] font-bold ${filtro === k ? "border-ink bg-ink text-white" : "border-line hover:border-ink"}`}>{t}</button>
-            ))}
-          </div>
-        </div>
-        {lista.length === 0 ? (
-          <p className="border-[1.5px] border-dashed border-line p-5 text-sm text-muted">Nenhum lançamento.</p>
-        ) : (
-          <ul className="flex flex-col">
-            {lista.map((l) => (
-              <li key={l.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line-soft py-3 last:border-0">
-                <span className="w-12 text-sm tabular-nums text-muted">{diaNoMes(l, mes).slice(8)}/{mes.slice(5)}</span>
-                <span className="min-w-0 flex-1 text-sm font-semibold">
-                  {l.descricao || l.categoria || "sem descrição"}
-                  {l.recorrente && <span className="ml-2 text-[11px] font-semibold text-muted">· todo mês</span>}
-                  {l.contato_id && <Link href={`/crm?c=${l.contato_id}`} className="ml-2 text-[11px] font-bold text-muted hover:text-red">· do CRM</Link>}
-                </span>
-                <span className="hidden w-40 truncate text-sm text-muted sm:block">{l.categoria}</span>
-                <span className={`w-28 text-right text-sm font-bold tabular-nums ${l.tipo === "custo" ? "text-red" : ""}`}>
-                  {l.tipo === "custo" ? "− " : "+ "}{brl(l.valor)}
-                </span>
-                {!l.contato_id && (
-                  <button type="button" onClick={() => apagar(l)} aria-label={`Remover ${l.descricao || "lançamento"}`}
-                    className={`h-9 border-[1.5px] ${armado === l.id ? "border-red bg-red px-2 text-[11px] font-bold text-white"
-                      : "w-9 border-transparent text-lg text-muted hover:border-red hover:text-red"}`}>
-                    {armado === l.id ? (l.recorrente ? "Remover de todos os meses?" : "Remover?") : "×"}
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {calc.porOrigem.length > 0 && (
+        <section aria-label="Receitas por origem" className="flex flex-col gap-3 border border-line bg-paper p-5 md:p-6">
+          <h2 className="text-[20px] font-bold tracking-tight">Receitas por origem</h2>
+          {calc.porOrigem.map(([nome, v]) => (
+            <div key={nome} className="flex items-center gap-2.5 text-[13px]">
+              <span className="w-[140px] shrink-0 truncate" title={nome}>{nome}</span>
+              <div className="h-2.5 flex-1 bg-bg"><div className="h-2.5 bg-ink" style={{ width: `${(v / calc.porOrigem[0][1]) * 100}%` }} /></div>
+              <span className="w-[86px] shrink-0 text-right font-bold tabular-nums">{brl(v)}</span>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {lista("receita")}
+      <div className="grid gap-5 lg:grid-cols-2">
+        {lista("fixo")}
+        {lista("variavel")}
+      </div>
     </main>
   );
 }

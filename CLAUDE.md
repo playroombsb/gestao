@@ -3,10 +3,10 @@
 Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
 - **Início**: próximas 7 tarefas, números do Instagram e resumo do CRM.
 - **Calendário**: sessões e aluguéis do CRM (proposta, agendado, realizado) mais workshops, eventos e outros da tabela `agenda`.
-- **Tarefas** (com prazo) e **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
+- **Tarefas**: kanban (padrão) ou lista; status A fazer, Fazendo, Feito; etiqueta opcional (Não iniciado, Aguardando revisão, Concluído, Publicado); prazo. **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
 - **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
 - **Integrações** (no grupo Gestão): Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp/Evolution: não conectar sem pedido da Ana.
-- **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (ticket, margem e vendas por produto, matriz) e Financeiro (custos e receitas por mês).
+- **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (nome, descrição e preço; o preço fica na coluna `ticket`, margem e vendas antigas seguem no banco sem aparecer) e Financeiro (receitas, custos fixos e custos variáveis por mês).
 
 ## Stack
 Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Docker na VPS.
@@ -20,7 +20,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - As tabelas de `studio_sm` têm RLS ligado e nenhuma policy, então a chave anon não acessa nada.
 
 ## Mapa
-- `app/page.tsx`: Início. `app/produtos/`: a antiga tela de números (`components/Painel.tsx`). `/painel` redireciona para `/produtos`.
+- `app/page.tsx`: Início. `/painel` redireciona para `/produtos`.
 - `app/tarefas`, `app/aplicacoes`, `app/estrategia`, `app/posicionamento`, `app/editorial`, `app/crm`, `app/financeiro`: uma pasta por página, cada uma com seu componente em `components/`.
 - `app/login/`: tela e actions de entrar e sair.
 - `app/actions.ts`: produtos, seções (`estrategia`, com coluna `pagina`) e tarefas. `app/actions-gestao.ts`: contatos, aplicações, lançamentos e pautas. Cada tabela só aceita os campos da sua lista de permitidos.
@@ -34,12 +34,12 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - `lib/dados.ts`: colunas, normalização e leitura do painel.
 - `lib/calc.ts`: regras de cálculo puras. Lucro = ticket × margem% × vendas.
 - `lib/supabase.ts`: cliente `service_role` apontando para o schema `studio_sm`, com `cache: "no-store"`.
-- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda.
+- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda, 0006 status e etiqueta das tarefas.
 - `scraper/`: coletor do Instagram (Python, Scrapling).
 
 ## Regras de negócio
 - Contato do CRM em "Realizado" vira receita sozinho (trigger `sincronizar_receita` em `contatos`): categoria Sessões ou Aluguéis, data do atendimento, valor do contato. Saiu de "Realizado", a receita é apagada. Essa receita não pode ser removida pelo Financeiro.
-- Lançamento recorrente aparece em todo mês a partir da data dele. Custo recorrente conta como fixo.
+- Lançamento recorrente aparece em todo mês a partir da data dele. Custo fixo = custo recorrente; custo variável = só no mês lançado.
 - CRM guarda só apelido e um contato. Nada de nome completo, documento ou foto.
 
 ## Aplicações do site

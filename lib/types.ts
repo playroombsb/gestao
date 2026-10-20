@@ -19,7 +19,24 @@ export type Pagina = "posicionamento" | "editorial";
 export type Secao = { id: string; titulo: string; conteudo: string; ordem: number };
 export type SecaoPatch = Partial<Omit<Secao, "id">>;
 
-export type Tarefa = { id: string; titulo: string; feita: boolean; prazo: string | null; ordem: number };
+export const STATUS_TAREFA = [
+  { k: "a_fazer", t: "A fazer" },
+  { k: "fazendo", t: "Fazendo" },
+  { k: "feito", t: "Feito" },
+] as const;
+export type StatusTarefa = (typeof STATUS_TAREFA)[number]["k"];
+
+export const ETIQUETAS = [
+  { k: "nao_iniciado", t: "Não iniciado" },
+  { k: "aguardando_revisao", t: "Aguardando revisão" },
+  { k: "concluido", t: "Concluído" },
+  { k: "publicado", t: "Publicado" },
+] as const;
+export type Etiqueta = (typeof ETIQUETAS)[number]["k"];
+
+export type Tarefa = {
+  id: string; titulo: string; status: StatusTarefa; etiqueta: Etiqueta | null; prazo: string | null; ordem: number;
+};
 export type TarefaPatch = Partial<Omit<Tarefa, "id">>;
 
 export const ETAPAS = [

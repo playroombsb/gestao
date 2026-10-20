@@ -129,7 +129,7 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
             <span className="min-w-[150px] px-2 text-center text-[14px] font-bold">{nomeMes(mes)}</span>
             <Link href={`/calendario?mes=${somaMes(mes, 1)}`} aria-label="Próximo mês" className="flex h-11 w-11 items-center justify-center text-lg font-bold hover:bg-bg">›</Link>
           </nav>
-          <button type="button" className={BOTAO} onClick={() => novo()}>+ Novo evento</button>
+          <button type="button" className={BOTAO} onClick={() => novo()}>+ Novo compromisso</button>
         </>} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -222,7 +222,7 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
           <section role="dialog" aria-modal="true" aria-labelledby="t-evento" onClick={(e) => e.stopPropagation()}
             className="flex h-full w-full max-w-[480px] flex-col gap-5 overflow-y-auto bg-paper p-5 md:p-7">
             <div className="flex items-center justify-between gap-3">
-              <h2 id="t-evento" className="text-[22px] font-extrabold tracking-tight">Evento</h2>
+              <h2 id="t-evento" className="text-[22px] font-extrabold tracking-tight">Compromisso</h2>
               <div className="flex items-center gap-3">
                 <StatusSalvo status={status} />
                 <button type="button" onClick={() => setAberto(null)} aria-label="Fechar" className="h-11 w-11 text-2xl text-muted hover:text-red">×</button>
@@ -268,7 +268,7 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
             <div className="mt-auto flex justify-end">
               <button type="button" onClick={() => apagar(atual.id)}
                 className={`min-h-[44px] px-3 text-[13px] font-bold ${armado ? "bg-red text-white" : "text-muted hover:text-red"}`}>
-                {armado ? "Remover mesmo?" : "Remover evento"}
+                {armado ? "Remover mesmo?" : "Remover compromisso"}
               </button>
             </div>
           </section>

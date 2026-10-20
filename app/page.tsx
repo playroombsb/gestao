@@ -69,7 +69,7 @@ export default async function Page() {
   const s = exigirLogin();
   const [tarefas, contatos, insta] = await Promise.all([listarTarefas(), listarContatos(), carregarInsta().catch(() => null)]);
 
-  const abertas = tarefas.ok ? ordenar(tarefas.data.filter((t) => !t.feita)) : [];
+  const abertas = tarefas.ok ? ordenar(tarefas.data.filter((t) => t.status !== "feito")) : [];
   const crm = contatos.ok ? resumoCrm(contatos.data) : null;
   const data = new Date().toLocaleDateString("pt-BR", { timeZone: TZ, weekday: "long", day: "numeric", month: "long" });
 

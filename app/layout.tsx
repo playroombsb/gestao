@@ -8,7 +8,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Studio - SM",
+  title: "Playroom",
   description: "Gestão do Playroom: tarefas, aplicações, marketing, CRM, produtos e financeiro.",
   robots: { index: false, follow: false },
 };

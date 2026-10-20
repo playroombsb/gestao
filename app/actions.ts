@@ -77,11 +77,12 @@ export async function removerSecao(id: string): Promise<Res<null>> {
 
 // Tarefas
 
-const COLS_TAREFA = "id,titulo,feita,prazo,ordem";
-const PERMITIDOS_TAREFA: (keyof TarefaPatch)[] = ["titulo", "feita", "prazo", "ordem"];
+const COLS_TAREFA = "id,titulo,status,etiqueta,prazo,ordem";
+const PERMITIDOS_TAREFA: (keyof TarefaPatch)[] = ["titulo", "status", "etiqueta", "prazo", "ordem"];
 
 const tarefa = (r: Record<string, unknown>): Tarefa => ({
-  id: txt(r.id), titulo: txt(r.titulo), feita: Boolean(r.feita), prazo: r.prazo ? txt(r.prazo) : null, ordem: Number(r.ordem ?? 0),
+  id: txt(r.id), titulo: txt(r.titulo), status: (txt(r.status) || "a_fazer") as Tarefa["status"],
+  etiqueta: r.etiqueta ? (txt(r.etiqueta) as Tarefa["etiqueta"]) : null, prazo: r.prazo ? txt(r.prazo) : null, ordem: Number(r.ordem ?? 0),
 });
 
 export async function listarTarefas(): Promise<Res<Tarefa[]>> {
@@ -95,14 +96,15 @@ export async function salvarTarefa(id: string, patch: TarefaPatch): Promise<Res<
   if (!sessao()) return negar();
   const limpo = filtrar(patch, PERMITIDOS_TAREFA);
   if ("prazo" in limpo && !limpo.prazo) limpo.prazo = null;
+  if ("etiqueta" in limpo && !limpo.etiqueta) limpo.etiqueta = null;
   const { error } = await db().from("tarefas").update(limpo).eq("id", id);
   return error ? { ok: false, erro: "Não salvou. Tente de novo." } : { ok: true, data: null };
 }
 
-export async function adicionarTarefa(titulo: string, ordem: number, prazo: string | null = null): Promise<Res<Tarefa>> {
+export async function adicionarTarefa(titulo: string, ordem: number, prazo: string | null = null, status: Tarefa["status"] = "a_fazer"): Promise<Res<Tarefa>> {
   if (!sessao()) return negar();
   const { data, error } = await db().from("tarefas")
-    .insert({ titulo: titulo.trim(), ordem, prazo: prazo || null }).select(COLS_TAREFA).single();
+    .insert({ titulo: titulo.trim(), ordem, prazo: prazo || null, status }).select(COLS_TAREFA).single();
   if (error || !data) return { ok: false, erro: "Não foi possível adicionar." };
   return { ok: true, data: tarefa(data) };
 }

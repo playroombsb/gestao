@@ -14,7 +14,7 @@ export default function Nav({ nome, novas }: { nome: string; novas: number }) {
   useEffect(() => setAberto(false), [atual]);
 
   const grupos: Grupo[] = [
-    { itens: [{ href: "/", t: "Início" }, { href: "/calendario", t: "Calendário" }, { href: "/tarefas", t: "Tarefas" }, { href: "/aplicacoes", t: "Aplicações", badge: novas }] },
+    { itens: [{ href: "/", t: "Início" }, { href: "/tarefas", t: "Tarefas" }, { href: "/calendario", t: "Calendário" }, { href: "/aplicacoes", t: "Aplicações", badge: novas }] },
     { nome: "Marketing", itens: [
       { href: "/estrategia", t: "Estratégia" }, { href: "/posicionamento", t: "Posicionamento" }, { href: "/editorial", t: "Linha editorial" },
     ] },
@@ -26,7 +26,7 @@ export default function Nav({ nome, novas }: { nome: string; novas: number }) {
   return (
     <aside className="z-20 shrink-0 bg-ink text-white md:sticky md:top-0 md:flex md:h-screen md:w-60 md:flex-col md:overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-3 md:px-7 md:pb-6 md:pt-8">
-        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-vivo">Studio - SM</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-vivo">Playroom</span>
         <button type="button" onClick={() => setAberto((a) => !a)} aria-expanded={aberto} aria-controls="menu-principal"
           className="min-h-[44px] px-2 text-[13px] font-bold md:hidden">
           {aberto ? "Fechar" : "Menu"}

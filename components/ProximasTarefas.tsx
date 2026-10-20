@@ -6,14 +6,14 @@ import { salvarTarefa } from "@/app/actions";
 import { TOM_PRAZO, rotuloPrazo } from "@/lib/prazo";
 import type { Tarefa } from "@/lib/types";
 
-/** As próximas tarefas na página inicial. Marcar como feita tira da lista. */
+/** As próximas tarefas na página inicial. Marcar como feita move para "Feito" e tira da lista. */
 export default function ProximasTarefas({ inicial, total }: { inicial: Tarefa[]; total: number }) {
   const [tarefas, setTarefas] = useState(inicial);
   const [erro, setErro] = useState<string | null>(null);
 
   async function concluir(t: Tarefa) {
     setTarefas((xs) => xs.filter((x) => x.id !== t.id));
-    const r = await salvarTarefa(t.id, { feita: true });
+    const r = await salvarTarefa(t.id, { status: "feito" });
     if (!r.ok) {
       setErro(r.erro);
       setTarefas((xs) => [...xs, t]);
