@@ -5,7 +5,7 @@ Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
 - **Calendário**: sessões e aluguéis do CRM (proposta, agendado, realizado) mais workshops, eventos e outros da tabela `agenda`.
 - **Tarefas**: kanban (padrão) ou lista; status A fazer, Fazendo, Feito; etiqueta opcional (Não iniciado, Aguardando revisão, Concluído, Publicado); prazo. **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
 - **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
-- **Integrações** (no grupo Gestão): Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp/Evolution: não conectar sem pedido da Ana.
+- **Admin** (só admin): Usuários e Integrações. **Integrações**: Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp/Evolution: não conectar sem pedido da Ana.
 - **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (nome, descrição e preço; o preço fica na coluna `ticket`, margem e vendas antigas seguem no banco sem aparecer) e Financeiro (receitas, custos fixos e custos variáveis por mês).
 
 ## Stack
@@ -13,9 +13,9 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 
 ## Como funciona o acesso
 - Login com usuário e senha (decisão da Ana em 20/10/2026). Usuárias iniciais, as duas admin: `ana` (Ana Paula) e `sanara` (Sanara, dona do Playroom). O campo de usuário aceita o login ou o nome completo, com ou sem espaço ("Ana Paula", "anapaula"), e ignora maiúsculas e acentos. A senha ignora espaços nas pontas, mas diferencia maiúsculas.
-- Usuários ficam em `studio_sm.usuarios`, senha só como hash scrypt (`lib/senha.ts`). Não há tela de cadastro: para criar alguém ou trocar senha, gere o hash com `gerarHash` e grave direto na tabela.
-- A sessão é um cookie `sm_sessao` httpOnly, assinado com HMAC usando `SESSION_SECRET`, válido por 30 dias. Trocar o `SESSION_SECRET` desloga todo mundo.
-- Toda página chama `exigirLogin()` e toda server action confere `sessao()`. 5 senhas erradas seguidas no mesmo usuário bloqueiam por 15 minutos (em memória, zera ao recriar o container).
+- Usuários ficam em `studio_sm.usuarios`, senha só como hash scrypt (`lib/senha.ts`). Admin gerencia em **Admin › Usuários** (`/admin/usuarios`): criar, renomear, trocar senha, dar ou tirar admin, encerrar logins, remover. Senha nova: mínimo 8 caracteres. Cada pessoa troca a própria senha em **Minha conta** (`/conta`, clicando no nome no rodapé do menu). Precisa sobrar pelo menos um admin; ninguém remove nem tira o admin de si.
+- A sessão é um cookie `sm_sessao` httpOnly, assinado com HMAC usando `SESSION_SECRET`, válido por 30 dias, com a `versao` do usuário. `sessao()` (em `lib/auth.ts`) confere no banco a cada requisição: usuário removido ou com versão diferente (senha trocada, logins encerrados) cai na hora. Trocar o `SESSION_SECRET` desloga todo mundo.
+- Toda página chama `await exigirLogin()` (ou `exigirAdmin()`) e toda server action confere `await sessao()`. Grupo Admin do menu e `/integracoes` são só para admin. 5 senhas erradas seguidas no mesmo usuário bloqueiam por 15 minutos (em memória, zera ao recriar o container).
 - O navegador nunca fala com o Supabase. Toda leitura e escrita passa pelas server actions, que usam a `service_role`.
 - As tabelas de `studio_sm` têm RLS ligado e nenhuma policy, então a chave anon não acessa nada.
 
@@ -34,7 +34,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - `lib/dados.ts`: colunas, normalização e leitura do painel.
 - `lib/calc.ts`: regras de cálculo puras. Lucro = ticket × margem% × vendas.
 - `lib/supabase.ts`: cliente `service_role` apontando para o schema `studio_sm`, com `cache: "no-store"`.
-- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda, 0006 status e etiqueta das tarefas.
+- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda, 0006 status e etiqueta das tarefas, 0007 versão da sessão.
 - `scraper/`: coletor do Instagram (Python, Scrapling).
 
 ## Regras de negócio

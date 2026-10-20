@@ -6,7 +6,7 @@ import Crm from "@/components/Crm";
 export const dynamic = "force-dynamic";
 
 export default async function Page({ searchParams }: { searchParams: { c?: string } }) {
-  exigirLogin();
+  await exigirLogin();
   const res = await listarContatos();
   if (!res.ok) return <Aviso titulo="O CRM não carregou." texto={res.erro} />;
   return <Crm inicial={res.data} abrir={searchParams.c} />;

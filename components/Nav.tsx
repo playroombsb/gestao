@@ -8,7 +8,7 @@ import { sair } from "@/app/login/actions";
 type Item = { href: string; t: string; badge?: number };
 type Grupo = { nome?: string; itens: Item[] };
 
-export default function Nav({ nome, novas }: { nome: string; novas: number }) {
+export default function Nav({ nome, novas, admin }: { nome: string; novas: number; admin: boolean }) {
   const atual = usePathname();
   const [aberto, setAberto] = useState(false);
   useEffect(() => setAberto(false), [atual]);
@@ -18,7 +18,8 @@ export default function Nav({ nome, novas }: { nome: string; novas: number }) {
     { nome: "Marketing", itens: [
       { href: "/estrategia", t: "Estratégia" }, { href: "/posicionamento", t: "Posicionamento" }, { href: "/editorial", t: "Linha editorial" },
     ] },
-    { nome: "Gestão", itens: [{ href: "/crm", t: "CRM" }, { href: "/produtos", t: "Produtos" }, { href: "/financeiro", t: "Financeiro" }, { href: "/integracoes", t: "Integrações" }] },
+    { nome: "Gestão", itens: [{ href: "/crm", t: "CRM" }, { href: "/produtos", t: "Produtos" }, { href: "/financeiro", t: "Financeiro" }] },
+    ...(admin ? [{ nome: "Admin", itens: [{ href: "/admin/usuarios", t: "Usuários" }, { href: "/integracoes", t: "Integrações" }] }] : []),
   ];
 
   const ativo = (href: string) => (href === "/" ? atual === "/" : atual === href || atual.startsWith(href + "/"));
@@ -57,7 +58,10 @@ export default function Nav({ nome, novas }: { nome: string; novas: number }) {
         ))}
 
         <form action={sair} className="mt-auto flex items-center justify-between gap-3 border-t border-side-line px-3 pt-4 text-[13px]">
-          <span className="text-side-text">{nome}</span>
+          <Link href="/conta" aria-current={atual === "/conta" ? "page" : undefined}
+            className={`min-h-[44px] content-center hover:text-white md:min-h-0 ${atual === "/conta" ? "font-bold text-white" : "text-side-text"}`}>
+            {nome}
+          </Link>
           <button type="submit" className="min-h-[44px] font-bold text-white hover:text-red-vivo md:min-h-0">Sair</button>
         </form>
       </nav>

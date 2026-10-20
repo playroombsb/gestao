@@ -4,8 +4,8 @@ import Entrar from "@/components/Entrar";
 
 export const dynamic = "force-dynamic";
 
-export default function Page() {
-  if (sessao()) redirect("/");
+export default async function Page() {
+  if (await sessao()) redirect("/");
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-7 px-5 py-10">
       <header className="flex flex-col gap-3 border-b-2 border-red pb-6">

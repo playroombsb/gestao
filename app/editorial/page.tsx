@@ -9,7 +9,7 @@ import Secoes from "@/components/Secoes";
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  exigirLogin();
+  await exigirLogin();
   const [secoes, pautas] = await Promise.all([listarSecoes("editorial"), listarPautas()]);
   if (!secoes.ok) return <Aviso titulo="A linha editorial não carregou." texto={secoes.erro} />;
   if (!pautas.ok) return <Aviso titulo="A linha editorial não carregou." texto={pautas.erro} />;

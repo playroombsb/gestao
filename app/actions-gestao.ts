@@ -29,13 +29,13 @@ const contato = (r: Record<string, unknown>): Contato => ({
 });
 
 export async function listarContatos(): Promise<Res<Contato[]>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("contatos").select(COLS_CONTATO).order("created_at", { ascending: false });
   return error ? falha("Não foi possível carregar o CRM.") : ok((data ?? []).map(contato));
 }
 
 export async function salvarContato(id: string, patch: ContatoPatch): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const limpo = filtrar(patch, PERMITIDOS_CONTATO);
   if ("data_hora" in limpo && !limpo.data_hora) limpo.data_hora = null;
   const { error } = await db().from("contatos").update(limpo).eq("id", id);
@@ -43,13 +43,13 @@ export async function salvarContato(id: string, patch: ContatoPatch): Promise<Re
 }
 
 export async function adicionarContato(): Promise<Res<Contato>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("contatos").insert({}).select(COLS_CONTATO).single();
   return error || !data ? falha("Não foi possível adicionar.") : ok(contato(data));
 }
 
 export async function removerContato(id: string): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("contatos").delete().eq("id", id);
   return error ? falha("Não foi possível remover.") : ok(null);
 }
@@ -66,13 +66,13 @@ const aplicacao = (r: Record<string, unknown>): Aplicacao => ({
 });
 
 export async function listarAplicacoes(): Promise<Res<Aplicacao[]>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("aplicacoes").select(COLS_APLICACAO).order("created_at", { ascending: false });
   return error ? falha("Não foi possível carregar as aplicações.") : ok((data ?? []).map(aplicacao));
 }
 
 export async function salvarAplicacao(id: string, patch: { status?: StatusAplicacao; nota?: string }): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const limpo = filtrar(patch, ["status", "nota"] as const);
   const { error } = await db().from("aplicacoes").update(limpo).eq("id", id);
   return error ? falha("Não salvou. Tente de novo.") : ok(null);
@@ -80,7 +80,7 @@ export async function salvarAplicacao(id: string, patch: { status?: StatusAplica
 
 /** Aprova e cria o contato no CRM, na etapa "Novo contato". */
 export async function aprovarAplicacao(id: string): Promise<Res<{ contato_id: string }>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data: a, error } = await db().from("aplicacoes").select(COLS_APLICACAO).eq("id", id).single();
   if (error || !a) return falha("Aplicação não encontrada.");
   const ap = aplicacao(a);
@@ -101,7 +101,7 @@ export async function aprovarAplicacao(id: string): Promise<Res<{ contato_id: st
 }
 
 export async function removerAplicacao(id: string): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("aplicacoes").delete().eq("id", id);
   return error ? falha("Não foi possível remover.") : ok(null);
 }
@@ -118,7 +118,7 @@ const lancamento = (r: Record<string, unknown>): Lancamento => ({
 
 /** Lançamentos do mês (AAAA-MM), mais os recorrentes que começaram antes. */
 export async function listarLancamentos(mes: string): Promise<Res<Lancamento[]>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   if (!/^\d{4}-\d{2}$/.test(mes)) return falha("Mês inválido.");
   const [a, m] = mes.split("-").map(Number);
   const ini = `${mes}-01`;
@@ -130,7 +130,7 @@ export async function listarLancamentos(mes: string): Promise<Res<Lancamento[]>>
 }
 
 export async function adicionarLancamento(l: Omit<Lancamento, "id" | "contato_id">): Promise<Res<Lancamento>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(l.data)) return falha("Data inválida.");
   if (!(l.valor > 0)) return falha("Informe um valor maior que zero.");
   const { data, error } = await db().from("lancamentos").insert({
@@ -141,7 +141,7 @@ export async function adicionarLancamento(l: Omit<Lancamento, "id" | "contato_id
 }
 
 export async function removerLancamento(id: string): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data } = await db().from("lancamentos").select("contato_id").eq("id", id).single();
   if (data?.contato_id) return falha("Essa receita vem do CRM. Para tirar, mude a etapa do atendimento lá.");
   const { error } = await db().from("lancamentos").delete().eq("id", id);
@@ -159,13 +159,13 @@ const pauta = (r: Record<string, unknown>): Pauta => ({
 });
 
 export async function listarPautas(): Promise<Res<Pauta[]>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("pautas").select(COLS_PAUTA).order("ordem");
   return error ? falha("Não foi possível carregar as pautas.") : ok((data ?? []).map(pauta));
 }
 
 export async function salvarPauta(id: string, patch: PautaPatch): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const limpo = filtrar(patch, PERMITIDOS_PAUTA);
   if ("data" in limpo && !limpo.data) limpo.data = null;
   const { error } = await db().from("pautas").update(limpo).eq("id", id);
@@ -173,13 +173,13 @@ export async function salvarPauta(id: string, patch: PautaPatch): Promise<Res<nu
 }
 
 export async function adicionarPauta(ordem: number): Promise<Res<Pauta>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("pautas").insert({ ordem }).select(COLS_PAUTA).single();
   return error || !data ? falha("Não foi possível adicionar.") : ok(pauta(data));
 }
 
 export async function removerPauta(id: string): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("pautas").delete().eq("id", id);
   return error ? falha("Não foi possível remover.") : ok(null);
 }
@@ -196,20 +196,20 @@ const evento = (r: Record<string, unknown>): Evento => ({
 
 /** Eventos entre duas datas ISO. */
 export async function listarAgenda(de: string, ate: string): Promise<Res<Evento[]>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("agenda").select(COLS_EVENTO).gte("inicio", de).lt("inicio", ate).order("inicio");
   return error ? falha("Não foi possível carregar o calendário.") : ok((data ?? []).map(evento));
 }
 
 export async function adicionarEvento(inicio: string, tipo: Evento["tipo"] = "evento"): Promise<Res<Evento>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   if (Number.isNaN(Date.parse(inicio))) return falha("Data inválida.");
   const { data, error } = await db().from("agenda").insert({ inicio, tipo }).select(COLS_EVENTO).single();
   return error || !data ? falha("Não foi possível adicionar.") : ok(evento(data));
 }
 
 export async function salvarEvento(id: string, patch: EventoPatch): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const limpo = filtrar(patch, PERMITIDOS_EVENTO);
   if ("fim" in limpo && !limpo.fim) limpo.fim = null;
   if ("inicio" in limpo && !limpo.inicio) delete limpo.inicio; // início é obrigatório
@@ -218,7 +218,7 @@ export async function salvarEvento(id: string, patch: EventoPatch): Promise<Res<
 }
 
 export async function removerEvento(id: string): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("agenda").delete().eq("id", id);
   return error ? falha("Não foi possível remover.") : ok(null);
 }

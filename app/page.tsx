@@ -66,7 +66,7 @@ function Instagram({ atual, antes }: { atual: Insta | null; antes: Insta | null 
 }
 
 export default async function Page() {
-  const s = exigirLogin();
+  const s = await exigirLogin();
   const [tarefas, contatos, insta] = await Promise.all([listarTarefas(), listarContatos(), carregarInsta().catch(() => null)]);
 
   const abertas = tarefas.ok ? ordenar(tarefas.data.filter((t) => t.status !== "feito")) : [];

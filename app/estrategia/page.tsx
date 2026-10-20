@@ -40,8 +40,8 @@ const Tag = ({ children }: { children: React.ReactNode }) => (
   <span className="rounded bg-bg px-2 py-1 text-[13px]">{children}</span>
 );
 
-export default function Page() {
-  exigirLogin();
+export default async function Page() {
+  await exigirLogin();
   return (
     <main className={PAGINA}>
       <Cabecalho rotulo="Marketing · Mapa de fluxos do negócio" titulo="Playroom"

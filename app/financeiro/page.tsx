@@ -13,7 +13,7 @@ function mesAnterior(mes: string) {
 }
 
 export default async function Page({ searchParams }: { searchParams: { mes?: string } }) {
-  exigirLogin();
+  await exigirLogin();
   const mes = /^\d{4}-\d{2}$/.test(searchParams.mes ?? "") ? searchParams.mes! : mesAtual();
   const [atual, anterior, produtos] = await Promise.all([listarLancamentos(mes), listarLancamentos(mesAnterior(mes)), listar()]);
   if (!atual.ok) return <Aviso titulo="O financeiro não carregou." texto={atual.erro} />;

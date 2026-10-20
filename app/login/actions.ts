@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { COOKIE, DURACAO, criarToken } from "@/lib/auth";
+import { COOKIE, criarToken, opcoesCookie } from "@/lib/auth";
 import { conferirSenha, normalizarLogin } from "@/lib/senha";
 import { db } from "@/lib/supabase";
 
@@ -21,7 +21,7 @@ export async function entrar(_: string | null, form: FormData): Promise<string |
   if (e && e.n >= TENTATIVAS && e.ate > Date.now()) return "Muitas tentativas erradas. Espere 15 minutos.";
 
   // Aceita o login ("ana") ou o nome completo, com ou sem espaço ("Ana Paula", "anapaula"). A tabela é pequena, então compara aqui.
-  const { data: todos, error } = await db().from("usuarios").select("id,nome,login,admin,senha_hash");
+  const { data: todos, error } = await db().from("usuarios").select("id,nome,login,admin,senha_hash,versao");
   if (error) return "Não foi possível entrar agora. Tente de novo.";
   const data = (todos ?? []).find((u) => u.login === login || normalizarLogin(u.nome) === login);
   if (!data || !conferirSenha(senha, String(data.senha_hash))) {
@@ -31,13 +31,9 @@ export async function entrar(_: string | null, form: FormData): Promise<string |
   }
 
   erros.delete(login);
-  cookies().set(COOKIE, criarToken({ id: String(data.id), nome: String(data.nome), admin: Boolean(data.admin) }), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: DURACAO,
-  });
+  cookies().set(COOKIE, criarToken({
+    id: String(data.id), nome: String(data.nome), admin: Boolean(data.admin), v: Number(data.versao),
+  }), opcoesCookie);
   redirect("/");
 }
 

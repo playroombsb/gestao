@@ -15,7 +15,7 @@ const NOTAS = [
 ];
 
 export default async function Page() {
-  exigirLogin();
+  await exigirLogin();
   const res = await listarSecoes("posicionamento");
   if (!res.ok) return <Aviso titulo="O posicionamento não carregou." texto={res.erro} />;
 

@@ -19,7 +19,7 @@ function grade(mes: string) {
 }
 
 export default async function Page({ searchParams }: { searchParams: { mes?: string } }) {
-  exigirLogin();
+  await exigirLogin();
   const mes = /^\d{4}-\d{2}$/.test(searchParams.mes ?? "") ? searchParams.mes! : mesAtual();
   const dias = grade(mes);
   // Limites em horário de Brasília (UTC-3)

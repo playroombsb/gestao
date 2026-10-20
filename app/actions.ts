@@ -13,27 +13,27 @@ const PERMITIDOS: (keyof ProdutoPatch)[] = [
 ];
 
 export async function listar(): Promise<Res<Produto[]>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("produtos").select(COLS).order("ordem");
   if (error) return { ok: false, erro: "Não foi possível carregar os dados." };
   return { ok: true, data: (data ?? []).map(normalizar) };
 }
 
 export async function salvar(id: string, patch: ProdutoPatch): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("produtos").update(filtrar(patch, PERMITIDOS)).eq("id", id);
   return error ? { ok: false, erro: "Não salvou. Tente de novo." } : { ok: true, data: null };
 }
 
 export async function adicionar(ordem: number): Promise<Res<Produto>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("produtos").insert({ ordem }).select(COLS).single();
   if (error || !data) return { ok: false, erro: "Não foi possível adicionar." };
   return { ok: true, data: normalizar(data) };
 }
 
 export async function remover(id: string): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("produtos").delete().eq("id", id);
   return error ? { ok: false, erro: "Não foi possível remover." } : { ok: true, data: null };
 }
@@ -49,20 +49,20 @@ const secao = (r: Record<string, unknown>): Secao => ({
 });
 
 export async function listarSecoes(pagina: Pagina): Promise<Res<Secao[]>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("estrategia").select(COLS_SECAO).eq("pagina", pagina).order("ordem");
   if (error) return { ok: false, erro: "Não foi possível carregar as seções." };
   return { ok: true, data: (data ?? []).map(secao) };
 }
 
 export async function salvarSecao(id: string, patch: SecaoPatch): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("estrategia").update(filtrar(patch, PERMITIDOS_SECAO)).eq("id", id);
   return error ? { ok: false, erro: "Não salvou. Tente de novo." } : { ok: true, data: null };
 }
 
 export async function adicionarSecao(pagina: Pagina, ordem: number): Promise<Res<Secao>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   if (!PAGINAS.includes(pagina)) return { ok: false, erro: "Página inválida." };
   const { data, error } = await db().from("estrategia").insert({ pagina, ordem }).select(COLS_SECAO).single();
   if (error || !data) return { ok: false, erro: "Não foi possível adicionar." };
@@ -70,7 +70,7 @@ export async function adicionarSecao(pagina: Pagina, ordem: number): Promise<Res
 }
 
 export async function removerSecao(id: string): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("estrategia").delete().eq("id", id);
   return error ? { ok: false, erro: "Não foi possível remover." } : { ok: true, data: null };
 }
@@ -86,14 +86,14 @@ const tarefa = (r: Record<string, unknown>): Tarefa => ({
 });
 
 export async function listarTarefas(): Promise<Res<Tarefa[]>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("tarefas").select(COLS_TAREFA).order("ordem");
   if (error) return { ok: false, erro: "Não foi possível carregar as tarefas." };
   return { ok: true, data: (data ?? []).map(tarefa) };
 }
 
 export async function salvarTarefa(id: string, patch: TarefaPatch): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const limpo = filtrar(patch, PERMITIDOS_TAREFA);
   if ("prazo" in limpo && !limpo.prazo) limpo.prazo = null;
   if ("etiqueta" in limpo && !limpo.etiqueta) limpo.etiqueta = null;
@@ -102,7 +102,7 @@ export async function salvarTarefa(id: string, patch: TarefaPatch): Promise<Res<
 }
 
 export async function adicionarTarefa(titulo: string, ordem: number, prazo: string | null = null, status: Tarefa["status"] = "a_fazer"): Promise<Res<Tarefa>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { data, error } = await db().from("tarefas")
     .insert({ titulo: titulo.trim(), ordem, prazo: prazo || null, status }).select(COLS_TAREFA).single();
   if (error || !data) return { ok: false, erro: "Não foi possível adicionar." };
@@ -110,7 +110,7 @@ export async function adicionarTarefa(titulo: string, ordem: number, prazo: stri
 }
 
 export async function removerTarefa(id: string): Promise<Res<null>> {
-  if (!sessao()) return negar();
+  if (!(await sessao())) return negar();
   const { error } = await db().from("tarefas").delete().eq("id", id);
   return error ? { ok: false, erro: "Não foi possível remover." } : { ok: true, data: null };
 }

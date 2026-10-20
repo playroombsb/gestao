@@ -20,14 +20,14 @@ async function contarNovas() {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const s = sessao();
+  const s = await sessao();
   const novas = s ? await contarNovas().catch(() => 0) : 0;
   return (
     <html lang="pt-BR" className={inter.variable}>
       <body className="bg-bg font-sans text-ink antialiased">
         {s ? (
           <div className="md:flex">
-            <Nav nome={s.nome} novas={novas} />
+            <Nav nome={s.nome} novas={novas} admin={s.admin} />
             <div className="min-w-0 flex-1">{children}</div>
           </div>
         ) : children}

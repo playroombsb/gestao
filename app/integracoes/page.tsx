@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { exigirLogin } from "@/lib/auth";
+import { exigirAdmin } from "@/lib/auth";
 import { PERFIL } from "@/lib/instagram";
 import { db } from "@/lib/supabase";
 import Cabecalho, { PAGINA } from "@/components/Cabecalho";
@@ -37,7 +37,7 @@ const Passos = ({ itens }: { itens: React.ReactNode[] }) => (
 );
 
 export default async function Page() {
-  exigirLogin();
+  await exigirAdmin();
   const h = headers();
   const base = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host")}`;
 
