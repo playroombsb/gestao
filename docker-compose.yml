@@ -8,3 +8,11 @@ services:
     network_mode: bridge
     ports:
       - "127.0.0.1:3036:3000"
+
+  # Coletor de métricas públicas do Instagram. Não sobe com "up": roda sob demanda pelo cron
+  # com "docker compose --profile insta run --rm insta".
+  insta:
+    build: ./scraper
+    profiles: ["insta"]
+    env_file: .env.local
+    network_mode: bridge

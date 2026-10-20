@@ -82,7 +82,7 @@ export default function Painel({ inicial }: { inicial: Produto[] }) {
   return (
     <main className="mx-auto flex max-w-[1080px] flex-col gap-9 px-4 pb-16 pt-6 md:gap-11 md:px-5 md:pt-8">
       <header className="flex flex-col gap-3 border-b-2 border-red pb-6 md:pb-7">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-red">Studio - SM · Playroom · Brasília</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-red">Gestão · Produtos</p>
         <h1 className="text-balance text-[clamp(36px,7vw,62px)] font-extrabold leading-none tracking-[-0.035em]">
           O que <span className="text-red">paga</span> a casa
         </h1>

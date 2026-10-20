@@ -1,22 +1,10 @@
 "use server";
 
 import { sessao } from "@/lib/auth";
+import { filtrar, negar, txt, type Res } from "@/lib/crud";
 import { COLS, normalizar } from "@/lib/dados";
 import { db } from "@/lib/supabase";
-import type { Produto, ProdutoPatch, Secao, SecaoPatch, Tarefa, TarefaPatch } from "@/lib/types";
-
-type Res<T> = { ok: true; data: T } | { ok: false; erro: string };
-
-function negar(): Res<never> {
-  return { ok: false, erro: "Sessão expirada. Entre de novo." };
-}
-
-/** Copia só as colunas permitidas; o resto do patch é ignorado. */
-function filtrar<P extends object>(patch: P, permitidos: (keyof P)[]) {
-  const limpo: Record<string, unknown> = {};
-  for (const c of permitidos) if (c in patch) limpo[c as string] = patch[c];
-  return limpo;
-}
+import type { Pagina, Produto, ProdutoPatch, Secao, SecaoPatch, Tarefa, TarefaPatch } from "@/lib/types";
 
 // Produtos
 
@@ -50,19 +38,20 @@ export async function remover(id: string): Promise<Res<null>> {
   return error ? { ok: false, erro: "Não foi possível remover." } : { ok: true, data: null };
 }
 
-// Estratégia
+// Seções de texto (posicionamento e linha editorial)
 
 const COLS_SECAO = "id,titulo,conteudo,ordem";
 const PERMITIDOS_SECAO: (keyof SecaoPatch)[] = ["titulo", "conteudo", "ordem"];
+const PAGINAS: Pagina[] = ["posicionamento", "editorial"];
 
 const secao = (r: Record<string, unknown>): Secao => ({
-  id: String(r.id), titulo: String(r.titulo ?? ""), conteudo: String(r.conteudo ?? ""), ordem: Number(r.ordem ?? 0),
+  id: txt(r.id), titulo: txt(r.titulo), conteudo: txt(r.conteudo), ordem: Number(r.ordem ?? 0),
 });
 
-export async function listarSecoes(): Promise<Res<Secao[]>> {
+export async function listarSecoes(pagina: Pagina): Promise<Res<Secao[]>> {
   if (!sessao()) return negar();
-  const { data, error } = await db().from("estrategia").select(COLS_SECAO).order("ordem");
-  if (error) return { ok: false, erro: "Não foi possível carregar a estratégia." };
+  const { data, error } = await db().from("estrategia").select(COLS_SECAO).eq("pagina", pagina).order("ordem");
+  if (error) return { ok: false, erro: "Não foi possível carregar as seções." };
   return { ok: true, data: (data ?? []).map(secao) };
 }
 
@@ -72,9 +61,10 @@ export async function salvarSecao(id: string, patch: SecaoPatch): Promise<Res<nu
   return error ? { ok: false, erro: "Não salvou. Tente de novo." } : { ok: true, data: null };
 }
 
-export async function adicionarSecao(ordem: number): Promise<Res<Secao>> {
+export async function adicionarSecao(pagina: Pagina, ordem: number): Promise<Res<Secao>> {
   if (!sessao()) return negar();
-  const { data, error } = await db().from("estrategia").insert({ ordem }).select(COLS_SECAO).single();
+  if (!PAGINAS.includes(pagina)) return { ok: false, erro: "Página inválida." };
+  const { data, error } = await db().from("estrategia").insert({ pagina, ordem }).select(COLS_SECAO).single();
   if (error || !data) return { ok: false, erro: "Não foi possível adicionar." };
   return { ok: true, data: secao(data) };
 }
@@ -87,11 +77,11 @@ export async function removerSecao(id: string): Promise<Res<null>> {
 
 // Tarefas
 
-const COLS_TAREFA = "id,titulo,feita,ordem";
-const PERMITIDOS_TAREFA: (keyof TarefaPatch)[] = ["titulo", "feita", "ordem"];
+const COLS_TAREFA = "id,titulo,feita,prazo,ordem";
+const PERMITIDOS_TAREFA: (keyof TarefaPatch)[] = ["titulo", "feita", "prazo", "ordem"];
 
 const tarefa = (r: Record<string, unknown>): Tarefa => ({
-  id: String(r.id), titulo: String(r.titulo ?? ""), feita: Boolean(r.feita), ordem: Number(r.ordem ?? 0),
+  id: txt(r.id), titulo: txt(r.titulo), feita: Boolean(r.feita), prazo: r.prazo ? txt(r.prazo) : null, ordem: Number(r.ordem ?? 0),
 });
 
 export async function listarTarefas(): Promise<Res<Tarefa[]>> {
@@ -103,13 +93,16 @@ export async function listarTarefas(): Promise<Res<Tarefa[]>> {
 
 export async function salvarTarefa(id: string, patch: TarefaPatch): Promise<Res<null>> {
   if (!sessao()) return negar();
-  const { error } = await db().from("tarefas").update(filtrar(patch, PERMITIDOS_TAREFA)).eq("id", id);
+  const limpo = filtrar(patch, PERMITIDOS_TAREFA);
+  if ("prazo" in limpo && !limpo.prazo) limpo.prazo = null;
+  const { error } = await db().from("tarefas").update(limpo).eq("id", id);
   return error ? { ok: false, erro: "Não salvou. Tente de novo." } : { ok: true, data: null };
 }
 
-export async function adicionarTarefa(titulo: string, ordem: number): Promise<Res<Tarefa>> {
+export async function adicionarTarefa(titulo: string, ordem: number, prazo: string | null = null): Promise<Res<Tarefa>> {
   if (!sessao()) return negar();
-  const { data, error } = await db().from("tarefas").insert({ titulo: titulo.trim(), ordem }).select(COLS_TAREFA).single();
+  const { data, error } = await db().from("tarefas")
+    .insert({ titulo: titulo.trim(), ordem, prazo: prazo || null }).select(COLS_TAREFA).single();
   if (error || !data) return { ok: false, erro: "Não foi possível adicionar." };
   return { ok: true, data: tarefa(data) };
 }
@@ -119,3 +112,4 @@ export async function removerTarefa(id: string): Promise<Res<null>> {
   const { error } = await db().from("tarefas").delete().eq("id", id);
   return error ? { ok: false, erro: "Não foi possível remover." } : { ok: true, data: null };
 }
+

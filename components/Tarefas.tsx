@@ -2,13 +2,23 @@
 
 import { useState } from "react";
 import { adicionarTarefa, removerTarefa, salvarTarefa } from "@/app/actions";
+import { TOM_PRAZO, ordenar, rotuloPrazo } from "@/lib/prazo";
 import { useAutosave } from "@/lib/useAutosave";
 import type { Tarefa, TarefaPatch } from "@/lib/types";
+import Cabecalho, { PAGINA } from "./Cabecalho";
 import StatusSalvo from "./StatusSalvo";
+
+/** Campo que cresce com o texto, para títulos longos não ficarem cortados. */
+function ajustar(el: HTMLTextAreaElement | null) {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight}px`;
+}
 
 export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
   const [tarefas, setTarefas] = useState<Tarefa[]>(inicial);
   const [texto, setTexto] = useState("");
+  const [prazo, setPrazo] = useState("");
   const [armado, setArmado] = useState<string | null>(null);
   const { status, rodar, agendar, esquecer } = useAutosave<TarefaPatch>(salvarTarefa);
 
@@ -22,10 +32,11 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
     const titulo = texto.trim();
     if (!titulo) return;
     const ordem = Math.max(0, ...tarefas.map((t) => t.ordem)) + 1;
-    const r = await rodar(() => adicionarTarefa(titulo, ordem));
+    const r = await rodar(() => adicionarTarefa(titulo, ordem, prazo || null));
     if (!r.ok) return;
     setTarefas((xs) => [...xs, r.data]);
     setTexto("");
+    setPrazo("");
   }
 
   async function apagar(id: string) {
@@ -40,8 +51,21 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
     await rodar(() => removerTarefa(id));
   }
 
-  const abertas = tarefas.filter((t) => !t.feita);
+  const abertas = ordenar(tarefas.filter((t) => !t.feita));
   const feitas = tarefas.filter((t) => t.feita);
+
+  // Rótulo do prazo; clicar abre o seletor de data por cima dele.
+  function campoPrazo(t: Tarefa) {
+    const r = rotuloPrazo(t.prazo);
+    return (
+      <label className="relative flex shrink-0 cursor-pointer items-center text-[12px]">
+        <span className={TOM_PRAZO[r.tom]}>{r.t}</span>
+        <input type="date" value={t.prazo ?? ""} aria-label={`Prazo de ${t.titulo}`}
+          onChange={(e) => alterar(t.id, { prazo: e.target.value || null }, true)}
+          className="absolute inset-0 cursor-pointer opacity-0" />
+      </label>
+    );
+  }
 
   // Função de render, não componente: um componente criado aqui remontaria o input a cada letra.
   function linha(t: Tarefa) {
@@ -57,9 +81,13 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
             {t.feita ? "✓" : ""}
           </span>
         </button>
-        <input className={`campo border-transparent ${t.feita ? "text-muted line-through" : "font-semibold"}`}
-          value={t.titulo} aria-label="Tarefa" placeholder="Tarefa sem nome"
-          onChange={(e) => alterar(t.id, { titulo: e.target.value })} />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+          <textarea ref={ajustar} rows={1} value={t.titulo} aria-label="Tarefa" placeholder="Tarefa sem nome"
+            className={`campo resize-none overflow-hidden border-transparent leading-snug ${t.feita ? "text-muted line-through" : "font-semibold"}`}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.blur(); } }}
+            onChange={(e) => { ajustar(e.target); alterar(t.id, { titulo: e.target.value.replace(/\n/g, " ") }); }} />
+          {!t.feita && campoPrazo(t)}
+        </div>
         <button type="button" onClick={() => apagar(t.id)} aria-label={`Remover ${t.titulo}`}
           className={`h-11 shrink-0 border-[1.5px] md:h-8 ${armado === t.id
             ? "border-red bg-red px-2.5 text-[12px] font-bold text-white md:px-1.5 md:text-[11px]"
@@ -71,16 +99,9 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
   }
 
   return (
-    <main className="mx-auto flex max-w-[1080px] flex-col gap-9 px-4 pb-16 pt-6 md:gap-11 md:px-5 md:pt-8">
-      <header className="flex flex-col gap-3 border-b-2 border-red pb-6 md:pb-7">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-red">Studio - SM · Playroom · Tarefas</p>
-        <h1 className="text-balance text-[clamp(36px,7vw,62px)] font-extrabold leading-none tracking-[-0.035em]">
-          O que falta <span className="text-red">fazer</span>
-        </h1>
-        <p className="text-base text-ink/80">
-          Tarefas do projeto. Escreva e aperte Enter para criar, marque quando terminar. Tudo salva sozinho.
-        </p>
-      </header>
+    <main className={PAGINA}>
+      <Cabecalho rotulo="Tarefas" titulo={<>O que falta <span className="text-red">fazer</span></>}
+        texto="Escreva e aperte Enter para criar. Clique no prazo para mudar a data. Tudo salva sozinho." />
 
       <section className="flex flex-col gap-4" aria-labelledby="t-abertas">
         <div className="sticky top-0 z-10 -mx-4 flex items-center gap-3 border-b border-line bg-bg/95 px-4 py-2.5 text-[13px] text-muted backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
@@ -95,6 +116,11 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
           <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Nova tarefa"
             aria-label="Nova tarefa"
             className="min-h-[48px] flex-1 border-[1.5px] border-line bg-paper px-3.5 font-semibold outline-none placeholder:font-normal placeholder:text-[#b3a7a5] focus:border-red" />
+          <label className="flex min-h-[48px] items-center gap-2 border-[1.5px] border-line bg-paper px-3 text-[13px] text-muted focus-within:border-red">
+            Prazo
+            <input type="date" value={prazo} onChange={(e) => setPrazo(e.target.value)}
+              className="bg-transparent font-semibold text-ink outline-none" />
+          </label>
           <button type="submit"
             className="min-h-[48px] border-2 border-red bg-red px-[18px] text-[13px] font-bold tracking-wide text-white hover:brightness-110">
             + Adicionar

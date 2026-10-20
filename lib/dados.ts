@@ -1,5 +1,4 @@
 import "server-only";
-import { db } from "./supabase";
 import type { Produto } from "./types";
 
 export const COLS = "id,nome,descricao,ticket,margem,vendas,ticket_ns,margem_ns,vendas_ns,ordem";
@@ -19,14 +18,4 @@ export function normalizar(r: Record<string, unknown>): Produto {
     vendas_ns: Boolean(r.vendas_ns),
     ordem: Number(r.ordem ?? 0),
   };
-}
-
-/** Produtos e a data da última alteração, para o painel de leitura. */
-export async function carregarPainel(): Promise<{ produtos: Produto[]; atualizado: string | null } | null> {
-  const { data, error } = await db().from("produtos").select(`${COLS},updated_at`).order("ordem");
-  if (error) return null;
-  const linhas = data ?? [];
-  const atualizado = linhas.reduce<string | null>(
-    (m, r) => (!m || String(r.updated_at) > m ? String(r.updated_at) : m), null);
-  return { produtos: linhas.map(normalizar), atualizado };
 }

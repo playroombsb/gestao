@@ -12,7 +12,9 @@ const config: Config = {
         muted: "#5f5453",
         line: "#dcd3d1",
         "line-soft": "#e4dcda",
-        red: { DEFAULT: "#c8102e", deep: "#7a0a18", soft: "#fbe6e9" },
+        red: { DEFAULT: "#c8102e", deep: "#7a0a18", soft: "#fbe6e9", vivo: "#ff4d64" },
+        // menu lateral preto
+        side: { text: "#d9d0ce", label: "#8a7f7d", line: "#2e2727" },
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],

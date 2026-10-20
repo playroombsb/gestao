@@ -1,6 +1,10 @@
 # Studio - SM
 
-Ferramenta de estratégia do Playroom (casa de BDSM em Brasília). Quatro páginas: Números (ticket, margem e vendas por produto, com "não sei"; calcula lucro mensal, ranking, matriz margem × giro e o que falta levantar), Painel (leitura dos números), Estratégia (seções de texto editáveis: arquétipo, posicionamento, cliente ideal) e Tarefas (lista do projeto).
+Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
+- **Início**: próximas 7 tarefas, números do Instagram e resumo do CRM.
+- **Tarefas** (com prazo) e **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
+- **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
+- **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (ticket, margem e vendas por produto, matriz) e Financeiro (custos e receitas por mês).
 
 ## Stack
 Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Docker na VPS.
@@ -14,13 +18,13 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - As tabelas de `studio_sm` têm RLS ligado e nenhuma policy, então a chave anon não acessa nada.
 
 ## Mapa
-- `app/page.tsx`: carrega os produtos para preenchimento.
-- `app/painel/page.tsx`: painel de leitura, sem nenhum campo editável.
-- `app/estrategia/page.tsx` e `components/Estrategia.tsx`: seções de texto editáveis.
-- `app/tarefas/page.tsx` e `components/Tarefas.tsx`: lista de tarefas (criar, marcar feita, editar, remover).
+- `app/page.tsx`: Início. `app/produtos/`: a antiga tela de números (`components/Painel.tsx`). `/painel` redireciona para `/produtos`.
+- `app/tarefas`, `app/aplicacoes`, `app/estrategia`, `app/posicionamento`, `app/editorial`, `app/crm`, `app/financeiro`: uma pasta por página, cada uma com seu componente em `components/`.
 - `app/login/`: tela e actions de entrar e sair.
-- `app/actions.ts`: listar, salvar, adicionar, remover de produtos, seções e tarefas. Cada tabela só aceita os campos da sua lista de permitidos.
-- `components/Nav.tsx`: menu do topo, aparece só com sessão.
+- `app/actions.ts`: produtos, seções (`estrategia`, com coluna `pagina`) e tarefas. `app/actions-gestao.ts`: contatos, aplicações, lançamentos e pautas. Cada tabela só aceita os campos da sua lista de permitidos.
+- `app/api/aplicacoes/route.ts`: recebe o formulário do site (ver "Aplicações do site").
+- `components/Nav.tsx`: menu lateral preto (no celular, botão Menu), aparece só com sessão. `components/Cabecalho.tsx`: cabeçalho e classes de página, cartão e botão.
+- `lib/crm.ts`: datas em Brasília e números do pipeline. `lib/prazo.ts`: ordem e rótulo dos prazos. `lib/instagram.ts`: última coleta e a de 7 dias antes.
 - `lib/auth.ts`: cookie de sessão assinado. `lib/useAutosave.ts`: salva 700 ms depois da última edição.
 - `components/Painel.tsx`: tela de preenchimento. Salva 700 ms após a pessoa parar de digitar.
 - `components/Resultados.tsx`: "A levantar", totais, ranking e matriz, usado nas duas páginas.
@@ -28,7 +32,19 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - `lib/dados.ts`: colunas, normalização e leitura do painel.
 - `lib/calc.ts`: regras de cálculo puras. Lucro = ticket × margem% × vendas.
 - `lib/supabase.ts`: cliente `service_role` apontando para o schema `studio_sm`, com `cache: "no-store"`.
-- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão).
+- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing.
+- `scraper/`: coletor do Instagram (Python, Scrapling).
+
+## Regras de negócio
+- Contato do CRM em "Realizado" vira receita sozinho (trigger `sincronizar_receita` em `contatos`): categoria Sessões ou Aluguéis, data do atendimento, valor do contato. Saiu de "Realizado", a receita é apagada. Essa receita não pode ser removida pelo Financeiro.
+- Lançamento recorrente aparece em todo mês a partir da data dele. Custo recorrente conta como fixo.
+- CRM guarda só apelido e um contato. Nada de nome completo, documento ou foto.
+
+## Aplicações do site
+O formulário do site (ainda a fazer) envia servidor a servidor: `POST https://sm.testesana.com.br/api/aplicacoes` com `Authorization: Bearer <APLICACOES_TOKEN>` e JSON `{ "apelido", "contato", "interesse", "respostas": [{ "pergunta", "resposta" }] }`. Qualquer outro campo simples vira resposta. Limite de 20 KB. O token não pode ir para o navegador.
+
+## Instagram
+`scraper/instagram.py` lê seguidores, seguindo e posts do HTML público do perfil e grava em `studio_sm.instagram`. O perfil é restrito por idade, então curtidas e engajamento não aparecem sem login. Da VPS o Instagram bloqueia (HTTP 429, IP de datacenter); do Mac da Ana funciona. Na VPS há um cron às 12:00 UTC (`docker compose --profile insta run --rm -T insta`, log em `/var/log/studio-sm-insta.log`) que só passa a funcionar com `INSTAGRAM_PROXY` (proxy residencial) no `.env.local`.
 
 ## Produção
 https://sm.testesana.com.br, com HTTPS, na VPS (`76.13.226.25`), pasta `/opt/apps/studio-sm`, container `studio-sm` em `127.0.0.1:3036`, nginx do sistema na frente. O sm.projetosdaana.com.br foi desligado em 20/10/2026.
