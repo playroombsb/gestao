@@ -2,23 +2,39 @@
 
 import { useEffect, useState } from "react";
 import { adicionarTarefa, removerTarefa, salvarTarefa } from "@/app/actions";
-import { TOM_PRAZO, ordenar, rotuloPrazo } from "@/lib/prazo";
+import { ordenar, prazoCurto } from "@/lib/prazo";
 import { useAutosave } from "@/lib/useAutosave";
-import { ETIQUETAS, STATUS_TAREFA, type Etiqueta, type StatusTarefa, type Tarefa, type TarefaPatch } from "@/lib/types";
+import {
+  ETIQUETAS, STATUS_TAREFA, type Etiqueta, type Pessoa, type StatusTarefa, type Tarefa, type TarefaPatch,
+} from "@/lib/types";
 import Cabecalho, { PAGINA } from "./Cabecalho";
 import StatusSalvo from "./StatusSalvo";
 
 type Vista = "kanban" | "lista";
 
-const COR_ETIQUETA: Record<Etiqueta, string> = {
-  nao_iniciado: "border-line text-muted",
-  aguardando_revisao: "border-red-soft bg-red-soft text-red-deep",
-  concluido: "border-ink bg-ink text-white",
-  publicado: "border-red bg-red text-white",
+// Pílula da etiqueta: fundo, texto e bolinha
+const ETIQUETA: Record<Etiqueta | "nenhuma", { fundo: string; ponto: string }> = {
+  nenhuma: { fundo: "bg-[#efeceb] text-[#9a8e8c]", ponto: "bg-[#b3a7a5]" },
+  nao_iniciado: { fundo: "bg-[#efeceb] text-[#4a4140]", ponto: "bg-[#6f6463]" },
+  aguardando_revisao: { fundo: "bg-[#fdeee2] text-[#b4530f]", ponto: "bg-[#d9670f]" },
+  concluido: { fundo: "bg-[#e6e3e2] text-ink", ponto: "bg-ink" },
+  publicado: { fundo: "bg-red-soft text-red", ponto: "bg-red" },
 };
-const COR_COLUNA: Record<StatusTarefa, string> = { a_fazer: "border-line", fazendo: "border-ink", feito: "border-red" };
+// Cor do avatar pela ordem de cadastro: a primeira pessoa em preto, a segunda em vermelho
+const AVATAR = ["bg-ink", "bg-red", "bg-[#6f6463]", "bg-red-deep"];
 const NOME_STATUS = Object.fromEntries(STATUS_TAREFA.map((s) => [s.k, s.t])) as Record<StatusTarefa, string>;
 const ORDEM: StatusTarefa[] = ["a_fazer", "fazendo", "feito"];
+const SELECT = "appearance-none bg-transparent font-bold text-ink outline-none";
+const SETA = (
+  <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
+    <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const iniciais = (nome: string) => {
+  const p = nome.trim().split(/\s+/);
+  return (p.length > 1 ? p[0][0] + p[p.length - 1][0] : p[0].slice(0, 2)).toUpperCase();
+};
 
 /** Campo que cresce com o texto, para títulos longos não ficarem cortados. */
 function ajustar(el: HTMLTextAreaElement | null) {
@@ -27,14 +43,15 @@ function ajustar(el: HTMLTextAreaElement | null) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
-export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
+export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pessoas: Pessoa[] }) {
   const [tarefas, setTarefas] = useState<Tarefa[]>(inicial);
   const [vista, setVista] = useState<Vista>("kanban");
-  const [filtro, setFiltro] = useState<Etiqueta | "todas" | "sem">("todas");
+  const [fEtiqueta, setFEtiqueta] = useState<string>("todas");
+  const [fPessoa, setFPessoa] = useState<string>("todos");
   const [texto, setTexto] = useState("");
   const [prazo, setPrazo] = useState("");
+  const [resp, setResp] = useState("");
   const [armado, setArmado] = useState<string | null>(null);
-  const [sobre, setSobre] = useState<StatusTarefa | null>(null);
   const { status, rodar, agendar, esquecer } = useAutosave<TarefaPatch>(salvarTarefa);
 
   // Lembra a visualização escolhida neste navegador
@@ -45,6 +62,9 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
     setVista(v);
     try { localStorage.setItem("tarefas-vista", v); } catch {}
   }
+
+  const pessoa = (id: string | null) => pessoas.find((p) => p.id === id) ?? null;
+  const corDe = (id: string) => AVATAR[Math.max(0, pessoas.findIndex((p) => p.id === id)) % AVATAR.length];
 
   function alterar(id: string, patch: TarefaPatch, imediato = false) {
     setTarefas((xs) => xs.map((t) => (t.id === id ? { ...t, ...patch } : t)));
@@ -57,7 +77,7 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
     const titulo = texto.trim();
     if (!titulo) return;
     const ordem = Math.max(0, ...tarefas.map((t) => t.ordem)) + 1;
-    const r = await rodar(() => adicionarTarefa(titulo, ordem, prazo || null));
+    const r = await rodar(() => adicionarTarefa(titulo, ordem, prazo || null, resp || null));
     if (!r.ok) return;
     setTarefas((xs) => [...xs, r.data]);
     setTexto("");
@@ -76,7 +96,9 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
     await rodar(() => removerTarefa(id));
   }
 
-  const visiveis = tarefas.filter((t) => filtro === "todas" || (filtro === "sem" ? !t.etiqueta : t.etiqueta === filtro));
+  const visiveis = tarefas.filter((t) =>
+    (fEtiqueta === "todas" || (fEtiqueta === "sem" ? !t.etiqueta : t.etiqueta === fEtiqueta))
+    && (fPessoa === "todos" || (fPessoa === "sem" ? !t.responsavel_id : t.responsavel_id === fPessoa)));
   const doStatus = (s: StatusTarefa) => {
     const xs = visiveis.filter((t) => t.status === s);
     return s === "feito" ? [...xs].sort((a, b) => b.ordem - a.ordem) : ordenar(xs);
@@ -86,20 +108,56 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
   // Partes usadas pelo kanban e pela lista. Funções de render, não componentes:
   // um componente criado aqui remontaria os campos a cada letra digitada.
 
-  function titulo(t: Tarefa) {
+  function titulo(t: Tarefa, grande: boolean) {
     return (
       <textarea ref={ajustar} rows={1} value={t.titulo} aria-label="Tarefa" placeholder="Tarefa sem nome"
-        className={`campo resize-none overflow-hidden border-transparent leading-snug ${t.status === "feito" ? "text-muted line-through" : "font-semibold"}`}
+        className={`w-full resize-none overflow-hidden rounded bg-transparent font-bold leading-snug tracking-tight outline-none focus:bg-bg ${
+          grande ? "text-[18px]" : "text-[15px]"} ${t.status === "feito" ? "text-muted" : "text-ink"}`}
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.blur(); } }}
         onChange={(e) => { ajustar(e.target); alterar(t.id, { titulo: e.target.value.replace(/\n/g, " ") }); }} />
     );
   }
 
-  function campoPrazo(t: Tarefa) {
-    const r = rotuloPrazo(t.prazo);
+  function etiqueta(t: Tarefa) {
+    const e = ETIQUETA[t.etiqueta ?? "nenhuma"];
     return (
-      <label className="relative flex shrink-0 cursor-pointer items-center text-[12px]">
-        <span className={TOM_PRAZO[t.status === "feito" && r.tom === "atrasada" ? "normal" : r.tom]}>{r.t}</span>
+      <label className={`relative inline-flex min-h-[32px] items-center gap-2 self-start rounded-full py-1 pl-3 pr-3.5 text-[13px] font-semibold ${e.fundo}`}>
+        <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${e.ponto}`} />
+        {t.etiqueta ? ETIQUETAS.find((x) => x.k === t.etiqueta)!.t : "+ Etiqueta"}
+        <select value={t.etiqueta ?? ""} aria-label={`Etiqueta de ${t.titulo}`}
+          onChange={(ev) => alterar(t.id, { etiqueta: (ev.target.value || null) as Etiqueta | null }, true)}
+          className="absolute inset-0 cursor-pointer opacity-0">
+          <option value="">Sem etiqueta</option>
+          {ETIQUETAS.map((x) => <option key={x.k} value={x.k}>{x.t}</option>)}
+        </select>
+      </label>
+    );
+  }
+
+  function avatar(t: Tarefa) {
+    const p = pessoa(t.responsavel_id);
+    return (
+      <label className="relative shrink-0" title={p ? p.nome : "Escolher responsável"}>
+        {p ? (
+          <span className={`flex h-9 w-9 items-center justify-center rounded-full text-[12px] font-extrabold text-white ${corDe(p.id)}`}>{iniciais(p.nome)}</span>
+        ) : (
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-dashed border-[#c9bfbd] text-[15px] text-[#9a8e8c]">+</span>
+        )}
+        <select value={t.responsavel_id ?? ""} aria-label={`Responsável por ${t.titulo}`}
+          onChange={(e) => alterar(t.id, { responsavel_id: e.target.value || null }, true)}
+          className="absolute inset-0 cursor-pointer opacity-0">
+          <option value="">Sem responsável</option>
+          {pessoas.map((x) => <option key={x.id} value={x.id}>{x.nome}</option>)}
+        </select>
+      </label>
+    );
+  }
+
+  function prazoDe(t: Tarefa) {
+    const r = prazoCurto(t.prazo, t.status === "feito");
+    return (
+      <label className="relative min-w-0 cursor-pointer">
+        <span className={`text-[15px] font-bold ${r.tom === "atrasada" ? "text-red" : r.tom === "sem" ? "text-[#b3a7a5]" : "text-ink"}`}>{r.t}</span>
         <input type="date" value={t.prazo ?? ""} aria-label={`Prazo de ${t.titulo}`}
           onChange={(e) => alterar(t.id, { prazo: e.target.value || null }, true)}
           className="absolute inset-0 cursor-pointer opacity-0" />
@@ -107,57 +165,42 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
     );
   }
 
-  function campoEtiqueta(t: Tarefa) {
-    return (
-      <select value={t.etiqueta ?? ""} aria-label={`Etiqueta de ${t.titulo}`}
-        onChange={(e) => alterar(t.id, { etiqueta: (e.target.value || null) as Etiqueta | null }, true)}
-        className={`min-h-[30px] max-w-full border-[1.5px] px-1.5 text-[11px] font-bold uppercase tracking-wide outline-none focus:outline-2 focus:outline-red ${
-          t.etiqueta ? COR_ETIQUETA[t.etiqueta] : "border-dashed border-line bg-paper text-muted"}`}>
-        <option value="">+ etiqueta</option>
-        {ETIQUETAS.map((e) => <option key={e.k} value={e.k}>{e.t}</option>)}
-      </select>
-    );
-  }
-
-  function botaoRemover(t: Tarefa) {
-    return (
+  function remover(t: Tarefa, cls = "") {
+    return armado === t.id ? (
+      <button type="button" onClick={() => apagar(t.id)} className={`shrink-0 rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white ${cls}`}>Remover?</button>
+    ) : (
       <button type="button" onClick={() => apagar(t.id)} aria-label={`Remover ${t.titulo}`}
-        className={`h-9 shrink-0 border-[1.5px] ${armado === t.id
-          ? "border-red bg-red px-2 text-[11px] font-bold text-white"
-          : "w-9 border-transparent text-lg text-muted hover:border-red hover:text-red"}`}>
-        {armado === t.id ? "Remover?" : "×"}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#b3a7a5] hover:bg-bg hover:text-red ${cls}`}>
+        <svg aria-hidden width="14" height="14" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
       </button>
     );
   }
 
   function cartao(t: Tarefa) {
     const i = ORDEM.indexOf(t.status);
+    const antes = ORDEM[i - 1];
+    const depois = ORDEM[i + 1];
     return (
       <article key={t.id}
-        className={`flex flex-col gap-2 border border-line bg-paper p-2.5 focus-within:outline focus-within:outline-2 focus-within:outline-red ${
-          t.status === "feito" ? "opacity-75" : ""}`}>
-        <div className="flex items-start gap-1">
-          <span draggable onDragStart={(e) => { e.dataTransfer.setData("text/plain", t.id); e.dataTransfer.effectAllowed = "move"; }}
-            title="Arraste para outra coluna" aria-hidden
-            className="mt-1 hidden cursor-grab select-none px-0.5 text-[14px] leading-none text-[#b3a7a5] hover:text-ink md:block">⠿</span>
-          {titulo(t)}
+        className="flex flex-col gap-3 rounded-2xl bg-paper p-5 shadow-[0_1px_2px_rgba(13,10,10,0.06),0_1px_8px_rgba(13,10,10,0.04)] focus-within:ring-2 focus-within:ring-red/60">
+        <div className="flex items-start justify-between gap-2">
+          {etiqueta(t)}
+          {remover(t, "-mr-2 -mt-1")}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {campoEtiqueta(t)}
-          {campoPrazo(t)}
-        </div>
-        <div className="flex items-center justify-between gap-1 border-t border-line-soft pt-1.5">
-          <div className="flex gap-1">
-            {i > 0 && (
-              <button type="button" onClick={() => mover(t.id, ORDEM[i - 1])} aria-label={`Mover para ${NOME_STATUS[ORDEM[i - 1]]}`}
-                className="min-h-[36px] px-2 text-[12px] font-bold text-muted hover:text-ink">← {NOME_STATUS[ORDEM[i - 1]]}</button>
+        {titulo(t, true)}
+        <div className="flex items-center gap-3">
+          {avatar(t)}
+          <div className="min-w-0 flex-1">{prazoDe(t)}</div>
+          <div className="flex shrink-0 gap-2">
+            {antes && (
+              <button type="button" onClick={() => mover(t.id, antes)} aria-label={`Mover para ${NOME_STATUS[antes]}`}
+                className="flex h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-line text-[18px] hover:border-ink">←</button>
             )}
-            {i < ORDEM.length - 1 && (
-              <button type="button" onClick={() => mover(t.id, ORDEM[i + 1])} aria-label={`Mover para ${NOME_STATUS[ORDEM[i + 1]]}`}
-                className="min-h-[36px] px-2 text-[12px] font-bold hover:text-red">{NOME_STATUS[ORDEM[i + 1]]} →</button>
+            {depois && (
+              <button type="button" onClick={() => mover(t.id, depois)} aria-label={`Mover para ${NOME_STATUS[depois]}`}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-[18px] text-white hover:bg-red">→</button>
             )}
           </div>
-          {botaoRemover(t)}
         </div>
       </article>
     );
@@ -166,24 +209,29 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
   function linha(t: Tarefa) {
     const feito = t.status === "feito";
     return (
-      <li key={t.id} className={`flex flex-wrap items-center gap-x-3 gap-y-1.5 border border-line border-l-4 bg-paper px-3 py-2 focus-within:outline focus-within:outline-2 focus-within:outline-red ${
-        feito ? "border-l-line-soft" : t.status === "fazendo" ? "border-l-ink" : "border-l-red"}`}>
+      <li key={t.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl bg-paper px-4 py-3 shadow-[0_1px_2px_rgba(13,10,10,0.06)] focus-within:ring-2 focus-within:ring-red/60">
         <button type="button" role="checkbox" aria-checked={feito}
           aria-label={feito ? `Reabrir ${t.titulo}` : `Marcar ${t.titulo} como feita`}
           onClick={() => mover(t.id, feito ? "a_fazer" : "feito")}
-          className="flex h-11 w-11 shrink-0 items-center justify-center md:h-9 md:w-9">
-          <span className={`flex h-5 w-5 items-center justify-center border-2 text-[13px] font-black ${
+          className="flex h-11 w-11 shrink-0 items-center justify-center">
+          <span className={`flex h-6 w-6 items-center justify-center rounded-full border-2 text-[12px] font-black ${
             feito ? "border-ink bg-ink text-white" : "border-line hover:border-red"}`}>{feito ? "✓" : ""}</span>
         </button>
-        <div className="min-w-0 flex-[1_1_240px]">{titulo(t)}</div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <select value={t.status} aria-label={`Status de ${t.titulo}`} onChange={(e) => mover(t.id, e.target.value as StatusTarefa)}
-            className="min-h-[30px] border-[1.5px] border-ink bg-paper px-1.5 text-[12px] font-bold outline-none focus:outline-2 focus:outline-red">
-            {STATUS_TAREFA.map((s) => <option key={s.k} value={s.k}>{s.t}</option>)}
-          </select>
-          {campoEtiqueta(t)}
-          {campoPrazo(t)}
-          {botaoRemover(t)}
+        <div className="min-w-0 flex-[1_1_240px]">{titulo(t, false)}</div>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="relative">
+            <select value={t.status} aria-label={`Status de ${t.titulo}`} onChange={(e) => mover(t.id, e.target.value as StatusTarefa)}
+              className="min-h-[32px] appearance-none rounded-full border-[1.5px] border-line bg-paper pl-3 pr-8 text-[13px] font-bold outline-none focus:border-ink">
+              {STATUS_TAREFA.map((s) => <option key={s.k} value={s.k}>{s.t}</option>)}
+            </select>
+            <svg aria-hidden width="10" height="10" viewBox="0 0 12 12" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+              <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </label>
+          {etiqueta(t)}
+          {avatar(t)}
+          <div className="min-w-[96px]">{prazoDe(t)}</div>
+          {remover(t)}
         </div>
       </li>
     );
@@ -192,64 +240,80 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
   return (
     <main className={PAGINA}>
       <Cabecalho rotulo="Tarefas" titulo={<>O que falta <span className="text-red">fazer</span></>}
-        texto="Escreva e aperte Enter para criar. Arraste entre colunas ou use as setas. Tudo salva sozinho."
+        texto="Escreva e aperte Enter para criar. Use as setas para mover. Tudo salva sozinho."
         acoes={
           <div role="group" aria-label="Visualização" className="flex border-[1.5px] border-ink">
             {(["kanban", "lista"] as const).map((v) => (
               <button key={v} type="button" aria-pressed={vista === v} onClick={() => trocarVista(v)}
-                className={`min-h-[40px] px-4 text-[13px] font-bold ${vista === v ? "bg-ink text-white" : "bg-paper hover:bg-bg"}`}>
+                className={`min-h-[44px] px-5 text-[15px] font-bold ${vista === v ? "bg-ink text-white" : "bg-paper hover:bg-bg"}`}>
                 {v === "kanban" ? "Kanban" : "Lista"}
               </button>
             ))}
           </div>
         } />
 
-      <section className="flex flex-col gap-4" aria-label="Tarefas">
-        <div className="sticky top-0 z-10 -mx-4 flex items-center gap-3 border-b border-line bg-bg/95 px-4 py-2.5 text-[13px] text-muted backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+      <section className="flex flex-col gap-5" aria-label="Tarefas">
+        <div className="flex items-center gap-4 text-[15px] text-muted">
           <span className="shrink-0">{feitas} de {tarefas.length} feitas</span>
-          <div className="h-1 max-w-[240px] flex-1 bg-line">
-            <div className="anima h-full bg-red" style={{ width: `${tarefas.length ? (feitas / tarefas.length) * 100 : 0}%` }} />
+          <div className="h-1.5 w-full max-w-[260px] rounded-full bg-line">
+            <div className="anima h-full rounded-full bg-red" style={{ width: `${tarefas.length ? (feitas / tarefas.length) * 100 : 0}%` }} />
           </div>
           <span className="ml-auto"><StatusSalvo status={status} /></span>
         </div>
 
-        <form onSubmit={nova} className="flex flex-col gap-2.5 sm:flex-row">
+        <form onSubmit={nova} className="flex flex-col gap-3 sm:flex-row">
           <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Nova tarefa" aria-label="Nova tarefa"
-            className="min-h-[48px] flex-1 border-[1.5px] border-line bg-paper px-3.5 font-semibold outline-none placeholder:font-normal placeholder:text-[#b3a7a5] focus:border-red" />
-          <label className="flex min-h-[48px] items-center gap-2 border-[1.5px] border-line bg-paper px-3 text-[13px] text-muted focus-within:border-red">
-            Prazo
-            <input type="date" value={prazo} onChange={(e) => setPrazo(e.target.value)} className="bg-transparent font-semibold text-ink outline-none" />
+            className="min-h-[56px] flex-1 rounded-lg border-[1.5px] border-line bg-paper px-5 text-[17px] outline-none placeholder:text-[#9a8e8c] focus:border-ink" />
+          <label className="relative">
+            <select value={resp} onChange={(e) => setResp(e.target.value)} aria-label="Responsável da nova tarefa"
+              className={`min-h-[56px] w-full appearance-none rounded-lg border-[1.5px] border-line bg-paper pl-5 pr-11 text-[16px] outline-none focus:border-ink sm:w-auto`}>
+              <option value="">Sem responsável</option>
+              {pessoas.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
+            </select>
+            {SETA}
           </label>
-          <button type="submit" className="min-h-[48px] border-2 border-red bg-red px-[18px] text-[13px] font-bold tracking-wide text-white hover:brightness-110">
+          <input type="date" value={prazo} onChange={(e) => setPrazo(e.target.value)} aria-label="Prazo da nova tarefa"
+            className="min-h-[56px] rounded-lg border-[1.5px] border-line bg-paper px-5 text-[16px] outline-none focus:border-ink" />
+          <button type="submit" className="min-h-[56px] rounded-lg bg-red px-7 text-[17px] font-bold text-white hover:brightness-110">
             + Adicionar
           </button>
         </form>
 
-        <div role="group" aria-label="Filtrar por etiqueta" className="flex flex-wrap gap-1.5">
-          {([["todas", "Todas"], ...ETIQUETAS.map((e) => [e.k, e.t]), ["sem", "Sem etiqueta"]] as [typeof filtro, string][]).map(([k, t]) => (
-            <button key={k} type="button" aria-pressed={filtro === k} onClick={() => setFiltro(k)}
-              className={`min-h-[36px] border-[1.5px] px-3 text-[12px] font-bold ${filtro === k ? "border-ink bg-ink text-white" : "border-line bg-paper hover:border-ink"}`}>
-              {t}
-            </button>
-          ))}
+        <div className="flex flex-wrap gap-3">
+          <label className="relative flex min-h-[52px] min-w-[240px] items-center gap-4 rounded-full border-[1.5px] border-line bg-paper pl-6 pr-12 text-[15px] focus-within:border-ink">
+            <span className="text-muted">Etiqueta</span>
+            <select value={fEtiqueta} onChange={(e) => setFEtiqueta(e.target.value)} aria-label="Filtrar por etiqueta" className={`${SELECT} flex-1 text-[16px]`}>
+              <option value="todas">Todas</option>
+              {ETIQUETAS.map((e) => <option key={e.k} value={e.k}>{e.t}</option>)}
+              <option value="sem">Sem etiqueta</option>
+            </select>
+            {SETA}
+          </label>
+          <label className="relative flex min-h-[52px] min-w-[240px] items-center gap-4 rounded-full border-[1.5px] border-line bg-paper pl-6 pr-12 text-[15px] focus-within:border-ink">
+            <span className="text-muted">Responsável</span>
+            <select value={fPessoa} onChange={(e) => setFPessoa(e.target.value)} aria-label="Filtrar por responsável" className={`${SELECT} flex-1 text-[16px]`}>
+              <option value="todos">Todos</option>
+              {pessoas.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
+              <option value="sem">Sem responsável</option>
+            </select>
+            {SETA}
+          </label>
         </div>
 
         {vista === "kanban" ? (
-          <div className="grid items-start gap-4 md:grid-cols-3">
+          <div className="grid items-start gap-5 md:grid-cols-3">
             {ORDEM.map((s) => {
               const xs = doStatus(s);
               return (
-                <section key={s} aria-label={NOME_STATUS[s]}
-                  onDragOver={(e) => { e.preventDefault(); setSobre(s); }}
-                  onDragLeave={() => setSobre((x) => (x === s ? null : x))}
-                  onDrop={(e) => { e.preventDefault(); setSobre(null); const id = e.dataTransfer.getData("text/plain"); if (id) mover(id, s); }}
-                  className={`flex min-h-[120px] flex-col gap-2 p-1 transition-colors ${sobre === s ? "bg-red-soft" : ""}`}>
-                  <div className={`flex items-baseline justify-between border-t-[3px] ${COR_COLUNA[s]} pt-2`}>
-                    <h2 className="text-[13px] font-extrabold uppercase tracking-[0.1em]">{NOME_STATUS[s]}</h2>
-                    <span className="text-[12px] text-muted">{xs.length}</span>
+                <section key={s} aria-label={NOME_STATUS[s]} className="flex flex-col gap-3 rounded-3xl border border-line-soft bg-[#efebe9] p-3">
+                  <div className="flex items-center justify-between px-3 pt-2">
+                    <h2 className="text-[17px] font-bold">{NOME_STATUS[s]}</h2>
+                    <span className={`flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[14px] font-bold text-white ${s === "feito" ? "bg-red" : "bg-ink"}`}>
+                      {xs.length}
+                    </span>
                   </div>
                   {xs.map(cartao)}
-                  {xs.length === 0 && <div className="border-[1.5px] border-dashed border-line p-4 text-[12px] text-muted">vazio</div>}
+                  {xs.length === 0 && <p className="rounded-2xl border-[1.5px] border-dashed border-line p-5 text-center text-[14px] text-muted">Nada aqui</p>}
                 </section>
               );
             })}
@@ -259,13 +323,14 @@ export default function Tarefas({ inicial }: { inicial: Tarefa[] }) {
             {ORDEM.map((s) => {
               const xs = doStatus(s);
               return (
-                <section key={s} aria-labelledby={`t-${s}`} className="flex flex-col gap-1.5">
-                  <h2 id={`t-${s}`} className="flex items-baseline gap-2 text-[20px] font-bold tracking-tight">
-                    {NOME_STATUS[s]} <span className="text-[13px] font-semibold text-muted">{xs.length}</span>
+                <section key={s} aria-labelledby={`t-${s}`} className="flex flex-col gap-2">
+                  <h2 id={`t-${s}`} className="flex items-center gap-3 text-[20px] font-bold tracking-tight">
+                    {NOME_STATUS[s]}
+                    <span className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-[13px] font-bold text-white ${s === "feito" ? "bg-red" : "bg-ink"}`}>{xs.length}</span>
                   </h2>
                   {xs.length === 0
-                    ? <div className="border-[1.5px] border-dashed border-line p-4 text-sm text-muted">Nada aqui.</div>
-                    : <ul className="flex flex-col gap-1.5">{xs.map(linha)}</ul>}
+                    ? <p className="rounded-2xl border-[1.5px] border-dashed border-line p-4 text-sm text-muted">Nada aqui.</p>
+                    : <ul className="flex flex-col gap-2">{xs.map(linha)}</ul>}
                 </section>
               );
             })}

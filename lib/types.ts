@@ -36,7 +36,11 @@ export type Etiqueta = (typeof ETIQUETAS)[number]["k"];
 
 export type Tarefa = {
   id: string; titulo: string; status: StatusTarefa; etiqueta: Etiqueta | null; prazo: string | null; ordem: number;
+  responsavel_id: string | null;
 };
+
+/** Usuária do sistema, só o que as telas precisam para mostrar responsável. */
+export type Pessoa = { id: string; nome: string };
 export type TarefaPatch = Partial<Omit<Tarefa, "id">>;
 
 export const ETAPAS = [
