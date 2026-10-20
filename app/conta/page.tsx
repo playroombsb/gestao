@@ -4,12 +4,12 @@ import MinhaSenha from "@/components/MinhaSenha";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+export default async function Page({ searchParams }: { searchParams: { senha?: string } }) {
   const s = await exigirLogin();
   return (
     <main className={PAGINA}>
       <Cabecalho rotulo="Minha conta" titulo={s.nome} texto={s.admin ? "Você é admin." : undefined} />
-      <MinhaSenha />
+      <MinhaSenha trocada={searchParams.senha === "trocada"} />
     </main>
   );
 }

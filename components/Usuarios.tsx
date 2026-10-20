@@ -10,10 +10,10 @@ import Cabecalho, { PAGINA } from "./Cabecalho";
 
 const desde = (iso: string) => new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
-export default function Usuarios({ inicial, eu }: { inicial: Usuario[]; eu: string }) {
+export default function Usuarios({ inicial, eu, aviso }: { inicial: Usuario[]; eu: string; aviso?: string }) {
   const router = useRouter();
   const [usuarios, setUsuarios] = useState(inicial);
-  const [msg, setMsg] = useState<{ t: string; erro?: boolean } | null>(null);
+  const [msg, setMsg] = useState<{ t: string; erro?: boolean } | null>(aviso ? { t: aviso } : null);
   const [novo, setNovo] = useState({ nome: "", login: "", senha: "", admin: false });
   const [senhas, setSenhas] = useState<Record<string, string>>({});
   const [aberto, setAberto] = useState<string | null>(null);
@@ -22,6 +22,12 @@ export default function Usuarios({ inicial, eu }: { inicial: Usuario[]; eu: stri
   function avisar(r: { ok: boolean; erro?: string }, sucesso: string) {
     setMsg(r.ok ? { t: sucesso } : { t: r.erro ?? "Algo deu errado.", erro: true });
     return r.ok;
+  }
+
+  // Mexer na própria senha ou nos próprios logins regrava o cookie e o Next recarrega a página:
+  // a mensagem vai pela URL para não se perder.
+  function avisarProprio(sucesso: string) {
+    router.replace(`/admin/usuarios?aviso=${encodeURIComponent(sucesso)}`);
   }
 
   async function criar(e: React.FormEvent) {
@@ -34,6 +40,7 @@ export default function Usuarios({ inicial, eu }: { inicial: Usuario[]; eu: stri
 
   async function trocarSenha(u: Usuario) {
     const r = await redefinirSenha(u.id, senhas[u.id] ?? "");
+    if (r.ok && u.id === eu) return avisarProprio("Sua senha foi trocada. Seus outros logins foram encerrados.");
     if (avisar(r, `Senha de ${u.nome} trocada. Os logins abertos foram encerrados.`)) {
       setSenhas((s) => ({ ...s, [u.id]: "" }));
       setAberto(null);
@@ -49,7 +56,9 @@ export default function Usuarios({ inicial, eu }: { inicial: Usuario[]; eu: stri
   }
 
   async function encerrar(u: Usuario) {
-    avisar(await encerrarSessoes(u.id), u.id === eu ? "Seus outros logins foram encerrados." : `Logins de ${u.nome} encerrados.`);
+    const r = await encerrarSessoes(u.id);
+    if (r.ok && u.id === eu) return avisarProprio("Seus outros logins foram encerrados.");
+    avisar(r, `Logins de ${u.nome} encerrados.`);
   }
 
   async function remover(u: Usuario) {

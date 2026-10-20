@@ -14,12 +14,12 @@ export default function Nav({ nome, novas, admin }: { nome: string; novas: numbe
   useEffect(() => setAberto(false), [atual]);
 
   const grupos: Grupo[] = [
-    { itens: [{ href: "/", t: "Início" }, { href: "/tarefas", t: "Tarefas" }, { href: "/calendario", t: "Calendário" }, { href: "/aplicacoes", t: "Aplicações", badge: novas }] },
+    { itens: [{ href: "/", t: "Início" }, { href: "/tarefas", t: "Tarefas" }, { href: "/calendario", t: "Calendário" }, { href: "/aplicacoes", t: "Aplicações", badge: novas }, { href: "/materiais", t: "Materiais de apoio" }] },
     { nome: "Marketing", itens: [
       { href: "/estrategia", t: "Estratégia" }, { href: "/posicionamento", t: "Posicionamento" }, { href: "/editorial", t: "Linha editorial" },
     ] },
     { nome: "Gestão", itens: [{ href: "/crm", t: "CRM" }, { href: "/produtos", t: "Produtos" }, { href: "/financeiro", t: "Financeiro" }] },
-    ...(admin ? [{ nome: "Admin", itens: [{ href: "/admin/usuarios", t: "Usuários" }, { href: "/integracoes", t: "Integrações" }] }] : []),
+    ...(admin ? [{ nome: "Admin", itens: [{ href: "/admin/usuarios", t: "Usuários" }, { href: "/admin/integracoes", t: "Integrações" }] }] : []),
   ];
 
   const ativo = (href: string) => (href === "/" ? atual === "/" : atual === href || atual.startsWith(href + "/"));

@@ -5,9 +5,9 @@ import Usuarios from "@/components/Usuarios";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+export default async function Page({ searchParams }: { searchParams: { aviso?: string } }) {
   const s = await exigirAdmin();
   const res = await listarUsuarios();
   if (!res.ok) return <Aviso titulo="Os usuários não carregaram." texto={res.erro} />;
-  return <Usuarios inicial={res.data} eu={s.id} />;
+  return <Usuarios inicial={res.data} eu={s.id} aviso={searchParams.aviso?.slice(0, 200)} />;
 }

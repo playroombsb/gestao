@@ -5,7 +5,8 @@ Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
 - **Calendário**: sessões e aluguéis do CRM (proposta, agendado, realizado) mais workshops, eventos e outros da tabela `agenda`.
 - **Tarefas**: kanban (padrão) ou lista, no visual de cartões arredondados que a Ana mandou; status A fazer, Fazendo, Feito; etiqueta opcional (Não iniciado, Aguardando revisão, Concluído, Publicado); responsável (uma usuária, avatar com iniciais); prazo. A ordem das tarefas sem prazo é a prioridade (coluna `ordem`). **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
 - **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
-- **Admin** (só admin): Usuários e Integrações. **Integrações**: Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp/Evolution: não conectar sem pedido da Ana.
+- **Materiais de apoio** (`/materiais`): PDFs, conteúdos, prompts, modelos e links por seção. Arquivos no bucket privado `studio-sm-materiais` (até 50 MB; `bodySizeLimit` no next.config e `client_max_body_size 50m` no nginx); download por `/api/materiais/<id>`, só com login, via link assinado de 60 s.
+- **Admin** (só admin): Usuários e Integrações (`/admin/integracoes`; `/integracoes` redireciona). **Integrações**: Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp/Evolution: não conectar sem pedido da Ana.
 - **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (nome, descrição e preço; o preço fica na coluna `ticket`, margem e vendas antigas seguem no banco sem aparecer) e Financeiro (receitas, custos fixos e custos variáveis por mês).
 
 ## Stack
@@ -34,7 +35,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - `lib/dados.ts`: colunas, normalização e leitura do painel.
 - `lib/calc.ts`: regras de cálculo puras. Lucro = ticket × margem% × vendas.
 - `lib/supabase.ts`: cliente `service_role` apontando para o schema `studio_sm`, com `cache: "no-store"`.
-- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda, 0006 status e etiqueta das tarefas, 0007 versão da sessão, 0008 responsável da tarefa.
+- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda, 0006 status e etiqueta das tarefas, 0007 versão da sessão, 0008 responsável da tarefa, 0009 materiais de apoio.
 - `scraper/`: coletor do Instagram (Python, Scrapling).
 
 ## Regras de negócio

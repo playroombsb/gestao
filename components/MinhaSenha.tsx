@@ -1,10 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { trocarMinhaSenha } from "@/app/actions-admin";
 
-
-export default function MinhaSenha() {
+/**
+  Trocar a senha regrava o cookie de login, e o Next recarrega a página: o estado daqui se perde.
+  Por isso a confirmação vem pela URL (?senha=trocada) e a página mostra a mensagem.
+*/
+export default function MinhaSenha({ trocada }: { trocada: boolean }) {
+  const router = useRouter();
   const [f, setF] = useState({ atual: "", nova: "", repete: "" });
   const [msg, setMsg] = useState<{ t: string; erro?: boolean } | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -16,8 +21,8 @@ export default function MinhaSenha() {
     const r = await trocarMinhaSenha(f.atual, f.nova);
     setEnviando(false);
     if (!r.ok) return setMsg({ t: r.erro, erro: true });
-    setMsg({ t: "Senha trocada. Seus logins em outros aparelhos foram encerrados." });
     setF({ atual: "", nova: "", repete: "" });
+    router.replace("/conta?senha=trocada");
   }
 
   return (
@@ -38,6 +43,7 @@ export default function MinhaSenha() {
         <input type="password" required autoComplete="new-password" className="caixa" value={f.repete}
           onChange={(e) => setF({ ...f, repete: e.target.value })} />
       </label>
+      {!msg && trocada && <p role="status" className="text-[14px] font-semibold text-ink">Senha trocada. Seus logins em outros aparelhos foram encerrados.</p>}
       {msg && <p role="status" className={`text-[14px] font-semibold ${msg.erro ? "text-red" : "text-ink"}`}>{msg.t}</p>}
       <div><button type="submit" disabled={enviando} className="btn-1">{enviando ? "Salvando…" : "Trocar senha"}</button></div>
     </form>

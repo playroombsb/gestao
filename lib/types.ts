@@ -130,3 +130,27 @@ export type Evento = {
   observacoes: string;
 };
 export type EventoPatch = Partial<Omit<Evento, "id">>;
+
+export const TIPOS_MATERIAL = [
+  { k: "pdf", t: "PDF" },
+  { k: "conteudo", t: "Conteúdo" },
+  { k: "prompt", t: "Prompt" },
+  { k: "modelo", t: "Modelo" },
+  { k: "link", t: "Link" },
+  { k: "outro", t: "Outro" },
+] as const;
+export type TipoMaterial = (typeof TIPOS_MATERIAL)[number]["k"];
+
+export type Material = {
+  id: string;
+  secao: string;
+  titulo: string;
+  descricao: string;
+  tipo: TipoMaterial;
+  conteudo: string;
+  link: string;
+  arquivo_nome: string | null;
+  arquivo_tamanho: number | null;
+  ordem: number;
+};
+export type MaterialPatch = Partial<Pick<Material, "secao" | "titulo" | "descricao" | "conteudo" | "link" | "ordem">>;
