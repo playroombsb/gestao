@@ -14,7 +14,7 @@ export default function Nav({ nome, novas }: { nome: string; novas: number }) {
   useEffect(() => setAberto(false), [atual]);
 
   const grupos: Grupo[] = [
-    { itens: [{ href: "/", t: "Início" }, { href: "/tarefas", t: "Tarefas" }, { href: "/aplicacoes", t: "Aplicações", badge: novas }] },
+    { itens: [{ href: "/", t: "Início" }, { href: "/calendario", t: "Calendário" }, { href: "/tarefas", t: "Tarefas" }, { href: "/aplicacoes", t: "Aplicações", badge: novas }] },
     { nome: "Marketing", itens: [
       { href: "/estrategia", t: "Estratégia" }, { href: "/posicionamento", t: "Posicionamento" }, { href: "/editorial", t: "Linha editorial" },
     ] },

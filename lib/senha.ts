@@ -15,7 +15,7 @@ export function conferirSenha(senha: string, guardado: string) {
   return timingSafeEqual(calculado, esperado);
 }
 
-/** "Serena " e "SERENA" viram "serena"; acentos saem. */
+/** "Serena ", "SERENA", "Ana Paula" e "anapaula" viram "serena" e "anapaula": sem acento, espaço ou maiúscula. */
 export function normalizarLogin(v: unknown) {
-  return String(v ?? "").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return String(v ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, "");
 }

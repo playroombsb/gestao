@@ -4,7 +4,7 @@ import { sessao } from "@/lib/auth";
 import { filtrar, negar, num, txt, type Res } from "@/lib/crud";
 import { db } from "@/lib/supabase";
 import type {
-  Aplicacao, Contato, ContatoPatch, Lancamento, Pauta, PautaPatch, Resposta, StatusAplicacao,
+  Aplicacao, Contato, ContatoPatch, Evento, EventoPatch, Lancamento, Pauta, PautaPatch, Resposta, StatusAplicacao,
 } from "@/lib/types";
 
 const falha = (erro: string) => ({ ok: false as const, erro });
@@ -181,5 +181,44 @@ export async function adicionarPauta(ordem: number): Promise<Res<Pauta>> {
 export async function removerPauta(id: string): Promise<Res<null>> {
   if (!sessao()) return negar();
   const { error } = await db().from("pautas").delete().eq("id", id);
+  return error ? falha("Não foi possível remover.") : ok(null);
+}
+
+// Calendário (workshops, eventos e outros; sessões e aluguéis vêm do CRM)
+
+const COLS_EVENTO = "id,titulo,tipo,inicio,fim,local,observacoes";
+const PERMITIDOS_EVENTO: (keyof EventoPatch)[] = ["titulo", "tipo", "inicio", "fim", "local", "observacoes"];
+
+const evento = (r: Record<string, unknown>): Evento => ({
+  id: txt(r.id), titulo: txt(r.titulo), tipo: (txt(r.tipo) || "evento") as Evento["tipo"],
+  inicio: txt(r.inicio), fim: r.fim ? txt(r.fim) : null, local: txt(r.local), observacoes: txt(r.observacoes),
+});
+
+/** Eventos entre duas datas ISO. */
+export async function listarAgenda(de: string, ate: string): Promise<Res<Evento[]>> {
+  if (!sessao()) return negar();
+  const { data, error } = await db().from("agenda").select(COLS_EVENTO).gte("inicio", de).lt("inicio", ate).order("inicio");
+  return error ? falha("Não foi possível carregar o calendário.") : ok((data ?? []).map(evento));
+}
+
+export async function adicionarEvento(inicio: string, tipo: Evento["tipo"] = "evento"): Promise<Res<Evento>> {
+  if (!sessao()) return negar();
+  if (Number.isNaN(Date.parse(inicio))) return falha("Data inválida.");
+  const { data, error } = await db().from("agenda").insert({ inicio, tipo }).select(COLS_EVENTO).single();
+  return error || !data ? falha("Não foi possível adicionar.") : ok(evento(data));
+}
+
+export async function salvarEvento(id: string, patch: EventoPatch): Promise<Res<null>> {
+  if (!sessao()) return negar();
+  const limpo = filtrar(patch, PERMITIDOS_EVENTO);
+  if ("fim" in limpo && !limpo.fim) limpo.fim = null;
+  if ("inicio" in limpo && !limpo.inicio) delete limpo.inicio; // início é obrigatório
+  const { error } = await db().from("agenda").update(limpo).eq("id", id);
+  return error ? falha("Não salvou. Tente de novo.") : ok(null);
+}
+
+export async function removerEvento(id: string): Promise<Res<null>> {
+  if (!sessao()) return negar();
+  const { error } = await db().from("agenda").delete().eq("id", id);
   return error ? falha("Não foi possível remover.") : ok(null);
 }

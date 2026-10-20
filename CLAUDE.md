@@ -2,6 +2,7 @@
 
 Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
 - **Início**: próximas 7 tarefas, números do Instagram e resumo do CRM.
+- **Calendário**: sessões e aluguéis do CRM (proposta, agendado, realizado) mais workshops, eventos e outros da tabela `agenda`.
 - **Tarefas** (com prazo) e **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
 - **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
 - **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (ticket, margem e vendas por produto, matriz) e Financeiro (custos e receitas por mês).
@@ -10,7 +11,7 @@ Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
 Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Docker na VPS.
 
 ## Como funciona o acesso
-- Login com usuário e senha (decisão da Ana em 20/10/2026). Usuárias iniciais, as duas admin: `ana` (Ana Paula) e `serena` (Serena). O campo de usuário aceita o login ou o nome completo ("Ana Paula") e ignora maiúsculas e acentos.
+- Login com usuário e senha (decisão da Ana em 20/10/2026). Usuárias iniciais, as duas admin: `ana` (Ana Paula) e `sanara` (Sanara, dona do Playroom). O campo de usuário aceita o login ou o nome completo, com ou sem espaço ("Ana Paula", "anapaula"), e ignora maiúsculas e acentos. A senha ignora espaços nas pontas, mas diferencia maiúsculas.
 - Usuários ficam em `studio_sm.usuarios`, senha só como hash scrypt (`lib/senha.ts`). Não há tela de cadastro: para criar alguém ou trocar senha, gere o hash com `gerarHash` e grave direto na tabela.
 - A sessão é um cookie `sm_sessao` httpOnly, assinado com HMAC usando `SESSION_SECRET`, válido por 30 dias. Trocar o `SESSION_SECRET` desloga todo mundo.
 - Toda página chama `exigirLogin()` e toda server action confere `sessao()`. 5 senhas erradas seguidas no mesmo usuário bloqueiam por 15 minutos (em memória, zera ao recriar o container).
@@ -32,7 +33,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - `lib/dados.ts`: colunas, normalização e leitura do painel.
 - `lib/calc.ts`: regras de cálculo puras. Lucro = ticket × margem% × vendas.
 - `lib/supabase.ts`: cliente `service_role` apontando para o schema `studio_sm`, com `cache: "no-store"`.
-- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing.
+- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda.
 - `scraper/`: coletor do Instagram (Python, Scrapling).
 
 ## Regras de negócio

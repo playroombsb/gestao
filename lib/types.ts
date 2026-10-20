@@ -97,3 +97,15 @@ export type Insta = {
   engajamento: number | null;
   posts_30d: number | null;
 };
+
+export type TipoEvento = "workshop" | "evento" | "outro";
+export type Evento = {
+  id: string;
+  titulo: string;
+  tipo: TipoEvento;
+  inicio: string; // ISO
+  fim: string | null;
+  local: string;
+  observacoes: string;
+};
+export type EventoPatch = Partial<Omit<Evento, "id">>;

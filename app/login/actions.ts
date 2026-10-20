@@ -13,13 +13,14 @@ const erros = new Map<string, { n: number; ate: number }>();
 
 export async function entrar(_: string | null, form: FormData): Promise<string | null> {
   const login = normalizarLogin(form.get("usuario"));
-  const senha = String(form.get("senha") ?? "");
+  // Espaço sobrando no começo ou no fim (teclado do celular, senha colada) não conta
+  const senha = String(form.get("senha") ?? "").trim();
   if (!login || !senha) return "Preencha usuário e senha.";
 
   const e = erros.get(login);
   if (e && e.n >= TENTATIVAS && e.ate > Date.now()) return "Muitas tentativas erradas. Espere 15 minutos.";
 
-  // Aceita o login ("ana") ou o nome completo ("Ana Paula"). A tabela é pequena, então compara aqui.
+  // Aceita o login ("ana") ou o nome completo, com ou sem espaço ("Ana Paula", "anapaula"). A tabela é pequena, então compara aqui.
   const { data: todos, error } = await db().from("usuarios").select("id,nome,login,admin,senha_hash");
   if (error) return "Não foi possível entrar agora. Tente de novo.";
   const data = (todos ?? []).find((u) => u.login === login || normalizarLogin(u.nome) === login);
