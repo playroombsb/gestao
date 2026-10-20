@@ -5,6 +5,7 @@ Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
 - **Calendário**: sessões e aluguéis do CRM (proposta, agendado, realizado) mais workshops, eventos e outros da tabela `agenda`.
 - **Tarefas** (com prazo) e **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
 - **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
+- **Integrações** (no grupo Gestão): Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp/Evolution: não conectar sem pedido da Ana.
 - **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (ticket, margem e vendas por produto, matriz) e Financeiro (custos e receitas por mês).
 
 ## Stack
