@@ -19,8 +19,10 @@ export async function entrar(_: string | null, form: FormData): Promise<string |
   const e = erros.get(login);
   if (e && e.n >= TENTATIVAS && e.ate > Date.now()) return "Muitas tentativas erradas. Espere 15 minutos.";
 
-  const { data, error } = await db().from("usuarios").select("id,nome,admin,senha_hash").eq("login", login).maybeSingle();
+  // Aceita o login ("ana") ou o nome completo ("Ana Paula"). A tabela é pequena, então compara aqui.
+  const { data: todos, error } = await db().from("usuarios").select("id,nome,login,admin,senha_hash");
   if (error) return "Não foi possível entrar agora. Tente de novo.";
+  const data = (todos ?? []).find((u) => u.login === login || normalizarLogin(u.nome) === login);
   if (!data || !conferirSenha(senha, String(data.senha_hash))) {
     const n = e && e.ate > Date.now() ? e.n + 1 : 1;
     erros.set(login, { n, ate: Date.now() + BLOQUEIO_MS });

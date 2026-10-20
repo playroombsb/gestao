@@ -6,7 +6,7 @@ Ferramenta de estratégia do Playroom (casa de BDSM em Brasília). Quatro págin
 Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Docker na VPS.
 
 ## Como funciona o acesso
-- Login com usuário e senha (decisão da Ana em 20/10/2026). Usuárias iniciais, as duas admin: `ana` (Ana Paula) e `serena` (Serena). O campo de usuário ignora maiúsculas e acentos.
+- Login com usuário e senha (decisão da Ana em 20/10/2026). Usuárias iniciais, as duas admin: `ana` (Ana Paula) e `serena` (Serena). O campo de usuário aceita o login ou o nome completo ("Ana Paula") e ignora maiúsculas e acentos.
 - Usuários ficam em `studio_sm.usuarios`, senha só como hash scrypt (`lib/senha.ts`). Não há tela de cadastro: para criar alguém ou trocar senha, gere o hash com `gerarHash` e grave direto na tabela.
 - A sessão é um cookie `sm_sessao` httpOnly, assinado com HMAC usando `SESSION_SECRET`, válido por 30 dias. Trocar o `SESSION_SECRET` desloga todo mundo.
 - Toda página chama `exigirLogin()` e toda server action confere `sessao()`. 5 senhas erradas seguidas no mesmo usuário bloqueiam por 15 minutos (em memória, zera ao recriar o container).
