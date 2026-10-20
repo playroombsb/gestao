@@ -5,9 +5,12 @@ import Aviso from "@/components/Aviso";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+const STATUS = ["nova", "analise", "aprovada", "recusada"] as const;
+
+export default async function Page({ searchParams }: { searchParams: { f?: string; a?: string } }) {
   await exigirLogin();
   const res = await listarAplicacoes();
   if (!res.ok) return <Aviso titulo="As aplicações não carregaram." texto={res.erro} />;
-  return <Aplicacoes inicial={res.data} />;
+  const f = STATUS.find((x) => x === searchParams.f);
+  return <Aplicacoes inicial={res.data} filtroInicial={f} abertaInicial={searchParams.a} />;
 }

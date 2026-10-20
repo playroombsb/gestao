@@ -51,7 +51,6 @@ export default function Usuarios({ inicial, eu, aviso }: { inicial: Usuario[]; e
     const r = await definirAdmin(u.id, !u.admin);
     if (avisar(r, `${u.nome} ${u.admin ? "não é mais" : "agora é"} admin.`)) {
       setUsuarios((xs) => xs.map((x) => (x.id === u.id ? { ...x, admin: !u.admin } : x)));
-      router.refresh();
     }
   }
 
@@ -73,10 +72,10 @@ export default function Usuarios({ inicial, eu, aviso }: { inicial: Usuario[]; e
 
   async function renomear(u: Usuario, nome: string) {
     if (nome.trim() === u.nome || !nome.trim()) return;
-    if (avisar(await renomearUsuario(u.id, nome), "Nome salvo.")) {
-      setUsuarios((xs) => xs.map((x) => (x.id === u.id ? { ...x, nome: nome.trim() } : x)));
-      router.refresh();
-    }
+    const r = await renomearUsuario(u.id, nome);
+    // O próprio nome aparece no menu: recarrega com a mensagem na URL
+    if (r.ok && u.id === eu) return avisarProprio("Nome salvo.");
+    if (avisar(r, "Nome salvo.")) setUsuarios((xs) => xs.map((x) => (x.id === u.id ? { ...x, nome: nome.trim() } : x)));
   }
 
   return (

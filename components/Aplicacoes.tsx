@@ -22,11 +22,18 @@ const SELO: Record<StatusAplicacao, [string, string]> = {
 const quando = (iso: string) =>
   new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
-export default function Aplicacoes({ inicial }: { inicial: Aplicacao[] }) {
+/**
+  Filtro e aplicação aberta ficam na URL (?f=&a=): ao aprovar ou mudar status a página recarrega
+  (para atualizar o número do menu) e a seleção volta igual.
+*/
+export default function Aplicacoes({ inicial, filtroInicial, abertaInicial }: {
+  inicial: Aplicacao[]; filtroInicial?: StatusAplicacao; abertaInicial?: string;
+}) {
   const router = useRouter();
   const [apps, setApps] = useState(inicial);
-  const [filtro, setFiltro] = useState<StatusAplicacao>(inicial.some((a) => a.status === "nova") ? "nova" : "analise");
-  const [aberta, setAberta] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState<StatusAplicacao>(filtroInicial ?? (inicial.some((a) => a.status === "nova") ? "nova" : "analise"));
+  const [aberta, setAberta] = useState<string | null>(abertaInicial ?? null);
+  const recarregar = (f: StatusAplicacao, a?: string) => router.replace(`/aplicacoes?f=${f}${a ? `&a=${a}` : ""}`, { scroll: false });
   const [armado, setArmado] = useState(false);
   const { status, rodar, agendar, esquecer } = useAutosave<{ nota?: string }>(salvarAplicacao);
 
@@ -43,7 +50,7 @@ export default function Aplicacoes({ inicial }: { inicial: Aplicacao[] }) {
     setAberta(id);
     setApps((xs) => xs.map((a) => (a.id === id ? { ...a, status: s } : a)));
     const r = await rodar(() => salvarAplicacao(id, { status: s }));
-    if (r.ok) router.refresh(); // atualiza o número do menu
+    if (r.ok) recarregar(filtro, id); // atualiza o número do menu
   }
 
   async function aprovar(a: Aplicacao) {
@@ -51,7 +58,7 @@ export default function Aplicacoes({ inicial }: { inicial: Aplicacao[] }) {
     const r = await rodar(() => aprovarAplicacao(a.id));
     if (!r.ok) return;
     setApps((xs) => xs.map((x) => (x.id === a.id ? { ...x, status: "aprovada", contato_id: r.data.contato_id } : x)));
-    router.refresh();
+    recarregar(filtro, a.id);
   }
 
   async function apagar(id: string) {
@@ -65,7 +72,7 @@ export default function Aplicacoes({ inicial }: { inicial: Aplicacao[] }) {
     setApps((xs) => xs.filter((a) => a.id !== id));
     setAberta(null);
     await rodar(() => removerAplicacao(id));
-    router.refresh();
+    recarregar(filtro);
   }
 
   return (
