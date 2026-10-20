@@ -1,15 +1,12 @@
-import Link from "next/link";
 import { listarTarefas } from "./actions";
-import { listarContatos } from "./actions-gestao";
+import { listarAgenda, listarContatos } from "./actions-gestao";
 import { exigirLogin } from "@/lib/auth";
-import { brl } from "@/lib/calc";
-import { dataHora, resumoCrm } from "@/lib/crm";
 import { PERFIL, carregarInsta } from "@/lib/instagram";
 import { hoje, ordenar } from "@/lib/prazo";
 import type { Insta } from "@/lib/types";
 import Cabecalho, { PAGINA } from "@/components/Cabecalho";
 import ProximasTarefas from "@/components/ProximasTarefas";
-import Tipo from "@/components/Tipo";
+import AgendaSemana from "@/components/AgendaSemana";
 
 export const dynamic = "force-dynamic";
 
@@ -67,10 +64,19 @@ function Instagram({ atual, antes }: { atual: Insta | null; antes: Insta | null 
 
 export default async function Page() {
   const s = await exigirLogin();
-  const [tarefas, contatos, insta] = await Promise.all([listarTarefas(), listarContatos(), carregarInsta().catch(() => null)]);
+  // Próximos 7 dias em Brasília, hoje incluído
+  const dias = Array.from({ length: 7 }, (_, i) => new Date(Date.parse(hoje() + "T12:00:00Z") + i * 86_400_000).toISOString().slice(0, 10));
+  const de = new Date(`${dias[0]}T00:00:00-03:00`).toISOString();
+  const ate = new Date(Date.parse(`${dias[6]}T00:00:00-03:00`) + 86_400_000).toISOString();
+
+  const [tarefas, contatos, agenda, insta] = await Promise.all([
+    listarTarefas(), listarContatos(), listarAgenda(de, ate), carregarInsta().catch(() => null),
+  ]);
 
   const abertas = tarefas.ok ? ordenar(tarefas.data.filter((t) => t.status !== "feito")) : [];
-  const crm = contatos.ok ? resumoCrm(contatos.data) : null;
+  const doCrm = contatos.ok
+    ? contatos.data.filter((c) => c.data_hora && c.data_hora >= de && c.data_hora < ate && ["proposta", "agendado", "realizado"].includes(c.etapa))
+    : [];
   const data = new Date().toLocaleDateString("pt-BR", { timeZone: TZ, weekday: "long", day: "numeric", month: "long" });
 
   return (
@@ -84,43 +90,9 @@ export default async function Page() {
         <Instagram atual={insta?.atual ?? null} antes={insta?.antes ?? null} />
       </div>
 
-      <section aria-labelledby="t-crm" className="flex flex-col gap-5 border border-line bg-paper p-5 md:p-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 id="t-crm" className="text-[20px] font-bold tracking-tight">Sessões e aluguéis</h2>
-          <Link href="/crm" className="text-[13px] font-bold hover:text-red">Abrir CRM</Link>
-        </div>
-        {!crm ? <p className="text-sm text-red">Não foi possível carregar o CRM.</p> : (
-          <>
-            <div className="flex flex-wrap gap-2">
-              {([["novo", "Novo contato", "border-line"], ["conversa", "Conversa", "border-line"], ["proposta", "Proposta", "border-line"],
-                ["agendado", "Agendado", "border-ink"]] as const).map(([k, t, cor]) => (
-                <div key={k} className={`flex flex-[1_1_120px] flex-col gap-0.5 border-t-[3px] ${cor} pt-2.5`}>
-                  <span className={ROTULO}>{t}</span>
-                  <span className="text-[24px] font-extrabold tabular-nums">{crm.porEtapa(k)}</span>
-                </div>
-              ))}
-              <div className="flex flex-[1_1_160px] flex-col gap-0.5 border-t-[3px] border-red pt-2.5">
-                <span className={ROTULO}>Realizado no mês</span>
-                <span className="text-[24px] font-extrabold tabular-nums">{brl(crm.realizadoMes)}</span>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className={`${ROTULO} pb-1`}>Próximos agendamentos</span>
-              {crm.proximos.length === 0 ? (
-                <p className="py-2 text-sm text-muted">Nenhum agendamento pela frente.</p>
-              ) : crm.proximos.slice(0, 5).map((c) => (
-                <Link key={c.id} href={`/crm?c=${c.id}`}
-                  className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line-soft py-2.5 last:border-0 hover:bg-bg">
-                  <span className="w-[130px] text-sm font-bold">{dataHora(c.data_hora)}</span>
-                  <Tipo tipo={c.tipo} />
-                  <span className="min-w-0 flex-1 text-sm">{c.apelido || "sem apelido"}</span>
-                  <span className="text-sm font-bold tabular-nums">{c.valor != null ? brl(c.valor) : ""}</span>
-                </Link>
-              ))}
-            </div>
-          </>
-        )}
-      </section>
+      {agenda.ok && contatos.ok
+        ? <AgendaSemana dias={dias} contatos={doCrm} eventos={agenda.data} />
+        : <p className="text-sm text-red">Não foi possível carregar a agenda.</p>}
     </main>
   );
 }

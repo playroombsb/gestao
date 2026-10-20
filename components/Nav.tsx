@@ -25,7 +25,7 @@ export default function Nav({ nome, novas, admin }: { nome: string; novas: numbe
   const ativo = (href: string) => (href === "/" ? atual === "/" : atual === href || atual.startsWith(href + "/"));
 
   return (
-    <aside className="z-20 shrink-0 bg-ink text-white md:sticky md:top-0 md:flex md:h-screen md:w-60 md:flex-col md:overflow-y-auto">
+    <aside className="z-20 shrink-0 bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_35%,#0d0a0a_70%)] text-white md:sticky md:top-0 md:flex md:h-screen md:w-60 md:flex-col md:overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-3 md:px-7 md:pb-6 md:pt-8">
         <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-vivo">Playroom</span>
         <button type="button" onClick={() => setAberto((a) => !a)} aria-expanded={aberto} aria-controls="menu-principal"

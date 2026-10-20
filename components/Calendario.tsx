@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { adicionarEvento, removerEvento, salvarEvento } from "@/app/actions-gestao";
+import { COR_AGENDA, TIPOS_AGENDA, horaBR, type TipoAgenda } from "@/lib/agenda";
 import { brl } from "@/lib/calc";
 import { deInput, diaBR, paraInput } from "@/lib/crm";
 import { hoje } from "@/lib/prazo";
@@ -11,22 +12,12 @@ import type { Contato, Evento, EventoPatch, TipoEvento } from "@/lib/types";
 import Cabecalho, { BOTAO, PAGINA } from "./Cabecalho";
 import StatusSalvo from "./StatusSalvo";
 
-type Tipo = "sessao" | "aluguel" | TipoEvento;
-type Item = { id: string; tipo: Tipo; titulo: string; inicio: string; crm?: Contato; evento?: Evento };
+type Item = { id: string; tipo: TipoAgenda; titulo: string; inicio: string; crm?: Contato; evento?: Evento };
 
-const TIPOS: { k: Tipo; t: string; um: string; cor: string; ponto: string }[] = [
-  { k: "sessao", t: "Sessões", um: "Sessão", cor: "bg-ink text-white", ponto: "bg-ink" },
-  { k: "aluguel", t: "Aluguéis", um: "Aluguel", cor: "bg-red-soft text-red-deep", ponto: "bg-red-soft border border-red-deep" },
-  { k: "workshop", t: "Workshops", um: "Workshop", cor: "bg-red text-white", ponto: "bg-red" },
-  { k: "evento", t: "Eventos", um: "Evento", cor: "border-[1.5px] border-ink bg-paper", ponto: "border-[1.5px] border-ink bg-paper" },
-  { k: "outro", t: "Outros", um: "Outro", cor: "bg-line text-ink", ponto: "bg-side-label" },
-];
-const COR = Object.fromEntries(TIPOS.map((t) => [t.k, t])) as Record<Tipo, (typeof TIPOS)[number]>;
 const SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const ROTULO = "text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted";
 const CAMPO = "w-full min-w-0 border-0 border-b-[1.5px] border-line-soft bg-transparent px-0.5 py-1.5 text-[15px] outline-none focus:border-red";
 
-const hora = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" });
 
 function nomeMes(mes: string) {
   const [a, m] = mes.split("-").map(Number);
@@ -47,7 +38,7 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
   mes: string; dias: string[]; eventos: Evento[]; contatos: Contato[];
 }) {
   const [eventos, setEventos] = useState(inicial);
-  const [ocultos, setOcultos] = useState<Set<Tipo>>(new Set());
+  const [ocultos, setOcultos] = useState<Set<TipoAgenda>>(new Set());
   const [dia, setDia] = useState(hoje().startsWith(mes) ? hoje() : `${mes}-01`);
   const [aberto, setAberto] = useState<string | null>(null);
   const [armado, setArmado] = useState(false);
@@ -55,8 +46,8 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
 
   const itens = useMemo(() => {
     const xs: Item[] = [
-      ...contatos.map((c) => ({ id: c.id, tipo: c.tipo as Tipo, titulo: c.apelido || "sem apelido", inicio: c.data_hora!, crm: c })),
-      ...eventos.map((e) => ({ id: e.id, tipo: e.tipo as Tipo, titulo: e.titulo || "sem título", inicio: e.inicio, evento: e })),
+      ...contatos.map((c) => ({ id: c.id, tipo: c.tipo as TipoAgenda, titulo: c.apelido || "sem apelido", inicio: c.data_hora!, crm: c })),
+      ...eventos.map((e) => ({ id: e.id, tipo: e.tipo as TipoAgenda, titulo: e.titulo || "sem título", inicio: e.inicio, evento: e })),
     ].filter((i) => !ocultos.has(i.tipo));
     const porDia: Record<string, Item[]> = {};
     for (const i of xs.sort((a, b) => a.inicio.localeCompare(b.inicio))) (porDia[diaBR(i.inicio)] ??= []).push(i);
@@ -65,15 +56,30 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
 
   const atual = eventos.find((e) => e.id === aberto) ?? null;
 
+  /** Fecha a ficha. Compromisso sem título não serve para nada: é descartado. */
+  function fecharFicha() {
+    const e = eventos.find((x) => x.id === aberto);
+    setAberto(null);
+    if (e && !e.titulo.trim()) {
+      esquecer(e.id);
+      setEventos((xs) => xs.filter((x) => x.id !== e.id));
+      void rodar(() => removerEvento(e.id));
+    }
+  }
+
   useEffect(() => {
-    if (!aberto) return;
-    const fechar = (e: KeyboardEvent) => e.key === "Escape" && setAberto(null);
-    window.addEventListener("keydown", fechar);
-    setTimeout(() => document.getElementById("evento-titulo")?.focus(), 30);
-    return () => window.removeEventListener("keydown", fechar);
+    if (aberto) setTimeout(() => document.getElementById("evento-titulo")?.focus(), 30);
   }, [aberto]);
 
-  function alternar(t: Tipo) {
+  // Registra de novo a cada mudança para o Esc ver o título atual
+  useEffect(() => {
+    if (!aberto) return;
+    const fechar = (e: KeyboardEvent) => e.key === "Escape" && fecharFicha();
+    window.addEventListener("keydown", fechar);
+    return () => window.removeEventListener("keydown", fechar);
+  });
+
+  function alternar(t: TipoAgenda) {
     setOcultos((s) => {
       const n = new Set(s);
       if (n.has(t)) n.delete(t); else n.add(t);
@@ -108,10 +114,10 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
   }
 
   function chip(i: Item, compacto: boolean) {
-    const cls = `flex w-full min-w-0 items-center gap-1 px-1.5 py-[3px] text-left text-[11.5px] font-semibold leading-tight ${COR[i.tipo].cor} ${
+    const cls = `flex w-full min-w-0 items-center gap-1 px-1.5 py-[3px] text-left text-[11.5px] font-semibold leading-tight ${COR_AGENDA[i.tipo].cor} ${
       i.crm?.etapa === "proposta" ? "opacity-60" : ""}`;
-    const texto = <><span className="shrink-0 tabular-nums opacity-80">{hora(i.inicio)}</span><span className="truncate">{i.titulo}</span></>;
-    if (compacto) return <span key={i.id} aria-hidden className={`h-2 w-2 rounded-full ${COR[i.tipo].ponto}`} />;
+    const texto = <><span className="shrink-0 tabular-nums opacity-80">{horaBR(i.inicio)}</span><span className="truncate">{i.titulo}</span></>;
+    if (compacto) return <span key={i.id} aria-hidden className={`h-2 w-2 rounded-full ${COR_AGENDA[i.tipo].ponto}`} />;
     return i.crm
       ? <Link key={i.id} href={`/crm?c=${i.id}`} className={cls} onClick={(e) => e.stopPropagation()}>{texto}</Link>
       : <button key={i.id} type="button" className={cls} onClick={(e) => { e.stopPropagation(); setAberto(i.id); }}>{texto}</button>;
@@ -134,7 +140,7 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div role="group" aria-label="Mostrar no calendário" className="flex flex-wrap gap-1.5">
-          {TIPOS.map((t) => {
+          {TIPOS_AGENDA.map((t) => {
             const on = !ocultos.has(t.k);
             return (
               <button key={t.k} type="button" aria-pressed={on} onClick={() => alternar(t.k)}
@@ -192,9 +198,9 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
             {doDia.map((i) => {
               const conteudo = (
                 <>
-                  <span className="w-14 shrink-0 text-sm font-bold tabular-nums">{hora(i.inicio)}</span>
-                  <span className={`shrink-0 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider ${COR[i.tipo].cor}`}>
-                    {COR[i.tipo].um}
+                  <span className="w-14 shrink-0 text-sm font-bold tabular-nums">{horaBR(i.inicio)}</span>
+                  <span className={`shrink-0 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider ${COR_AGENDA[i.tipo].cor}`}>
+                    {COR_AGENDA[i.tipo].um}
                   </span>
                   <span className="min-w-0 flex-1 text-sm font-semibold">
                     {i.titulo}
@@ -218,14 +224,14 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
       </section>
 
       {atual && (
-        <div className="fixed inset-0 z-30 flex justify-end bg-ink/40" onClick={() => setAberto(null)}>
+        <div className="fixed inset-0 z-30 flex justify-end bg-ink/40" onClick={fecharFicha}>
           <section role="dialog" aria-modal="true" aria-labelledby="t-evento" onClick={(e) => e.stopPropagation()}
             className="flex h-full w-full max-w-[480px] flex-col gap-5 overflow-y-auto bg-paper p-5 md:p-7">
             <div className="flex items-center justify-between gap-3">
               <h2 id="t-evento" className="text-[22px] font-extrabold tracking-tight">Compromisso</h2>
               <div className="flex items-center gap-3">
                 <StatusSalvo status={status} />
-                <button type="button" onClick={() => setAberto(null)} aria-label="Fechar" className="h-11 w-11 text-2xl text-muted hover:text-red">×</button>
+                <button type="button" onClick={fecharFicha} aria-label="Fechar" className="h-11 w-11 text-2xl text-muted hover:text-red">×</button>
               </div>
             </div>
             <label className="flex flex-col gap-1">
@@ -233,8 +239,8 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
               <input id="evento-titulo" className={`${CAMPO} font-semibold`} value={atual.titulo} placeholder="ex: Workshop de spanking"
                 onChange={(e) => alterar(atual.id, { titulo: e.target.value })} />
             </label>
-            <div role="group" aria-label="Tipo" className="flex flex-wrap gap-1.5">
-              {TIPOS.filter((t) => t.k !== "sessao" && t.k !== "aluguel").map((t) => (
+            <div role="group" aria-label="TipoAgenda" className="flex flex-wrap gap-1.5">
+              {TIPOS_AGENDA.filter((t) => t.k !== "sessao" && t.k !== "aluguel").map((t) => (
                 <button key={t.k} type="button" aria-pressed={atual.tipo === t.k}
                   onClick={() => alterar(atual.id, { tipo: t.k as TipoEvento }, true)}
                   className={`min-h-[40px] border-[1.5px] px-3.5 text-[13px] font-bold ${atual.tipo === t.k ? "border-ink bg-ink text-white" : "border-line hover:border-ink"}`}>
