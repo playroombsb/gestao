@@ -4,10 +4,14 @@ services:
     container_name: studio-sm
     restart: unless-stopped
     env_file: .env.local
-    # A VPS não tem mais faixas livres para redes novas do compose; a bridge padrão basta (só expõe no localhost).
-    network_mode: bridge
-    ports:
-      - "127.0.0.1:3036:3000"
+    # Na VPS (Hostinger) quem fala com a internet é o Traefik que já existe na máquina: ele lê estes
+    # rótulos, atende o domínio e emite o certificado HTTPS. Nenhuma porta é publicada no host.
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.studio-sm.rule=Host(`gestao.playroombsb.com.br`)
+      - traefik.http.routers.studio-sm.entrypoints=websecure
+      - traefik.http.routers.studio-sm.tls.certresolver=letsencrypt
+      - traefik.http.services.studio-sm.loadbalancer.server.port=3000
 
   # Coletor de métricas públicas do Instagram. Não sobe com "up": roda sob demanda pelo cron
   # com "docker compose --profile insta run --rm insta".
@@ -15,4 +19,3 @@ services:
     build: ./scraper
     profiles: ["insta"]
     env_file: .env.local
-    network_mode: bridge

@@ -5,7 +5,7 @@ Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
 - **Calendário**: sessões e aluguéis do CRM (proposta, agendado, realizado) mais workshops, eventos e outros da tabela `agenda`.
 - **Tarefas**: kanban (padrão) ou lista, no visual de cartões arredondados que a Ana mandou; status A fazer, Fazendo, Feito; etiqueta opcional (Não iniciado, Aguardando revisão, Concluído, Publicado); responsável (uma usuária, avatar com iniciais); prazo. A ordem das tarefas sem prazo é a prioridade (coluna `ordem`). **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
 - **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
-- **Materiais de apoio** (`/materiais`): PDFs, conteúdos, prompts, modelos e links por seção. Arquivos no bucket privado `studio-sm-materiais` (até 50 MB; `bodySizeLimit` no next.config e `client_max_body_size 50m` no nginx); download por `/api/materiais/<id>`, só com login, via link assinado de 60 s.
+- **Materiais de apoio** (`/materiais`): PDFs, conteúdos, prompts, modelos e links por seção. Arquivos no bucket privado `studio-sm-materiais` (até 50 MB; `bodySizeLimit` no next.config); download por `/api/materiais/<id>`, só com login, via link assinado de 60 s.
 - **Admin** (só admin): Usuários e Integrações (`/admin/integracoes`; `/integracoes` redireciona). **Integrações**: Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp/Evolution: não conectar sem pedido da Ana.
 - **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (nome, descrição e preço; o preço fica na coluna `ticket`, margem e vendas antigas seguem no banco sem aparecer) e Financeiro (receitas, custos fixos e custos variáveis por mês).
 
@@ -44,15 +44,20 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - CRM guarda só apelido e um contato. Nada de nome completo, documento ou foto.
 
 ## Aplicações do site
-O formulário do site (ainda a fazer) envia servidor a servidor: `POST https://sm.testesana.com.br/api/aplicacoes` com `Authorization: Bearer <APLICACOES_TOKEN>` e JSON `{ "apelido", "contato", "interesse", "respostas": [{ "pergunta", "resposta" }] }`. Qualquer outro campo simples vira resposta. Limite de 20 KB. O token não pode ir para o navegador.
+O formulário do site (ainda a fazer) envia servidor a servidor: `POST https://gestao.playroombsb.com.br/api/aplicacoes` com `Authorization: Bearer <APLICACOES_TOKEN>` e JSON `{ "apelido", "contato", "interesse", "respostas": [{ "pergunta", "resposta" }] }`. Qualquer outro campo simples vira resposta. Limite de 20 KB. O token não pode ir para o navegador.
 
 ## Instagram
 `scraper/instagram.py` lê seguidores, seguindo e posts do HTML público do perfil e grava em `studio_sm.instagram`. O perfil é restrito por idade, então curtidas e engajamento não aparecem sem login. Da VPS o Instagram bloqueia (HTTP 429, IP de datacenter); do Mac da Ana funciona. Na VPS há um cron semanal, segunda às 12:00 UTC = 9h de Brasília (`docker compose --profile insta run --rm -T insta`, log em `/var/log/studio-sm-insta.log`) que só passa a funcionar com `INSTAGRAM_PROXY` (proxy residencial) no `.env.local`.
 
 ## Produção
-https://sm.testesana.com.br, com HTTPS, na VPS (`76.13.226.25`), pasta `/opt/apps/studio-sm`, container `studio-sm` em `127.0.0.1:3036`, nginx do sistema na frente. O sm.projetosdaana.com.br foi desligado em 20/10/2026.
+https://gestao.playroombsb.com.br, desde 22/10/2026. Infraestrutura própria do Playroom: os acessos dela servem só a este projeto.
+- **VPS** Hostinger `2.25.69.237` (chave `~/.ssh/playroom_vps` no Mac da Ana), pasta `/opt/apps/studio-sm`, container `studio-sm` sem porta publicada. O **Traefik** da máquina atende o domínio e emite o HTTPS pelos labels do `docker-compose.yml` (certresolver `letsencrypt`, entrypoint `websecure`).
+- **Banco**: projeto Supabase próprio do Playroom, schema `studio_sm` (estrutura das `supabase/migrations`), bucket privado `studio-sm-materiais`. O schema precisa estar em *Exposed schemas* no painel (Settings › API).
+- **Firewall** (ufw) ligado: só 22, 80 e 443. Porta publicada por Docker passa por cima do ufw; por isso a 32768 da Evolution (que também roda nessa VPS e não é deste projeto) está bloqueada na chain `DOCKER-USER`, em `/etc/ufw/after.rules` e `after6.rules`.
+- O endereço antigo `sm.testesana.com.br` (VPS `76.13.226.25`) só redireciona (301) para o novo. O container antigo está parado e o banco antigo (schema `studio_sm` no Supabase da Ana) ficou como cópia de segurança.
+- `.env.local` da VPS: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SESSION_SECRET`, `APLICACOES_TOKEN`, `AGENDA_ICS_TOKEN` (os três últimos novos na migração).
 
-Subir ou atualizar: enviar os arquivos por `rsync` e rodar `docker compose up -d --build`. Trocou variável no `.env.local`: `docker compose up -d --force-recreate` (o `restart` mantém o valor antigo).
+Subir ou atualizar: enviar os arquivos por `rsync` (sem apagar o `.env.local` de lá) e rodar `docker compose up -d --build`. Trocou variável no `.env.local`: `docker compose up -d --force-recreate` (o `restart` mantém o valor antigo).
 
 ## Identidade
 Fundo claro `#f5f2f1`, cartões brancos, texto preto `#0d0a0a`, vermelho `#c8102e` só como acento, cinza fraco `apagado` (`#756a68`, passa no contraste). Fonte Inter. Tokens em `tailwind.config.ts`.
