@@ -54,7 +54,7 @@ https://gestao.playroombsb.com.br, desde 22/10/2026. Infraestrutura própria do 
 - **VPS** Hostinger `2.25.69.237` (chave `~/.ssh/playroom_vps` no Mac da Ana), pasta `/opt/apps/studio-sm`, container `studio-sm` sem porta publicada. O **Traefik** da máquina atende o domínio e emite o HTTPS pelos labels do `docker-compose.yml` (certresolver `letsencrypt`, entrypoint `websecure`).
 - **Banco**: projeto Supabase próprio do Playroom, schema `studio_sm` (estrutura das `supabase/migrations`), bucket privado `studio-sm-materiais`. O schema precisa estar em *Exposed schemas* no painel (Settings › API).
 - **Firewall** (ufw) ligado: só 22, 80 e 443. Porta publicada por Docker passa por cima do ufw; por isso a 32768 da Evolution (que também roda nessa VPS e não é deste projeto) está bloqueada na chain `DOCKER-USER`, em `/etc/ufw/after.rules` e `after6.rules`.
-- O endereço antigo `sm.testesana.com.br` (VPS `76.13.226.25`) só redireciona (301) para o novo. O container antigo está parado e o banco antigo (schema `studio_sm` no Supabase da Ana) ficou como cópia de segurança.
+- O endereço antigo `sm.testesana.com.br` (nginx da VPS `76.13.226.25`) só redireciona (301) para o novo. Em 22/10/2026 o projeto foi apagado da VPS antiga e do Supabase da Ana (schema `studio_sm` e bucket): o único lugar com os dados é o banco do Playroom.
 - `.env.local` da VPS: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SESSION_SECRET`, `APLICACOES_TOKEN`, `AGENDA_ICS_TOKEN` (os três últimos novos na migração).
 
 Subir ou atualizar: enviar os arquivos por `rsync` (sem apagar o `.env.local` de lá) e rodar `docker compose up -d --build`. Trocou variável no `.env.local`: `docker compose up -d --force-recreate` (o `restart` mantém o valor antigo).
