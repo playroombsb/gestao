@@ -1,9 +1,11 @@
 import { headers } from "next/headers";
 import { exigirAdmin } from "@/lib/auth";
+import { estado as estadoWhats } from "@/lib/evolution";
 import { PERFIL } from "@/lib/instagram";
 import { db } from "@/lib/supabase";
 import Cabecalho, { PAGINA } from "@/components/Cabecalho";
 import Copiar from "@/components/Copiar";
+import WhatsappConexao from "@/components/WhatsappConexao";
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +43,14 @@ export default async function Page() {
   const h = headers();
   const base = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host")}`;
 
-  const [ultApp, ultInsta] = await Promise.all([
+  const [ultApp, ultInsta, whats, ultMsg] = await Promise.all([
     db().from("aplicacoes").select("created_at").order("created_at", { ascending: false }).limit(1),
     db().from("instagram").select("coletado_em").eq("perfil", PERFIL).order("coletado_em", { ascending: false }).limit(1),
+    estadoWhats(),
+    db().from("wa_mensagens").select("em").eq("de_mim", false).order("em", { ascending: false }).limit(1),
   ]);
+  const msgEm = ultMsg.data?.[0]?.em as string | undefined;
+  const whatsEstado: Estado = whats.estado === "conectado" ? "ativa" : whats.estado === "sem_instancia" ? "desligada" : "atencao";
   const appEm = ultApp.data?.[0]?.created_at as string | undefined;
   const instaEm = ultInsta.data?.[0]?.coletado_em as string | undefined;
   const instaHoras = instaEm ? (Date.now() - Date.parse(instaEm)) / 3_600_000 : Infinity;
@@ -97,8 +103,11 @@ export default async function Page() {
         )}
       </Cartao>
 
-      <Cartao nome="WhatsApp (Evolution)" estado="desligada"
-        resumo="Nenhuma conexão feita. Quando for a hora, daqui saem avisos de nova aplicação e confirmações de sessão." />
+      <Cartao nome="WhatsApp (Evolution)" estado={whatsEstado}
+        resumo="O WhatsApp do Playroom no sistema: as mensagens chegam em Conversas e a equipe responde por lá.">
+        <WhatsappConexao inicial={whats.estado} numero={whats.numero} nome={whats.nome} />
+        {msgEm && <p className="text-[13px] text-muted">Última mensagem recebida: {quando(msgEm)}</p>}
+      </Cartao>
     </main>
   );
 }

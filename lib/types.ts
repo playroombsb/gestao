@@ -154,3 +154,27 @@ export type Material = {
   ordem: number;
 };
 export type MaterialPatch = Partial<Pick<Material, "secao" | "titulo" | "descricao" | "conteudo" | "link" | "ordem">>;
+
+export type Conversa = {
+  jid: string;
+  nome: string;
+  telefone: string;
+  contato_id: string | null;
+  ultima_em: string | null;
+  ultima_previa: string;
+  ultima_de_mim: boolean;
+  nao_lidas: number;
+};
+
+export type Mensagem = {
+  id: string;
+  jid: string;
+  de_mim: boolean;
+  tipo: "texto" | "imagem" | "audio" | "video" | "documento" | "figurinha" | "localizacao" | "contato" | "outro";
+  texto: string;
+  midia_nome: string | null;
+  midia_mime: string | null;
+  status: "" | "pendente" | "enviada" | "entregue" | "lida" | "erro";
+  enviada_por: string | null;
+  em: string;
+};

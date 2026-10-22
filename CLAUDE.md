@@ -1,12 +1,13 @@
 # Studio - SM
 
-Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral:
+Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral (Início, Tarefas, Calendário, Aplicações, Conversas; seções Marketing e Gestão; Conhecimento, que abre e fecha; Admin):
 - **Início**: próximas 7 tarefas, números do Instagram e resumo do CRM.
 - **Calendário**: sessões e aluguéis do CRM (proposta, agendado, realizado) mais workshops, eventos e outros da tabela `agenda`.
 - **Tarefas**: kanban (padrão) ou lista, no visual de cartões arredondados que a Ana mandou; status A fazer, Fazendo, Feito; etiqueta opcional (Não iniciado, Aguardando revisão, Concluído, Publicado); responsável (uma usuária, avatar com iniciais); prazo. A ordem das tarefas sem prazo é a prioridade (coluna `ordem`). **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
 - **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
-- **Materiais de apoio** (`/materiais`): PDFs, conteúdos, prompts, modelos e links por seção. Arquivos no bucket privado `studio-sm-materiais` (até 50 MB; `bodySizeLimit` no next.config); download por `/api/materiais/<id>`, só com login, via link assinado de 60 s.
-- **Admin** (só admin): Usuários e Integrações (`/admin/integracoes`; `/integracoes` redireciona). **Integrações**: Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp/Evolution: não conectar sem pedido da Ana.
+- **Conversas** (`/conversas`, só admin): WhatsApp do Playroom pela Evolution API. Ver "WhatsApp" abaixo.
+- **Conhecimento › Materiais de apoio** (`/materiais`, todas as usuárias): PDFs, conteúdos, prompts, modelos e links por seção. Arquivos no bucket privado `studio-sm-materiais` (até 50 MB; `bodySizeLimit` no next.config); download por `/api/materiais/<id>`, só com login, via link assinado de 60 s.
+- **Admin** (só admin): Usuários e Integrações (`/admin/integracoes`; `/integracoes` redireciona). **Integrações**: Google Agenda por assinatura de link .ics (`/api/agenda?t=<AGENDA_ICS_TOKEN>`, mão única), status do formulário do site e do Instagram. WhatsApp: conectar e desconectar o número do Playroom por QR code.
 - **Gestão**: CRM (pipeline de sessões e aluguéis), Produtos (nome, descrição e preço; o preço fica na coluna `ticket`, margem e vendas antigas seguem no banco sem aparecer) e Financeiro (receitas, custos fixos e custos variáveis por mês).
 
 ## Stack
@@ -35,7 +36,7 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 - `lib/dados.ts`: colunas, normalização e leitura do painel.
 - `lib/calc.ts`: regras de cálculo puras. Lucro = ticket × margem% × vendas.
 - `lib/supabase.ts`: cliente `service_role` apontando para o schema `studio_sm`, com `cache: "no-store"`.
-- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda, 0006 status e etiqueta das tarefas, 0007 versão da sessão, 0008 responsável da tarefa, 0009 materiais de apoio.
+- `supabase/migrations/`: 0001 produtos, 0002 estratégia e tarefas, 0003 usuários (sem seed; hashes inseridos à mão), 0004 gestão e marketing, 0005 agenda, 0006 status e etiqueta das tarefas, 0007 versão da sessão, 0008 responsável da tarefa, 0009 materiais de apoio, 0010 conversas do WhatsApp.
 - `scraper/`: coletor do Instagram (Python, Scrapling).
 
 ## Regras de negócio
@@ -45,6 +46,14 @@ Next.js 14 (App Router) · TypeScript · Tailwind · Supabase (Postgres) · Dock
 
 ## Aplicações do site
 O formulário do site (ainda a fazer) envia servidor a servidor: `POST https://gestao.playroombsb.com.br/api/aplicacoes` com `Authorization: Bearer <APLICACOES_TOKEN>` e JSON `{ "apelido", "contato", "interesse", "respostas": [{ "pergunta", "resposta" }] }`. Qualquer outro campo simples vira resposta. Limite de 20 KB. O token não pode ir para o navegador.
+
+## WhatsApp
+- Evolution API v2 na VPS do Playroom (`/docker/evolution-api-pjou`, endereço HTTPS no Traefik). Instância `playroom`. Variáveis: `EVOLUTION_URL`, `EVOLUTION_API_KEY` (chave global da Evolution), `EVOLUTION_INSTANCE`, `WHATSAPP_WEBHOOK_TOKEN`. Cliente em `lib/evolution.ts` (só servidor).
+- Conectar em **Admin › Integrações**: cria a instância se faltar, liga o webhook (`/api/whatsapp/webhook?t=<WHATSAPP_WEBHOOK_TOKEN>`, eventos MESSAGES_UPSERT, MESSAGES_UPDATE, CONNECTION_UPDATE) e mostra o QR code.
+- O webhook grava uma cópia em `wa_conversas` e `wa_mensagens` (decisão da Ana em 22/10/2026). Só conversas individuais; grupos, status e canais são ignorados. Conversa `@lid` com número informado fica no número. O gatilho `wa_atualizar_conversa` cuida da prévia e das não lidas; responder (pelo sistema ou pelo celular) zera. Status da mensagem só avança.
+- Fotos, áudios, vídeos e documentos não são copiados: vêm da Evolution na hora por `/api/whatsapp/midia/<id>` (só admin). Foto e vídeo só abrem quando alguém clica em "Ver". Tipo informado pelo remetente não é confiável: fora foto, vídeo e áudio, tudo vira download.
+- A tela atualiza a cada 4 s enquanto está visível. Conversa aberta conta como lida (não manda "visto" ao WhatsApp). "Criar no CRM" usa o primeiro nome do WhatsApp como apelido e o telefone como contato.
+- `lib/whatsapp.ts`: tradução dos payloads (funções puras). O agente de IA de triagem das demandas vem depois.
 
 ## Instagram
 `scraper/instagram.py` lê seguidores, seguindo e posts do HTML público do perfil e grava em `studio_sm.instagram`. O perfil é restrito por idade, então curtidas e engajamento não aparecem sem login. Da VPS o Instagram bloqueia (HTTP 429, IP de datacenter); do Mac da Ana funciona. Na VPS há um cron semanal, segunda às 12:00 UTC = 9h de Brasília (`docker compose --profile insta run --rm -T insta`, log em `/var/log/studio-sm-insta.log`) que só passa a funcionar com `INSTAGRAM_PROXY` (proxy residencial) no `.env.local`.

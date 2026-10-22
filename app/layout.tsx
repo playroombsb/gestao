@@ -22,15 +22,21 @@ async function contarNovas() {
   return count ?? 0;
 }
 
+/** Conversas do WhatsApp com mensagem não lida (o número só aparece para admin). */
+async function contarConversas() {
+  const { count } = await db().from("wa_conversas").select("jid", { count: "exact", head: true }).gt("nao_lidas", 0);
+  return count ?? 0;
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // As duas consultas em paralelo: a contagem é descartada se não houver sessão
-  const [s, novas] = await Promise.all([sessao(), contarNovas().catch(() => 0)]);
+  // As consultas em paralelo: as contagens são descartadas se não houver sessão
+  const [s, novas, conversas] = await Promise.all([sessao(), contarNovas().catch(() => 0), contarConversas().catch(() => 0)]);
   return (
     <html lang="pt-BR" className={inter.variable}>
       <body className="bg-bg font-sans text-ink antialiased">
         {s ? (
           <div className="md:flex">
-            <Nav nome={s.nome} novas={novas} admin={s.admin} />
+            <Nav nome={s.nome} novas={novas} conversas={s.admin ? conversas : 0} admin={s.admin} />
             <div className="min-w-0 flex-1">{children}</div>
           </div>
         ) : children}

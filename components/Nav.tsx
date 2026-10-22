@@ -6,23 +6,36 @@ import { useEffect, useState } from "react";
 import { sair } from "@/app/login/actions";
 
 type Item = { href: string; t: string; badge?: number };
-type Grupo = { nome?: string; itens: Item[] };
+/** nome = título do grupo; suspenso = o grupo abre e fecha num clique (formato dropdown) */
+type Grupo = { nome?: string; suspenso?: boolean; itens: Item[] };
 
-export default function Nav({ nome, novas, admin }: { nome: string; novas: number; admin: boolean }) {
+export default function Nav({ nome, novas, conversas, admin }: { nome: string; novas: number; conversas: number; admin: boolean }) {
   const atual = usePathname();
   const [aberto, setAberto] = useState(false);
   useEffect(() => setAberto(false), [atual]);
 
   const grupos: Grupo[] = [
-    { itens: [{ href: "/", t: "Início" }, { href: "/tarefas", t: "Tarefas" }, { href: "/calendario", t: "Calendário" }, { href: "/aplicacoes", t: "Aplicações", badge: novas }, { href: "/materiais", t: "Materiais de apoio" }] },
+    { itens: [
+      { href: "/", t: "Início" }, { href: "/tarefas", t: "Tarefas" }, { href: "/calendario", t: "Calendário" },
+      { href: "/aplicacoes", t: "Aplicações", badge: novas },
+      ...(admin ? [{ href: "/conversas", t: "Conversas", badge: conversas }] : []),
+    ] },
     { nome: "Marketing", itens: [
       { href: "/estrategia", t: "Estratégia" }, { href: "/posicionamento", t: "Posicionamento" }, { href: "/editorial", t: "Linha editorial" },
     ] },
     { nome: "Gestão", itens: [{ href: "/crm", t: "CRM" }, { href: "/produtos", t: "Produtos" }, { href: "/financeiro", t: "Financeiro" }] },
+    // Fora do Admin: todas as usuárias veem os materiais (decisão da Ana em 22/10/2026)
+    { nome: "Conhecimento", suspenso: true, itens: [{ href: "/materiais", t: "Materiais de apoio" }] },
     ...(admin ? [{ nome: "Admin", itens: [{ href: "/admin/usuarios", t: "Usuários" }, { href: "/admin/integracoes", t: "Integrações" }] }] : []),
   ];
 
   const ativo = (href: string) => (href === "/" ? atual === "/" : atual === href || atual.startsWith(href + "/"));
+
+  // Grupo suspenso começa aberto quando a página atual é dele; abre de novo ao navegar para dentro dele
+  const [suspensos, setSuspensos] = useState<Record<string, boolean>>({});
+  const dentro = (g: Grupo) => g.itens.some((i) => ativo(i.href));
+  const suspensoAberto = (g: Grupo) => suspensos[g.nome ?? ""] ?? dentro(g);
+  useEffect(() => setSuspensos({}), [atual]);
 
   return (
     <aside className="z-20 shrink-0 bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_35%,#0d0a0a_70%)] pt-[env(safe-area-inset-top)] text-white md:sticky md:top-0 md:flex md:h-screen md:w-60 md:flex-col md:overflow-y-auto md:pt-0">
@@ -36,9 +49,24 @@ export default function Nav({ nome, novas, admin }: { nome: string; novas: numbe
 
       <nav id="menu-principal" aria-label="Menu principal"
         className={`${aberto ? "flex" : "hidden"} flex-1 flex-col gap-0.5 border-t border-side-line px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 md:flex md:border-0 md:px-4 md:pt-0`}>
-        {grupos.map((g, i) => (
+        {grupos.map((g, i) => {
+          const expandido = !g.suspenso || suspensoAberto(g);
+          const idLista = `grupo-${i}`;
+          return (
           <div key={i} className="flex flex-col gap-0.5">
-            {g.nome && <span className="mt-4 px-3 pb-1.5 pt-2 text-[12px] font-bold uppercase tracking-[0.14em] text-side-label">{g.nome}</span>}
+            {g.nome && !g.suspenso && <span className="mt-4 px-3 pb-1.5 pt-2 text-[12px] font-bold uppercase tracking-[0.14em] text-side-label">{g.nome}</span>}
+            {g.suspenso && (
+              <button type="button" aria-expanded={expandido} aria-controls={idLista}
+                onClick={() => setSuspensos((s) => ({ ...s, [g.nome ?? ""]: !expandido }))}
+                className={`mt-4 flex min-h-[40px] items-center justify-between gap-2 rounded-lg px-3 text-left text-[14px] font-semibold transition-colors toque:min-h-[44px] ${
+                  dentro(g) && !expandido ? "bg-white/10 text-white" : "text-side-text hover:bg-white/5 hover:text-white"}`}>
+                {g.nome}
+                <svg aria-hidden viewBox="0 0 12 12" className={`h-3 w-3 shrink-0 transition-transform duration-200 ${expandido ? "rotate-180" : ""}`}>
+                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            )}
+            <div id={idLista} className={`${expandido ? "flex" : "hidden"} flex-col gap-0.5`}>
             {g.itens.map(({ href, t, badge }) => {
               const on = ativo(href);
               return (
@@ -54,8 +82,10 @@ export default function Nav({ nome, novas, admin }: { nome: string; novas: numbe
                 </Link>
               );
             })}
+            </div>
           </div>
-        ))}
+          );
+        })}
 
         <form action={sair} className="mt-auto flex items-center justify-between gap-2 border-t border-side-line pt-3 text-[14px]">
           <Link href="/conta" aria-current={atual === "/conta" ? "page" : undefined}
