@@ -6,39 +6,87 @@ import { useEffect, useState } from "react";
 import { sair } from "@/app/login/actions";
 
 type Item = { href: string; t: string; badge?: number };
-/** nome = título do grupo; suspenso = o grupo abre e fecha num clique (formato dropdown) */
-type Grupo = { nome?: string; suspenso?: boolean; itens: Item[] };
+type Icone = keyof typeof ICONES;
+/** Entrada principal do menu: página solta (href) ou seção que abre e fecha com páginas dentro (itens). */
+type Principal = { id: string; t: string; icone: Icone; href?: string; badge?: number; itens?: Item[] };
+
+// Traços no estilo Lucide (licença ISC), 24x24
+const ICONES = {
+  inicio: ["M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", "M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"],
+  conversas: ["M7.9 20A9 9 0 1 0 4 16.1L2 22Z"],
+  crm: ["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", "M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z", "M22 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75"],
+  calendario: ["M8 2v4", "M16 2v4", "M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z", "M3 10h18"],
+  operacao: ["M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z", "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2", "m9 14 2 2 4-4"],
+  marketing: ["m3 11 18-5v12L3 14v-3z", "M11.6 16.8a3 3 0 1 1-5.8-1.6"],
+  gestao: ["M3 3v18h18", "M18 17V9", "M13 17V5", "M8 17v-3"],
+  conhecimento: ["M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z", "M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"],
+  admin: ["M4 21v-7", "M4 10V3", "M12 21v-9", "M12 8V3", "M20 21v-5", "M20 12V3", "M2 14h4", "M10 8h4", "M18 16h4"],
+};
+
+function Ico({ nome }: { nome: Icone }) {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px] shrink-0">
+      {ICONES[nome].map((d) => <path key={d} d={d} />)}
+    </svg>
+  );
+}
+
+const Selo = ({ n, on }: { n: number; on?: boolean }) => (
+  <span className={`ml-auto min-w-[22px] rounded-full px-1.5 py-0.5 text-center text-[12px] font-bold ${on ? "bg-white text-red" : "bg-red text-white"}`}>{n}</span>
+);
+
+const GUARDA = "menu-secoes-abertas";
 
 export default function Nav({ nome, novas, conversas, admin }: { nome: string; novas: number; conversas: number; admin: boolean }) {
   const atual = usePathname();
   const [aberto, setAberto] = useState(false);
   useEffect(() => setAberto(false), [atual]);
 
-  const grupos: Grupo[] = [
-    { itens: [
-      { href: "/", t: "Início" }, { href: "/tarefas", t: "Tarefas" }, { href: "/calendario", t: "Calendário" },
-      { href: "/aplicacoes", t: "Aplicações", badge: novas },
-      ...(admin ? [{ href: "/conversas", t: "Conversas", badge: conversas }] : []),
+  const menu: Principal[] = [
+    { id: "inicio", t: "Início", icone: "inicio", href: "/" },
+    ...(admin ? [{ id: "conversas", t: "Conversas", icone: "conversas" as const, href: "/conversas", badge: conversas }] : []),
+    { id: "calendario", t: "Calendário", icone: "calendario", href: "/calendario" },
+    { id: "crm", t: "CRM", icone: "crm", href: "/crm" },
+    { id: "operacao", t: "Operação", icone: "operacao", itens: [
+      { href: "/tarefas", t: "Tarefas" }, { href: "/aplicacoes", t: "Aplicações", badge: novas },
     ] },
-    { nome: "Marketing", itens: [
-      { href: "/estrategia", t: "Estratégia" }, { href: "/posicionamento", t: "Posicionamento" }, { href: "/editorial", t: "Linha editorial" },
+    { id: "marketing", t: "Marketing", icone: "marketing", itens: [
+      { href: "/estrategia", t: "Estratégia" }, { href: "/posicionamento", t: "Posicionamento" },
+      { href: "/editorial", t: "Linha editorial" }, { href: "/metricas", t: "Métricas" },
     ] },
-    { nome: "Gestão", itens: [{ href: "/crm", t: "CRM" }, { href: "/produtos", t: "Produtos" }, { href: "/financeiro", t: "Financeiro" }] },
+    { id: "gestao", t: "Gestão", icone: "gestao", itens: [{ href: "/produtos", t: "Produtos" }, { href: "/financeiro", t: "Financeiro" }] },
     // Fora do Admin: todas as usuárias veem os materiais (decisão da Ana em 22/10/2026)
-    { nome: "Conhecimento", suspenso: true, itens: [{ href: "/materiais", t: "Materiais de apoio" }] },
-    ...(admin ? [{ nome: "Admin", itens: [{ href: "/admin/usuarios", t: "Usuários" }, { href: "/admin/integracoes", t: "Integrações" }] }] : []),
+    { id: "conhecimento", t: "Conhecimento", icone: "conhecimento", itens: [{ href: "/materiais", t: "Materiais de apoio" }] },
+    ...(admin ? [{ id: "admin", t: "Admin", icone: "admin" as const, itens: [{ href: "/admin/usuarios", t: "Usuários" }, { href: "/admin/integracoes", t: "Integrações" }] }] : []),
   ];
 
   const ativo = (href: string) => (href === "/" ? atual === "/" : atual === href || atual.startsWith(href + "/"));
+  const dentro = (p: Principal) => !!p.itens?.some((i) => ativo(i.href));
 
-  // Grupo suspenso começa aberto quando a página atual é dele; abre de novo ao navegar para dentro dele
-  const [suspensos, setSuspensos] = useState<Record<string, boolean>>({});
-  const dentro = (g: Grupo) => g.itens.some((i) => ativo(i.href));
-  const suspensoAberto = (g: Grupo) => suspensos[g.nome ?? ""] ?? dentro(g);
-  useEffect(() => setSuspensos({}), [atual]);
+  // Seções abertas: lembradas neste navegador; a seção da página atual sempre abre ao chegar nela
+  const [abertas, setAbertas] = useState<Record<string, boolean>>({});
+  const secaoAtual = menu.find(dentro)?.id;
+  useEffect(() => {
+    let guardadas: Record<string, boolean> = {};
+    try { guardadas = JSON.parse(localStorage.getItem(GUARDA) ?? "{}"); } catch { /* sem armazenamento: só a seção atual abre */ }
+    setAbertas(secaoAtual ? { ...guardadas, [secaoAtual]: true } : guardadas);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (secaoAtual) setAbertas((a) => (a[secaoAtual] ? a : { ...a, [secaoAtual]: true }));
+  }, [secaoAtual]);
+  function alternar(id: string, agora: boolean) {
+    setAbertas((a) => {
+      const n = { ...a, [id]: !agora };
+      try { localStorage.setItem(GUARDA, JSON.stringify(n)); } catch { /* ignora */ }
+      return n;
+    });
+  }
+
+  const principal = "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 text-[15px] font-bold transition-colors";
 
   return (
-    <aside className="z-20 shrink-0 bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_35%,#0d0a0a_70%)] pt-[env(safe-area-inset-top)] text-white md:sticky md:top-0 md:flex md:h-screen md:w-60 md:flex-col md:overflow-y-auto md:pt-0">
+    <aside className="z-20 shrink-0 bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_35%,#0d0a0a_70%)] pt-[env(safe-area-inset-top)] text-white md:sticky md:top-0 md:flex md:h-screen md:w-64 md:flex-col md:overflow-y-auto md:pt-0">
       <div className="flex items-center justify-between px-4 py-3 md:px-7 md:pb-6 md:pt-8">
         <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-red-vivo">Playroom</span>
         <button type="button" onClick={() => setAberto((a) => !a)} aria-expanded={aberto} aria-controls="menu-principal"
@@ -48,42 +96,50 @@ export default function Nav({ nome, novas, conversas, admin }: { nome: string; n
       </div>
 
       <nav id="menu-principal" aria-label="Menu principal"
-        className={`${aberto ? "flex" : "hidden"} flex-1 flex-col gap-0.5 border-t border-side-line px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 md:flex md:border-0 md:px-4 md:pt-0`}>
-        {grupos.map((g, i) => {
-          const expandido = !g.suspenso || suspensoAberto(g);
-          const idLista = `grupo-${i}`;
+        className={`${aberto ? "flex" : "hidden"} flex-1 flex-col gap-1 border-t border-side-line px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 md:flex md:border-0 md:px-4 md:pt-0`}>
+        {menu.map((p) => {
+          if (p.href) {
+            const on = ativo(p.href);
+            return (
+              <Link key={p.id} href={p.href} aria-current={on ? "page" : undefined}
+                className={`${principal} ${on ? "bg-red text-white" : "text-white/90 hover:bg-white/[0.06] hover:text-white"}`}>
+                <Ico nome={p.icone} />
+                {p.t}
+                {!!p.badge && <Selo n={p.badge} on={on} />}
+              </Link>
+            );
+          }
+          const temAtivo = dentro(p);
+          // Antes de ler o navegador, a seção da página atual já vem aberta (sem piscar)
+          const exp = abertas[p.id] ?? temAtivo;
+          const soma = (p.itens ?? []).reduce((s, i) => s + (i.badge ?? 0), 0);
           return (
-          <div key={i} className="flex flex-col gap-0.5">
-            {g.nome && !g.suspenso && <span className="mt-4 px-3 pb-1.5 pt-2 text-[12px] font-bold uppercase tracking-[0.14em] text-side-label">{g.nome}</span>}
-            {g.suspenso && (
-              <button type="button" aria-expanded={expandido} aria-controls={idLista}
-                onClick={() => setSuspensos((s) => ({ ...s, [g.nome ?? ""]: !expandido }))}
-                className={`mt-4 flex min-h-[40px] items-center justify-between gap-2 rounded-lg px-3 text-left text-[14px] font-semibold transition-colors toque:min-h-[44px] ${
-                  dentro(g) && !expandido ? "bg-white/10 text-white" : "text-side-text hover:bg-white/5 hover:text-white"}`}>
-                {g.nome}
-                <svg aria-hidden viewBox="0 0 12 12" className={`h-3 w-3 shrink-0 transition-transform duration-200 ${expandido ? "rotate-180" : ""}`}>
+            <div key={p.id} className="flex flex-col">
+              <button type="button" aria-expanded={exp} aria-controls={`secao-${p.id}`} onClick={() => alternar(p.id, exp)}
+                className={`${principal} text-left ${temAtivo ? "text-white" : "text-white/90 hover:text-white"} hover:bg-white/[0.06]`}>
+                <span className={temAtivo ? "text-red-vivo" : ""}><Ico nome={p.icone} /></span>
+                {p.t}
+                {!exp && soma > 0 && <Selo n={soma} />}
+                <svg aria-hidden viewBox="0 0 12 12" className={`${!exp && soma > 0 ? "" : "ml-auto"} h-3 w-3 shrink-0 text-side-label transition-transform duration-200 ${exp ? "rotate-180" : ""}`}>
                   <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-            )}
-            <div id={idLista} className={`${expandido ? "flex" : "hidden"} flex-col gap-0.5`}>
-            {g.itens.map(({ href, t, badge }) => {
-              const on = ativo(href);
-              return (
-                <Link key={href} href={href} aria-current={on ? "page" : undefined}
-                  className={`flex min-h-[40px] items-center justify-between gap-2 rounded-lg pr-3 text-[14px] transition-colors toque:min-h-[44px] ${g.nome ? "pl-6" : "pl-3"} ${
-                    on ? "bg-red font-bold text-white" : "font-semibold text-side-text hover:bg-white/5 hover:text-white"}`}>
-                  {t}
-                  {!!badge && (
-                    <span className={`min-w-[22px] rounded-full px-1.5 py-0.5 text-center text-[12px] font-bold ${on ? "bg-white text-red" : "bg-red text-white"}`}>
-                      {badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+              <ul id={`secao-${p.id}`} className={`${exp ? "flex" : "hidden"} ml-[21px] flex-col gap-0.5 border-l border-side-line py-1 pl-3`}>
+                {p.itens!.map(({ href, t, badge }) => {
+                  const on = ativo(href);
+                  return (
+                    <li key={href}>
+                      <Link href={href} aria-current={on ? "page" : undefined}
+                        className={`flex min-h-[38px] items-center gap-2 rounded-lg px-3 text-[14px] transition-colors toque:min-h-[44px] ${
+                          on ? "bg-red font-bold text-white" : "font-medium text-side-text hover:bg-white/5 hover:text-white"}`}>
+                        {t}
+                        {!!badge && <Selo n={badge} on={on} />}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-          </div>
           );
         })}
 

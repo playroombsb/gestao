@@ -23,3 +23,10 @@ export async function carregarInsta(): Promise<{ atual: Insta | null; antes: Ins
   const antes = linhas.find((l) => Date.parse(l.coletado_em) <= corte) ?? linhas[linhas.length - 1];
   return { atual, antes: antes && antes.coletado_em !== atual.coletado_em ? antes : null };
 }
+
+/** Todas as coletas do perfil (até 2 anos de coleta semanal), para o gráfico de Métricas. */
+export async function carregarSerieInsta(): Promise<Insta[]> {
+  const { data } = await db().from("instagram").select("*").eq("perfil", PERFIL)
+    .order("coletado_em", { ascending: false }).limit(110);
+  return (data ?? []).map(linha);
+}

@@ -1,9 +1,10 @@
 # Studio - SM
 
-Sistema de gestão do Playroom (casa de BDSM em Brasília), com menu lateral (Início, Tarefas, Calendário, Aplicações, Conversas; seções Marketing e Gestão; Conhecimento, que abre e fecha; Admin):
+Sistema de gestão do Playroom (casa de BDSM em Brasília). Menu lateral (decisão da Ana em 22/10/2026): no topo Início, Conversas (só admin), Calendário e CRM; depois seções principais em destaque, cada uma abre e fecha: **Operação** (Tarefas, Aplicações), **Marketing** (Estratégia, Posicionamento, Linha editorial, Métricas), **Gestão** (Produtos, Financeiro), **Conhecimento** (Materiais de apoio, todas as usuárias veem) e **Admin** (Usuários, Integrações). A seção da página atual abre sozinha; as abertas e fechadas ficam lembradas no navegador (`localStorage`). Páginas:
 - **Início**: próximas 7 tarefas, números do Instagram e resumo do CRM.
 - **Calendário**: sessões e aluguéis do CRM (proposta, agendado, realizado) mais workshops, eventos e outros da tabela `agenda`.
 - **Tarefas**: kanban (padrão) ou lista, no visual de cartões arredondados que a Ana mandou; status A fazer, Fazendo, Feito; etiqueta opcional (Não iniciado, Aguardando revisão, Concluído, Publicado); responsável (uma usuária, avatar com iniciais); prazo. A ordem das tarefas sem prazo é a prioridade (coluna `ordem`). **Aplicações** (envios do formulário do site; aprovar cria o contato no CRM).
+- **Métricas** (`/metricas`): período de 30 dias, 90 dias ou 12 meses (`?p=`); aplicações, conversas novas, contatos no CRM (comparados com o período anterior), conversão (realizados sobre realizados mais perdidos), funil pela etapa atual, origem dos contatos com receita realizada e gráfico de seguidores do Instagram. Contas em `lib/metricas.ts`.
 - **Marketing**: Estratégia (mapa de fluxos do negócio, fixo no código), Posicionamento (arquétipo fixo mais seções editáveis), Linha editorial (banco de pautas mais seções editáveis).
 - **Conversas** (`/conversas`, só admin): WhatsApp do Playroom pela Evolution API. Ver "WhatsApp" abaixo.
 - **Conhecimento › Materiais de apoio** (`/materiais`, todas as usuárias): PDFs, conteúdos, prompts, modelos e links por seção. Arquivos no bucket privado `studio-sm-materiais` (até 50 MB; `bodySizeLimit` no next.config); download por `/api/materiais/<id>`, só com login, via link assinado de 60 s.
