@@ -98,7 +98,7 @@ export default function Aplicacoes({ inicial, filtroInicial, abertaInicial }: {
 
       {apps.length === 0 ? (
         <div className="flex flex-col gap-2 rounded-2xl border-[1.5px] border-dashed border-line p-6 text-[14px] text-muted">
-          <p className="font-semibold text-ink">Nenhuma aplicação ainda.</p>
+          <p className="font-medium text-ink">Nenhuma aplicação ainda.</p>
           <p>Quando o formulário do site estiver no ar, cada envio aparece aqui como &ldquo;Nova&rdquo;.</p>
         </div>
       ) : (
@@ -112,7 +112,7 @@ export default function Aplicacoes({ inicial, filtroInicial, abertaInicial }: {
                     atual?.id === a.id ? "outline outline-2 outline-red" : ""}`}>
                   <span className="flex items-center justify-between gap-2">
                     {a.status === "nova" && <span aria-label="nova" className="h-2 w-2 shrink-0 rounded-full bg-red" />}
-                    <strong className="min-w-0 flex-1 text-[15px] font-semibold">{a.apelido || a.contato || "sem nome"}</strong>
+                    <strong className="min-w-0 flex-1 text-[15px] font-medium">{a.apelido || a.contato || "sem nome"}</strong>
                     <span className="shrink-0 text-[12px] text-muted">{quando(a.created_at)}</span>
                   </span>
                   {a.interesse && <span className="text-[13px] text-muted">Interesse: {a.interesse}</span>}
@@ -128,9 +128,9 @@ export default function Aplicacoes({ inicial, filtroInicial, abertaInicial }: {
                 <span className={`selo ${SELO[atual.status][1]}`}>{SELO[atual.status][0]}</span>
               </div>
               <dl className="grid gap-4 sm:grid-cols-3">
-                <div className="flex flex-col gap-1"><dt className="rotulo">Contato</dt><dd className="break-words text-[15px] font-semibold">{atual.contato || "—"}</dd></div>
-                <div className="flex flex-col gap-1"><dt className="rotulo">Interesse</dt><dd className="text-[15px] font-semibold">{atual.interesse || "—"}</dd></div>
-                <div className="flex flex-col gap-1"><dt className="rotulo">Recebida</dt><dd className="text-[15px] font-semibold">{quando(atual.created_at)}</dd></div>
+                <div className="flex flex-col gap-1"><dt className="rotulo">Contato</dt><dd className="break-words text-[15px] font-medium">{atual.contato || "—"}</dd></div>
+                <div className="flex flex-col gap-1"><dt className="rotulo">Interesse</dt><dd className="text-[15px] font-medium">{atual.interesse || "—"}</dd></div>
+                <div className="flex flex-col gap-1"><dt className="rotulo">Recebida</dt><dd className="text-[15px] font-medium">{quando(atual.created_at)}</dd></div>
               </dl>
               {atual.respostas.length > 0 && (
                 <div className="flex flex-col gap-3.5 border-t border-line-soft pt-4">

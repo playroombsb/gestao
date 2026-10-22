@@ -77,6 +77,7 @@ Padrão visual (decidido em 20/10/2026, a partir da página de Tarefas): peças 
 - Cantos: botões e campos 8px, filtros e setas em pílula, cartões 16px. Sidebar com itens arredondados e gradiente leve.
 - Escala: texto 12/13/15, seção 18, título da página 28 a 40. Campos com 16px no celular (o iPhone dá zoom abaixo disso).
 - Alturas: 40px no mouse, 44px no toque (variante `toque:`, ponteiro grosso).
+- Pesos (22/10/2026, a Ana achou negrito demais): 800 só no título da página; 700 nos números de destaque; 600 em títulos de seção e de cartão, botões, itens principais do menu, selos e contadores; 500 em rótulos, nomes de lista, subitens do menu e filtros não marcados; 400 no resto. `strong` vale 600. Negrito em menos de 20% do texto da página.
 - Kanban de Tarefas e CRM: colunas lado a lado só em tela larga; abaixo disso, abas com uma coluna por vez.
 
 ## Regras

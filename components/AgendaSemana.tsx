@@ -38,16 +38,16 @@ export default function AgendaSemana({ dias, contatos, eventos }: { dias: string
           const doDia = itens.filter((i) => diaBR(i.inicio) === d);
           return (
             <li key={d} className="grid gap-x-4 gap-y-1 border-b border-line-soft py-2.5 last:border-0 sm:grid-cols-[150px_minmax(0,1fr)]">
-              <span className={`text-[14px] font-bold ${d === dias[0] ? "text-red" : ""}`}>{nomeDia(d, dias[0])}</span>
+              <span className={`text-[14px] font-semibold ${d === dias[0] ? "text-red" : ""}`}>{nomeDia(d, dias[0])}</span>
               {doDia.length === 0 ? <span className="text-[14px] text-apagado">livre</span> : (
                 <ul className="flex flex-col gap-1">
                   {doDia.map((i) => (
                     <li key={i.id}>
                       <Link href={i.href} className="-mx-2 flex min-h-[36px] flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-2 hover:bg-bg toque:min-h-[44px]">
-                        <span className="w-12 text-[14px] font-semibold tabular-nums">{horaBR(i.inicio)}</span>
+                        <span className="w-12 text-[14px] font-medium tabular-nums">{horaBR(i.inicio)}</span>
                         <span className={`selo ${COR_AGENDA[i.tipo].cor}`}>{COR_AGENDA[i.tipo].um}</span>
-                        <span className="min-w-0 text-[14px] font-semibold">{i.titulo}</span>
-                        {i.aConfirmar && <span className="text-[12px] font-semibold text-muted">a confirmar</span>}
+                        <span className="min-w-0 text-[14px] font-medium">{i.titulo}</span>
+                        {i.aConfirmar && <span className="text-[12px] font-medium text-muted">a confirmar</span>}
                       </Link>
                     </li>
                   ))}

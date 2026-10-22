@@ -27,7 +27,7 @@ export default function Entrar() {
         <input name="senha" type="password" autoComplete="current-password" required
           className="caixa" />
       </label>
-      <p aria-live="polite" className="min-h-[20px] text-[14px] font-semibold text-red">{erro}</p>
+      <p aria-live="polite" className="min-h-[20px] text-[14px] font-medium text-red">{erro}</p>
       <Botao />
     </form>
   );

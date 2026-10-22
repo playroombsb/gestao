@@ -84,8 +84,8 @@ export default async function Page() {
         resumo="Cada envio do formulário do site cai em Aplicações como &ldquo;Nova&rdquo;.">
         <dl className="grid gap-4 text-[14px] sm:grid-cols-3">
           <div><dt className="rotulo">Endereço</dt><dd className="break-all font-mono text-[13px]">{base}/api/aplicacoes</dd></div>
-          <div><dt className="rotulo">Token</dt><dd className="font-semibold">{appToken ? "configurado no servidor" : "falta configurar"}</dd></div>
-          <div><dt className="rotulo">Última recebida</dt><dd className="font-semibold">{appEm ? quando(appEm) : "nenhuma ainda"}</dd></div>
+          <div><dt className="rotulo">Token</dt><dd className="font-medium">{appToken ? "configurado no servidor" : "falta configurar"}</dd></div>
+          <div><dt className="rotulo">Última recebida</dt><dd className="font-medium">{appEm ? quando(appEm) : "nenhuma ainda"}</dd></div>
         </dl>
         <p className="text-[13px] text-muted">O site manda direto do servidor dele, nunca do navegador, para o token não vazar.</p>
       </Cartao>
@@ -93,8 +93,8 @@ export default async function Page() {
       <Cartao nome="Instagram" estado={instaHoras < 8 * 24 ? "ativa" : "atencao"}
         resumo={`Coleta semanal dos números públicos de @${PERFIL} (seguidores, seguindo e posts), mostrados no Início.`}>
         <dl className="grid gap-4 text-[14px] sm:grid-cols-2">
-          <div><dt className="rotulo">Última coleta</dt><dd className="font-semibold">{instaEm ? quando(instaEm) : "nenhuma"}</dd></div>
-          <div><dt className="rotulo">Agendada</dt><dd className="font-semibold">toda segunda às 9h</dd></div>
+          <div><dt className="rotulo">Última coleta</dt><dd className="font-medium">{instaEm ? quando(instaEm) : "nenhuma"}</dd></div>
+          <div><dt className="rotulo">Agendada</dt><dd className="font-medium">toda segunda às 9h</dd></div>
         </dl>
         {instaHoras >= 8 * 24 && (
           <p className="rounded-lg bg-red-soft px-3 py-2.5 text-[13px] text-red-deep">

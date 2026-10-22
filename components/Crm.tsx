@@ -79,12 +79,12 @@ export default function Crm({ inicial, abrir }: { inicial: Contato[]; abrir?: st
         className={`flex w-full flex-col gap-1.5 rounded-2xl bg-paper p-3.5 text-left shadow-[0_1px_2px_rgba(13,10,10,0.06),0_1px_8px_rgba(13,10,10,0.04)] transition-shadow hover:shadow-[0_2px_10px_rgba(13,10,10,0.1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-red ${
           aberto === c.id ? "outline outline-2 outline-red" : ""}`}>
         <span className="flex items-start justify-between gap-2">
-          <strong className="min-w-0 text-[15px] font-semibold">{c.apelido || "sem apelido"}</strong>
+          <strong className="min-w-0 text-[15px] font-medium">{c.apelido || "sem apelido"}</strong>
           <Tipo tipo={c.tipo} />
         </span>
         <span className="text-[13px] text-muted">{detalhe}</span>
         {c.etapa === "agendado" && c.sinal !== "sem" && (
-          <span className={`text-[12px] font-bold ${c.sinal === "pago" ? "text-ink" : "text-red"}`}>
+          <span className={`text-[12px] font-semibold ${c.sinal === "pago" ? "text-ink" : "text-red"}`}>
             {c.sinal === "pago" ? "Sinal pago" : "Sinal pendente"}
           </span>
         )}
@@ -122,7 +122,7 @@ export default function Crm({ inicial, abrir }: { inicial: Contato[]; abrir?: st
         ].map(([t, v], i) => (
           <div key={t} className="flex flex-[1_1_160px] flex-col gap-1 bg-paper px-5 py-4">
             <span className="rotulo">{t}</span>
-            <span className={`text-[24px] font-extrabold tabular-nums ${i === 2 ? "text-red" : ""}`}>{v}</span>
+            <span className={`text-[24px] font-bold tabular-nums ${i === 2 ? "text-red" : ""}`}>{v}</span>
           </div>
         ))}
       </div>
@@ -145,8 +145,8 @@ export default function Crm({ inicial, abrir }: { inicial: Contato[]; abrir?: st
             return (
               <div key={k} className={`${etapaVisivel === k ? "flex" : "hidden"} flex-col gap-2 rounded-3xl border border-line-soft bg-[#efebe9] p-2 xl:flex`}>
                 <div className="hidden items-center justify-between px-2 pt-1 xl:flex">
-                  <span className="text-[14px] font-bold">{t}</span>
-                  <span className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[12px] font-bold text-white ${k === "realizado" ? "bg-red" : "bg-ink"}`}>{itens.length}</span>
+                  <span className="text-[14px] font-semibold">{t}</span>
+                  <span className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[12px] font-semibold text-white ${k === "realizado" ? "bg-red" : "bg-ink"}`}>{itens.length}</span>
                 </div>
                 {itens.map(cartao)}
                 {itens.length === 0 && <div className="rounded-2xl border-[1.5px] border-dashed border-line p-4 text-center text-[13px] text-muted">Nada aqui</div>}
@@ -184,7 +184,7 @@ export default function Crm({ inicial, abrir }: { inicial: Contato[]; abrir?: st
             <div className="grid grid-cols-2 gap-x-5 gap-y-4">
               <label className="col-span-2 flex flex-col gap-1 sm:col-span-1">
                 <span className="rotulo">Apelido</span>
-                <input id="ficha-apelido" className={`caixa font-semibold`} value={atual.apelido}
+                <input id="ficha-apelido" className={`caixa font-medium`} value={atual.apelido}
                   onChange={(e) => alterar(atual.id, { apelido: e.target.value })} />
               </label>
               <label className="col-span-2 flex flex-col gap-1 sm:col-span-1">
@@ -217,7 +217,7 @@ export default function Crm({ inicial, abrir }: { inicial: Contato[]; abrir?: st
               </label>
               <label className="flex flex-col gap-1">
                 <span className="rotulo">Valor (R$)</span>
-                <input key={`valor-${atual.id}`} inputMode="decimal" className={`caixa font-semibold`} defaultValue={mostrar(atual.valor)}
+                <input key={`valor-${atual.id}`} inputMode="decimal" className={`caixa font-medium`} defaultValue={mostrar(atual.valor)}
                   placeholder="0" onChange={(e) => alterar(atual.id, { valor: parseNum(e.target.value) })} />
               </label>
               <label className="flex flex-col gap-1">

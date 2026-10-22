@@ -27,8 +27,8 @@ export default async function Page() {
 
       <section aria-labelledby="t-arq" className="flex flex-wrap gap-8 rounded-2xl bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_45%,#0d0a0a_80%)] p-6 text-white md:p-8">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-3">
-          <span className="text-[12px] font-bold uppercase tracking-[0.12em] text-side-text">Arquétipo</span>
-          <h2 id="t-arq" className="text-[28px] font-extrabold leading-[1.05] tracking-[-0.03em]">
+          <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-side-text">Arquétipo</span>
+          <h2 id="t-arq" className="text-[28px] font-bold leading-[1.05] tracking-[-0.03em]">
             Governante <span className="text-red-vivo">com</span> Amante
           </h2>
           <p className="text-[15px] leading-relaxed text-[#e9e2e0]">
@@ -36,10 +36,10 @@ export default async function Page() {
             presença, a sensação de ser escolhida. O Rebelde fica como tempero, pra tirar o BDSM do tabu.
           </p>
           <dl className="grid gap-x-6 gap-y-1.5 pt-1 text-[13px] text-side-text sm:grid-cols-2">
-            <div><dt className="inline font-bold text-white">Conduz </dt><dd className="inline">com regra, combinado e calma</dd></div>
-            <div><dt className="inline font-bold text-white">Entrega </dt><dd className="inline">desejo, presença, ser escolhido</dd></div>
-            <div><dt className="inline font-bold text-white">Voz </dt><dd className="inline">calma, terna, firme nas decisões</dd></div>
-            <div><dt className="inline font-bold text-white">Cuidado </dt><dd className="inline">controle virar frieza</dd></div>
+            <div><dt className="inline font-semibold text-white">Conduz </dt><dd className="inline">com regra, combinado e calma</dd></div>
+            <div><dt className="inline font-semibold text-white">Entrega </dt><dd className="inline">desejo, presença, ser escolhido</dd></div>
+            <div><dt className="inline font-semibold text-white">Voz </dt><dd className="inline">calma, terna, firme nas decisões</dd></div>
+            <div><dt className="inline font-semibold text-white">Cuidado </dt><dd className="inline">controle virar frieza</dd></div>
           </dl>
         </div>
         <div className="flex min-w-0 flex-[1_1_260px] flex-col justify-center gap-2.5">
@@ -47,7 +47,7 @@ export default async function Page() {
             <div key={x.nome} className="flex items-center gap-2.5 text-[13px]">
               <span className="w-[84px]">{x.nome}</span>
               <div className="h-2 flex-1 rounded-full bg-side-line"><div className={`h-2 rounded-full ${x.cor}`} style={{ width: `${x.n}%` }} /></div>
-              <span className="w-6 text-right font-bold tabular-nums">{x.n}</span>
+              <span className="w-6 text-right font-semibold tabular-nums">{x.n}</span>
             </div>
           ))}
           <span className="text-[13px] text-side-text">Notas do teste. Em destaque, os dois usados no posicionamento. Menos presente: Cara Comum (44).</span>

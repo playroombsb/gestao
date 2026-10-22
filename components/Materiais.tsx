@@ -86,18 +86,18 @@ export default function Materiais({ inicial }: { inicial: Material[] }) {
         <div className="flex items-start justify-between gap-2">
           <span className={`selo ${COR_TIPO[m.tipo]}`}>{NOME_TIPO[m.tipo]}</span>
           <button type="button" onClick={() => apagar(m)} aria-label={`Remover ${m.titulo}`}
-            className={armado === m.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white" : "btn-icone -mr-2 -mt-1.5 text-lg"}>
+            className={armado === m.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-semibold text-white" : "btn-icone -mr-2 -mt-1.5 text-lg"}>
             {armado === m.id ? "Remover?" : "×"}
           </button>
         </div>
-        <input className="campo font-bold md:!text-[16px]" value={m.titulo} aria-label={`Título de ${m.titulo}`}
+        <input className="campo font-semibold md:!text-[16px]" value={m.titulo} aria-label={`Título de ${m.titulo}`}
           onChange={(e) => alterar(m.id, { titulo: e.target.value })} />
         <textarea ref={ajustar} rows={1} value={m.descricao} placeholder="Descrição" aria-label={`Descrição de ${m.titulo}`}
           className="campo resize-none overflow-hidden leading-relaxed text-ink/80"
           onChange={(e) => { ajustar(e.target); alterar(m.id, { descricao: e.target.value }); }} />
         {COM_TEXTO.includes(m.tipo) && (
           <details className="group rounded-xl bg-bg px-3 py-2">
-            <summary className="flex min-h-[36px] cursor-pointer items-center text-[13px] font-bold toque:min-h-[44px]">Ver e editar o texto</summary>
+            <summary className="flex min-h-[36px] cursor-pointer items-center text-[13px] font-semibold toque:min-h-[44px]">Ver e editar o texto</summary>
             <textarea ref={ajustar} rows={4} value={m.conteudo} aria-label={`Texto de ${m.titulo}`}
               className="campo mt-1 resize-none overflow-hidden whitespace-pre-wrap font-mono leading-relaxed md:!text-[13px]"
               onChange={(e) => { ajustar(e.target); alterar(m.id, { conteudo: e.target.value }); }} />
@@ -154,7 +154,7 @@ export default function Materiais({ inicial }: { inicial: Material[] }) {
             <label className="flex flex-col gap-1">
               <span className="rotulo">Arquivo{tipo === "pdf" ? " PDF" : ""} (até 50 MB)</span>
               <input name="arquivo" type="file" required={tipo === "pdf"} accept={tipo === "pdf" ? "application/pdf" : undefined}
-                className="caixa py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-1.5 file:text-[13px] file:font-bold file:text-white" />
+                className="caixa py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-1.5 file:text-[13px] file:font-semibold file:text-white" />
             </label>
           )}
           {COM_TEXTO.includes(tipo) && (
@@ -169,7 +169,7 @@ export default function Materiais({ inicial }: { inicial: Material[] }) {
               <input name="link" type="url" required={tipo === "link"} className="caixa" placeholder="https://" />
             </label>
           )}
-          {erro && <p role="alert" className="text-[14px] font-semibold text-red">{erro}</p>}
+          {erro && <p role="alert" className="text-[14px] font-medium text-red">{erro}</p>}
           <div><button type="submit" disabled={enviando} className="btn-1">{enviando ? "Enviando…" : "Salvar material"}</button></div>
         </form>
       )}

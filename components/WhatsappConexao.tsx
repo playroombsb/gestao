@@ -75,8 +75,8 @@ export default function WhatsappConexao({ inicial, numero, nome }: { inicial: Es
     return (
       <div className="flex flex-col gap-4">
         <dl className="grid gap-4 text-[14px] sm:grid-cols-2">
-          <div><dt className="rotulo">Número</dt><dd className="font-semibold">{numero ? telefoneBonito(numero) : "conectado"}</dd></div>
-          {nome && <div><dt className="rotulo">Nome no WhatsApp</dt><dd className="font-semibold">{nome}</dd></div>}
+          <div><dt className="rotulo">Número</dt><dd className="font-medium">{numero ? telefoneBonito(numero) : "conectado"}</dd></div>
+          {nome && <div><dt className="rotulo">Nome no WhatsApp</dt><dd className="font-medium">{nome}</dd></div>}
         </dl>
         <div className="flex flex-wrap items-center gap-2.5">
           <Link href="/conversas" className="btn-1">Abrir conversas</Link>
@@ -84,7 +84,7 @@ export default function WhatsappConexao({ inicial, numero, nome }: { inicial: Es
             {armado ? "Desconectar mesmo?" : "Desconectar"}
           </button>
         </div>
-        {erro && <p role="alert" className="text-[13px] font-semibold text-red">{erro}</p>}
+        {erro && <p role="alert" className="text-[13px] font-medium text-red">{erro}</p>}
         <p className="text-[13px] text-muted">
           Desconectar tira o sistema dos aparelhos conectados do celular. As conversas que já chegaram continuam aqui.
         </p>
@@ -117,7 +117,7 @@ export default function WhatsappConexao({ inicial, numero, nome }: { inicial: Es
           <span className="text-[13px] text-muted">Use o celular com o número do Playroom.</span>
         </div>
       )}
-      {erro && <p role="alert" className="text-[13px] font-semibold text-red">{erro}</p>}
+      {erro && <p role="alert" className="text-[13px] font-medium text-red">{erro}</p>}
     </div>
   );
 }

@@ -20,7 +20,7 @@ function Produto({ n, nome, sub, voce, children }: {
 }) {
   return (
     <div className="grid gap-4 border-b border-line py-6 last:border-0 md:grid-cols-[150px_200px_minmax(0,1fr)] md:gap-6">
-      <span className={`self-start justify-self-start rounded-lg border-2 border-ink px-3.5 py-2 text-[14px] font-bold ${voce ? "bg-ink text-white" : ""}`}>
+      <span className={`self-start justify-self-start rounded-lg border-2 border-ink px-3.5 py-2 text-[14px] font-semibold ${voce ? "bg-ink text-white" : ""}`}>
         {n}
       </span>
       <div>
@@ -49,7 +49,7 @@ export default async function Page() {
 
       {/* 01 */}
       <section aria-labelledby="t-01" className="flex flex-col gap-2">
-        <h2 id="t-01" className="flex items-baseline gap-3 text-[22px] font-bold tracking-tight">
+        <h2 id="t-01" className="flex items-baseline gap-3 text-[22px] font-semibold tracking-tight">
           <span className={`${MONO} text-red`}>01</span>Produtos e desafios
         </h2>
         <div className="border-l-[3px] border-red pl-4 md:pl-8">
@@ -63,13 +63,13 @@ export default async function Page() {
               </div>
               <div aria-hidden className="flex gap-1">
                 {MESES.map((m, i) => (
-                  <span key={i} className={`w-7 text-center ${MONO} text-[12px] ${ALTA.has(i) ? "font-bold text-red" : "text-muted"}`}>{m}</span>
+                  <span key={i} className={`w-7 text-center ${MONO} text-[12px] ${ALTA.has(i) ? "font-semibold text-red" : "text-muted"}`}>{m}</span>
                 ))}
               </div>
             </div>
             <div className="flex gap-8">
-              <p><span className="block text-[28px] font-extrabold leading-none text-red">25</span><span className="text-[13px] text-muted">sessões · alta</span></p>
-              <p><span className="block text-[28px] font-extrabold leading-none">12</span><span className="text-[13px] text-muted">sessões · baixa</span></p>
+              <p><span className="block text-[28px] font-bold leading-none text-red">25</span><span className="text-[13px] text-muted">sessões · alta</span></p>
+              <p><span className="block text-[28px] font-bold leading-none">12</span><span className="text-[13px] text-muted">sessões · baixa</span></p>
             </div>
             <p className={`${MONO} text-red`}>↳ alimenta o Personagem Atrativo (03)</p>
           </Produto>
@@ -92,9 +92,9 @@ export default async function Page() {
                 <p>Consultoria sobre BDSM em geral · Consultoria para outras profissionais · Cursos online (a definir)</p>
               </div>
               <div className="flex min-w-0 flex-[1_1_200px] flex-col gap-2 border-l-2 border-ink pl-4">
-                <span className={`${MONO} font-bold`}>PRIORIDADE</span>
-                <p><span className="mr-2 font-bold text-red">1</span>Workshops · Experience (mín. 200) · Produtos físicos</p>
-                <p><span className="mr-2 font-bold text-red">2</span>Cursos online / aulas online</p>
+                <span className={`${MONO} font-semibold`}>PRIORIDADE</span>
+                <p><span className="mr-2 font-semibold text-red">1</span>Workshops · Experience (mín. 200) · Produtos físicos</p>
+                <p><span className="mr-2 font-semibold text-red">2</span>Cursos online / aulas online</p>
               </div>
             </div>
           </Produto>
@@ -102,8 +102,8 @@ export default async function Page() {
           <Produto n="Produto 4" nome="Eventos/Festas">
             <div className="flex flex-wrap items-start gap-6">
               <p className="flex-[1_1_220px]"><strong>Desafios:</strong> ansiedade, lugar/espaço, equipe.</p>
-              <p><span className="block text-[28px] font-extrabold leading-none text-red">100h</span><span className="text-[13px] text-muted">média por evento</span></p>
-              <p><span className="block text-[28px] font-extrabold leading-none">2</span><span className="text-[13px] text-muted">eventos por ano</span></p>
+              <p><span className="block text-[28px] font-bold leading-none text-red">100h</span><span className="text-[13px] text-muted">média por evento</span></p>
+              <p><span className="block text-[28px] font-bold leading-none">2</span><span className="text-[13px] text-muted">eventos por ano</span></p>
             </div>
           </Produto>
 
@@ -115,20 +115,20 @@ export default async function Page() {
 
       {/* 02 */}
       <section aria-labelledby="t-02" className="flex flex-col gap-5 border-t-2 border-ink pt-8">
-        <h2 id="t-02" className="flex items-baseline gap-3 text-[22px] font-bold tracking-tight">
+        <h2 id="t-02" className="flex items-baseline gap-3 text-[22px] font-semibold tracking-tight">
           <span className={`${MONO} text-red`}>02</span>Tempo
         </h2>
         <div className="grid gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-2">
-            <p className="font-bold">Proporção ideal 70/30</p>
-            <div className={`flex h-11 ${MONO} text-[14px] font-bold`}>
+            <p className="font-semibold">Proporção ideal 70/30</p>
+            <div className={`flex h-11 ${MONO} text-[14px] font-semibold`}>
               <span className="flex w-[70%] items-center bg-ink px-3 text-white">70</span>
               <span className="flex w-[30%] items-center bg-red px-3 text-white">30</span>
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <p className="font-bold">Onde está meu tempo hoje</p>
-            <div className={`flex h-11 ${MONO} text-[14px] font-bold`}>
+            <p className="font-semibold">Onde está meu tempo hoje</p>
+            <div className={`flex h-11 ${MONO} text-[14px] font-semibold`}>
               <span className="flex w-[60%] items-center bg-red px-3 text-white">60% atração</span>
               <span className="flex w-[40%] items-center border-2 border-ink px-3">40% entrega</span>
             </div>
@@ -138,7 +138,7 @@ export default async function Page() {
 
       {/* 03 */}
       <section aria-labelledby="t-03" className="flex flex-col gap-6 border-t-2 border-ink pt-8">
-        <h2 id="t-03" className="flex items-baseline gap-3 text-[22px] font-bold tracking-tight">
+        <h2 id="t-03" className="flex items-baseline gap-3 text-[22px] font-semibold tracking-tight">
           <span className={`${MONO} text-red`}>03</span>Funil, público e personagem
         </h2>
         <div className="grid gap-8 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
@@ -155,7 +155,7 @@ export default async function Page() {
             ))}
           </div>
           <div className="flex flex-col">
-            <span className={`${MONO} pb-3 font-bold`}>GRUPOS DE CLIENTES</span>
+            <span className={`${MONO} pb-3 font-semibold`}>GRUPOS DE CLIENTES</span>
             {[
               ["Sessão", "Em off: público que não vai em evento"],
               ["Experiência", "Público experimentalista"],
@@ -169,14 +169,14 @@ export default async function Page() {
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <div className="rounded-lg border-2 border-red px-4 py-3">
-            <p className="text-[18px] font-bold">Personagem Atrativo</p>
+            <p className="text-[18px] font-semibold">Personagem Atrativo</p>
             <p className="text-[14px]">Pagar para estar perto de você</p>
             <p className="text-[14px] text-red">(mecanismo de seita)</p>
           </div>
           <span aria-hidden className="text-2xl text-red">→</span>
           <div className="flex min-w-[220px] flex-1 flex-col">
-            <p className="border-b border-ink py-2 font-semibold">Persona pública</p>
-            <p className="py-2 font-semibold">Elementos</p>
+            <p className="border-b border-ink py-2 font-medium">Persona pública</p>
+            <p className="py-2 font-medium">Elementos</p>
           </div>
         </div>
       </section>

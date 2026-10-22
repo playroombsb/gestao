@@ -61,12 +61,12 @@ export default function Secoes({ pagina, inicial }: { pagina: Pagina; inicial: S
         <article key={s.id}
           className="cartao flex flex-col gap-2 focus-within:ring-2 focus-within:ring-red/50">
           <div className="flex items-start gap-3">
-            <span className="pt-2 text-[13px] font-extrabold text-red">{String(i + 1).padStart(2, "0")}</span>
-            <input id={`titulo-${s.id}`} className="campo font-bold md:!text-[18px]" value={s.titulo}
+            <span className="pt-2 text-[13px] font-bold text-red">{String(i + 1).padStart(2, "0")}</span>
+            <input id={`titulo-${s.id}`} className="campo font-semibold md:!text-[18px]" value={s.titulo}
               placeholder="Título da seção" aria-label="Título da seção"
               onChange={(e) => alterar(s.id, { titulo: e.target.value })} />
             <button type="button" onClick={() => apagar(s.id)} aria-label={`Remover ${s.titulo || "seção"}`}
-              className={armado === s.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white" : "btn-icone text-lg"}>
+              className={armado === s.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-semibold text-white" : "btn-icone text-lg"}>
               {armado === s.id ? "Remover?" : "×"}
             </button>
           </div>

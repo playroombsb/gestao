@@ -211,7 +211,7 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
     if (m.tipo === "audio") return <audio controls preload="none" src={src} className="h-10 w-[240px] max-w-full" aria-label="Áudio" />;
     if (m.tipo === "documento") {
       return (
-        <a href={src} className={`inline-flex items-center gap-2 font-semibold underline underline-offset-2 ${m.de_mim ? "text-white" : "text-ink"}`}>
+        <a href={src} className={`inline-flex items-center gap-2 font-medium underline underline-offset-2 ${m.de_mim ? "text-white" : "text-ink"}`}>
           📄 {m.midia_nome || "Documento"}
         </a>
       );
@@ -221,7 +221,7 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
       if (!reveladas.has(m.id)) {
         return (
           <button type="button" onClick={() => revelar(m.id)}
-            className={`inline-flex min-h-[40px] items-center gap-2 rounded-lg px-3 text-[13px] font-bold ${m.de_mim ? "bg-white/15 hover:bg-white/25" : "bg-bg hover:bg-line-soft"}`}>
+            className={`inline-flex min-h-[40px] items-center gap-2 rounded-lg px-3 text-[13px] font-semibold ${m.de_mim ? "bg-white/15 hover:bg-white/25" : "bg-bg hover:bg-line-soft"}`}>
             {rotulo} · Ver
           </button>
         );
@@ -231,8 +231,8 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
         // eslint-disable-next-line @next/next/no-img-element
         : <img src={src} alt={m.texto || rotulo} className={`${m.tipo === "figurinha" ? "w-32" : "max-h-[360px] w-full max-w-[320px]"} rounded-lg object-contain`} />;
     }
-    if (m.tipo === "localizacao") return <span className="font-semibold">📍 Localização</span>;
-    if (m.tipo === "contato") return <span className="font-semibold">👤 Contato</span>;
+    if (m.tipo === "localizacao") return <span className="font-medium">📍 Localização</span>;
+    if (m.tipo === "contato") return <span className="font-medium">👤 Contato</span>;
     if (m.tipo === "outro" && !m.texto) return <span className="italic opacity-80">Mensagem que o sistema ainda não mostra. Veja no celular.</span>;
     return null;
   }
@@ -248,7 +248,7 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
   const faixaEstado = !conectado && (
     <p role="status" className="rounded-lg bg-red-soft px-3.5 py-2.5 text-[13px] text-red-deep">
       {estado === "indisponivel" ? "A Evolution não respondeu agora. " : "O WhatsApp do Playroom não está conectado. "}
-      Dá para ler o que já chegou, mas não dá para enviar. <Link href="/admin/integracoes" className="font-bold underline">Conectar em Integrações</Link>
+      Dá para ler o que já chegou, mas não dá para enviar. <Link href="/admin/integracoes" className="font-semibold underline">Conectar em Integrações</Link>
     </p>
   );
 
@@ -256,7 +256,7 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
     <main className="mx-auto flex h-[calc(100dvh-60px)] max-w-[1280px] flex-col gap-4 px-4 pb-4 pt-4 md:h-screen md:gap-5 md:px-8 md:pb-6 md:pt-8">
       <header className={`${aberta ? "hidden md:flex" : "flex"} flex-wrap items-end justify-between gap-3 border-b-2 border-red pb-4`}>
         <div className="flex min-w-0 flex-col gap-1.5">
-          <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-red">Conversas</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-red">Conversas</p>
           <h1 className="text-balance text-[clamp(28px,4vw,40px)] font-extrabold leading-[1.05] tracking-[-0.03em]">
             Quem está <span className="text-red">chamando</span>
           </h1>
@@ -291,20 +291,20 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
                 <li key={c.jid}>
                   <button type="button" onClick={() => abrir(c.jid)} aria-current={on ? "true" : undefined}
                     className={`flex w-full items-center gap-3 border-b border-line-soft px-3.5 py-3 text-left transition-colors ${on ? "bg-bg" : "hover:bg-bg/60"}`}>
-                    <span aria-hidden className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${c.nao_lidas ? "bg-red text-white" : "bg-ink text-white"}`}>
+                    <span aria-hidden className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold ${c.nao_lidas ? "bg-red text-white" : "bg-ink text-white"}`}>
                       {iniciais(nome)}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="flex items-baseline justify-between gap-2">
-                        <strong className={`truncate text-[15px] ${c.nao_lidas ? "font-bold" : "font-semibold"}`}>{nome}</strong>
-                        <span className={`shrink-0 text-[12px] ${c.nao_lidas ? "font-bold text-red" : "text-apagado"}`}>{quandoCurto(c.ultima_em)}</span>
+                        <strong className={`truncate text-[15px] ${c.nao_lidas ? "font-semibold" : "font-medium"}`}>{nome}</strong>
+                        <span className={`shrink-0 text-[12px] ${c.nao_lidas ? "font-semibold text-red" : "text-apagado"}`}>{quandoCurto(c.ultima_em)}</span>
                       </span>
                       <span className="flex items-center justify-between gap-2">
                         <span className={`truncate text-[13px] ${c.nao_lidas ? "text-ink" : "text-muted"}`}>
                           {c.ultima_de_mim && "Você: "}{c.ultima_previa || " "}
                         </span>
                         {c.nao_lidas > 0 && (
-                          <span aria-label={`${c.nao_lidas} não lidas`} className="min-w-[22px] shrink-0 rounded-full bg-red px-1.5 py-0.5 text-center text-[12px] font-bold text-white">
+                          <span aria-label={`${c.nao_lidas} não lidas`} className="min-w-[22px] shrink-0 rounded-full bg-red px-1.5 py-0.5 text-center text-[12px] font-semibold text-white">
                             {c.nao_lidas}
                           </span>
                         )}
@@ -325,7 +325,7 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
             <>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line-soft bg-paper px-3 py-2.5 md:px-5">
                 <button type="button" onClick={fechar} className="btn-3 -ml-1 px-2 md:hidden" aria-label="Voltar para a lista">←</button>
-                <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-bold text-white">{iniciais(nomeDe(atual))}</span>
+                <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-white">{iniciais(nomeDe(atual))}</span>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <strong className="truncate text-[15px]">{nomeDe(atual)}</strong>
                   {atual.nome && atual.telefone && <span className="whitespace-nowrap text-[12px] text-muted">{telefoneBonito(atual.telefone)}</span>}
@@ -370,7 +370,7 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
                   return (
                     <div key={m.id} className="flex flex-col">
                       {novoDia && (
-                        <span className="mx-auto my-2 rounded-full bg-paper px-3 py-1 text-[12px] font-bold text-muted shadow-[0_1px_2px_rgba(13,10,10,0.06)]">{rotuloDia(dia)}</span>
+                        <span className="mx-auto my-2 rounded-full bg-paper px-3 py-1 text-[12px] font-semibold text-muted shadow-[0_1px_2px_rgba(13,10,10,0.06)]">{rotuloDia(dia)}</span>
                       )}
                       <div className={`flex max-w-[85%] flex-col gap-1.5 rounded-2xl px-3.5 py-2 text-[15px] leading-snug md:max-w-[70%] ${
                         m.de_mim ? "self-end rounded-br-md bg-ink text-white" : "self-start rounded-bl-md border border-line-soft bg-paper"}`}>
@@ -380,7 +380,7 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
                           {quem && <span>{quem} ·</span>}
                           {hora(m.em)}
                           {m.de_mim && m.status && (
-                            <span className={m.status === "lida" ? "font-bold text-red-vivo" : m.status === "erro" ? "font-bold text-red-vivo" : ""}>
+                            <span className={m.status === "lida" ? "font-semibold text-red-vivo" : m.status === "erro" ? "font-semibold text-red-vivo" : ""}>
                               · {STATUS_TXT[m.status]}
                             </span>
                           )}
@@ -394,7 +394,7 @@ export default function Conversas({ inicial, abertaInicial, mensagensIniciais, m
               <form onSubmit={(e) => { e.preventDefault(); void enviar(); }}
                 className="flex flex-col gap-2 border-t border-line-soft bg-paper px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:px-5">
                 {!conectado && faixaEstado}
-                {erro && <p role="alert" className="text-[13px] font-semibold text-red">{erro}</p>}
+                {erro && <p role="alert" className="text-[13px] font-medium text-red">{erro}</p>}
                 <div className="flex items-end gap-2">
                   <textarea ref={caixa} value={texto} onChange={(e) => setTexto(e.target.value)} onKeyDown={teclas}
                     rows={Math.min(6, Math.max(1, texto.split("\n").length))} maxLength={4000}

@@ -8,7 +8,7 @@ export default function Cabecalho({ rotulo, titulo, texto, acoes }: {
   return (
     <header className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-red pb-5 md:pb-6">
       <div className="flex min-w-0 flex-col gap-2">
-        <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-red">{rotulo}</p>
+        <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-red">{rotulo}</p>
         <h1 className="text-balance text-[clamp(28px,4vw,40px)] font-extrabold leading-[1.05] tracking-[-0.03em]">{titulo}</h1>
         {texto && <p className="text-[15px] text-ink/80">{texto}</p>}
       </div>

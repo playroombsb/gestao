@@ -23,8 +23,8 @@ function Metrica({ rotulo, valor, nota, destaque }: { rotulo: string; valor: str
   return (
     <div className="flex flex-[1_1_140px] flex-col gap-1 bg-paper p-4">
       <span className="rotulo">{rotulo}</span>
-      <span className="text-[24px] font-extrabold tracking-tight tabular-nums">{valor}</span>
-      {nota && <span className={`text-[12px] ${destaque ? "font-bold text-red" : "text-muted"}`}>{nota}</span>}
+      <span className="text-[24px] font-bold tracking-tight tabular-nums">{valor}</span>
+      {nota && <span className={`text-[12px] ${destaque ? "font-semibold text-red" : "text-muted"}`}>{nota}</span>}
     </div>
   );
 }
@@ -36,7 +36,7 @@ function Instagram({ atual, antes }: { atual: Insta | null; antes: Insta | null 
     <section aria-labelledby="t-insta" className="cartao flex min-w-0 flex-[1_1_320px] flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <h2 id="t-insta" className="titulo-secao">Instagram</h2>
-        <a href={`https://www.instagram.com/${PERFIL}/`} target="_blank" rel="noreferrer" className="btn-3 -mr-3 font-semibold">@{PERFIL}</a>
+        <a href={`https://www.instagram.com/${PERFIL}/`} target="_blank" rel="noreferrer" className="btn-3 -mr-3 font-medium">@{PERFIL}</a>
       </div>
       {!atual ? (
         <p className="rounded-xl border-[1.5px] border-dashed border-line p-5 text-[13px] text-muted">Ainda sem coleta. Os números chegam uma vez por semana.</p>

@@ -104,7 +104,7 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
             <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${g === "receita" ? "bg-ink" : g === "fixo" ? "bg-red" : "bg-red-soft ring-1 ring-red"}`} />
             {info.titulo}
           </h2>
-          <span className={`text-[18px] font-extrabold tabular-nums ${g === "receita" ? "" : "text-red"}`}>{brl(total)}</span>
+          <span className={`text-[18px] font-bold tabular-nums ${g === "receita" ? "" : "text-red"}`}>{brl(total)}</span>
         </div>
         {g === "fixo" && <p className="text-[13px] text-muted">Lançados uma vez, repetem todo mês a partir da data.</p>}
         {xs.length === 0 ? (
@@ -115,15 +115,15 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
               <li key={l.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line-soft py-2.5 last:border-0">
                 <span className="w-12 text-[14px] tabular-nums text-muted">{diaNoMes(l, mes).slice(8)}/{mes.slice(5)}</span>
                 <span className="min-w-0 flex-1 text-[14px]">
-                  <span className="font-semibold">{l.descricao || l.categoria || "sem descrição"}</span>
+                  <span className="font-medium">{l.descricao || l.categoria || "sem descrição"}</span>
                   {l.descricao && l.categoria && <span className="ml-1.5 text-[12px] text-muted">· {l.categoria}</span>}
-                  {l.tipo === "receita" && l.recorrente && <span className="ml-1.5 text-[12px] font-semibold text-muted">· todo mês</span>}
-                  {l.contato_id && <Link href={`/crm?c=${l.contato_id}`} className="ml-1.5 text-[12px] font-bold text-muted hover:text-red">· do CRM</Link>}
+                  {l.tipo === "receita" && l.recorrente && <span className="ml-1.5 text-[12px] font-medium text-muted">· todo mês</span>}
+                  {l.contato_id && <Link href={`/crm?c=${l.contato_id}`} className="ml-1.5 text-[12px] font-semibold text-muted hover:text-red">· do CRM</Link>}
                 </span>
-                <span className="text-right text-[14px] font-bold tabular-nums">{brl(l.valor)}</span>
+                <span className="text-right text-[14px] font-semibold tabular-nums">{brl(l.valor)}</span>
                 {!l.contato_id && (
                   <button type="button" onClick={() => apagar(l)} aria-label={`Remover ${l.descricao || "lançamento"}`}
-                    className={armado === l.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white" : "btn-icone text-lg"}>
+                    className={armado === l.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-semibold text-white" : "btn-icone text-lg"}>
                     {armado === l.id ? (l.recorrente ? "Remover de todos os meses?" : "Remover?") : "×"}
                   </button>
                 )}
@@ -140,9 +140,9 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
       <Cabecalho rotulo="Gestão · Financeiro" titulo={<>Custos e <span className="text-red">receitas</span></>}
         acoes={
           <nav aria-label="Mês" className="flex items-center rounded-full border-[1.5px] border-ink bg-paper">
-            <Link href={`/financeiro?mes=${anterior}`} aria-label="Mês anterior" className="flex h-[38px] w-10 items-center justify-center rounded-full text-lg font-bold hover:bg-bg toque:h-11 toque:w-11">‹</Link>
-            <span className="min-w-[140px] px-1 text-center text-[14px] font-bold">{nomeMes(mes)}</span>
-            <Link href={`/financeiro?mes=${somaMes(mes, 1)}`} aria-label="Próximo mês" className="flex h-[38px] w-10 items-center justify-center rounded-full text-lg font-bold hover:bg-bg toque:h-11 toque:w-11">›</Link>
+            <Link href={`/financeiro?mes=${anterior}`} aria-label="Mês anterior" className="flex h-[38px] w-10 items-center justify-center rounded-full text-lg font-semibold hover:bg-bg toque:h-11 toque:w-11">‹</Link>
+            <span className="min-w-[140px] px-1 text-center text-[14px] font-semibold">{nomeMes(mes)}</span>
+            <Link href={`/financeiro?mes=${somaMes(mes, 1)}`} aria-label="Próximo mês" className="flex h-[38px] w-10 items-center justify-center rounded-full text-lg font-semibold hover:bg-bg toque:h-11 toque:w-11">›</Link>
           </nav>
         } />
 
@@ -154,14 +154,14 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
         ].map(([t, v, nota]) => (
           <div key={t as string} className="flex flex-[1_1_180px] flex-col gap-1 bg-paper px-5 py-4">
             <span className="rotulo">{t}</span>
-            <span className="text-[24px] font-extrabold tabular-nums">{brl(v as number)}</span>
+            <span className="text-[24px] font-bold tabular-nums">{brl(v as number)}</span>
             <span className="text-[13px] text-muted">{nota}</span>
           </div>
         ))}
         <div className="flex flex-[1_1_180px] flex-col gap-1 bg-ink px-5 py-4 text-white">
-          <span className="text-[12px] font-bold uppercase tracking-[0.12em] text-side-text">Resultado</span>
-          <span className="text-[24px] font-extrabold tabular-nums">{brl(calc.resultado)}</span>
-          <span className="text-[13px] font-bold text-red-vivo">
+          <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-side-text">Resultado</span>
+          <span className="text-[24px] font-bold tabular-nums">{brl(calc.resultado)}</span>
+          <span className="text-[13px] font-semibold text-red-vivo">
             {calc.receitas ? `margem ${Math.round((calc.resultado / calc.receitas) * 100)}%` : "sem receita no mês"}
           </span>
         </div>
@@ -198,7 +198,7 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
           </label>
           <label className="flex flex-[0_1_140px] flex-col gap-1">
             <span className="rotulo">{form.grupo === "fixo" ? "Valor por mês (R$)" : "Valor (R$)"}</span>
-            <input inputMode="decimal" required className={`caixa text-right font-bold`} value={form.valor} placeholder="0"
+            <input inputMode="decimal" required className={`caixa text-right font-semibold`} value={form.valor} placeholder="0"
               onChange={(e) => setForm({ ...form, valor: e.target.value })} />
           </label>
           {form.grupo === "receita" && (
@@ -210,7 +210,7 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
           )}
           <button type="submit" className="btn-1">Salvar</button>
         </div>
-        {aviso && <p role="status" className="text-[14px] font-semibold text-red">{aviso}</p>}
+        {aviso && <p role="status" className="text-[14px] font-medium text-red">{aviso}</p>}
         <p className="text-[13px] text-muted">Atendimentos realizados no CRM entram sozinhos como receita.</p>
       </form>
 
@@ -221,7 +221,7 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
             <div key={nome} className="flex items-center gap-2.5 text-[13px]">
               <span className="w-[140px] shrink-0 truncate" title={nome}>{nome}</span>
               <div className="h-2.5 flex-1 rounded-full bg-bg"><div className="h-2.5 rounded-full bg-ink" style={{ width: `${(v / calc.porOrigem[0][1]) * 100}%` }} /></div>
-              <span className="w-[86px] shrink-0 text-right font-bold tabular-nums">{brl(v)}</span>
+              <span className="w-[86px] shrink-0 text-right font-semibold tabular-nums">{brl(v)}</span>
             </div>
           ))}
         </section>

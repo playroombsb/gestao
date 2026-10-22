@@ -64,9 +64,9 @@ export default function Produtos({ inicial }: { inicial: Produto[] }) {
         {itens.map((p, i) => (
           <article key={p.id}
             className="cartao grid gap-x-5 gap-y-2 !p-4 focus-within:ring-2 focus-within:ring-red/50 md:!p-5 md:grid-cols-[32px_minmax(0,1fr)_170px_40px] md:items-start">
-            <span className="hidden pt-2 text-[13px] font-extrabold text-red md:block">{String(i + 1).padStart(2, "0")}</span>
+            <span className="hidden pt-2 text-[13px] font-bold text-red md:block">{String(i + 1).padStart(2, "0")}</span>
             <div className="flex min-w-0 flex-col gap-1">
-              <input id={`nome-${p.id}`} className="campo font-semibold md:!text-[16px]" value={p.nome} placeholder="Nome do produto"
+              <input id={`nome-${p.id}`} className="campo font-medium md:!text-[16px]" value={p.nome} placeholder="Nome do produto"
                 aria-label="Nome do produto" onChange={(e) => alterar(p.id, { nome: e.target.value })} />
               <textarea ref={ajustar} rows={1} value={p.descricao} placeholder="Descrição"
                 aria-label={`Descrição de ${p.nome || "produto"}`}
@@ -76,11 +76,11 @@ export default function Produtos({ inicial }: { inicial: Produto[] }) {
             <label className="flex flex-col gap-1">
               <span className="rotulo">Preço (R$)</span>
               <input key={`preco-${p.id}`} inputMode="decimal" defaultValue={mostrar(p.ticket)} placeholder="0"
-                className="campo text-right font-bold tabular-nums md:!text-[16px]"
+                className="campo text-right font-semibold tabular-nums md:!text-[16px]"
                 onChange={(e) => alterar(p.id, { ticket: parseNum(e.target.value), ticket_ns: false })} />
             </label>
             <button type="button" onClick={() => apagar(p.id)} aria-label={`Remover ${p.nome || "produto"}`}
-              className={armado === p.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white" : "btn-icone text-lg"}>
+              className={armado === p.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-semibold text-white" : "btn-icone text-lg"}>
               {armado === p.id ? "Remover?" : "×"}
             </button>
           </article>

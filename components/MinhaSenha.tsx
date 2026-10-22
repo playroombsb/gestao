@@ -43,8 +43,8 @@ export default function MinhaSenha({ trocada }: { trocada: boolean }) {
         <input type="password" required autoComplete="new-password" className="caixa" value={f.repete}
           onChange={(e) => setF({ ...f, repete: e.target.value })} />
       </label>
-      {!msg && trocada && <p role="status" className="text-[14px] font-semibold text-ink">Senha trocada. Seus logins em outros aparelhos foram encerrados.</p>}
-      {msg && <p role="status" className={`text-[14px] font-semibold ${msg.erro ? "text-red" : "text-ink"}`}>{msg.t}</p>}
+      {!msg && trocada && <p role="status" className="text-[14px] font-medium text-ink">Senha trocada. Seus logins em outros aparelhos foram encerrados.</p>}
+      {msg && <p role="status" className={`text-[14px] font-medium ${msg.erro ? "text-red" : "text-ink"}`}>{msg.t}</p>}
       <div><button type="submit" disabled={enviando} className="btn-1">{enviando ? "Salvando…" : "Trocar senha"}</button></div>
     </form>
   );

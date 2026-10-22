@@ -84,7 +84,7 @@ export default function Usuarios({ inicial, eu, aviso }: { inicial: Usuario[]; e
         texto="Crie acessos, troque senhas e decida quem é admin. Admin vê esta área e as integrações." />
 
       {msg && (
-        <p role="status" className={`rounded-xl px-4 py-3 text-[14px] font-semibold ${msg.erro ? "bg-red-soft text-red-deep" : "bg-ink text-white"}`}>{msg.t}</p>
+        <p role="status" className={`rounded-xl px-4 py-3 text-[14px] font-medium ${msg.erro ? "bg-red-soft text-red-deep" : "bg-ink text-white"}`}>{msg.t}</p>
       )}
 
       <section aria-label="Usuários" className="flex flex-col gap-2">
@@ -92,10 +92,10 @@ export default function Usuarios({ inicial, eu, aviso }: { inicial: Usuario[]; e
           <article key={u.id} className="cartao flex flex-col gap-3 !p-4 md:!p-5">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <input defaultValue={u.nome} aria-label={`Nome de ${u.nome}`} onBlur={(e) => renomear(u, e.target.value)}
-                className="campo min-w-[160px] flex-1 font-bold md:!text-[16px]" />
+                className="campo min-w-[160px] flex-1 font-semibold md:!text-[16px]" />
               <span className="font-mono text-[13px] text-muted">usuário: {u.login}</span>
               {u.admin && <span className="selo bg-red text-white">Admin</span>}
-              {u.id === eu && <span className="text-[13px] font-semibold text-muted">você</span>}
+              {u.id === eu && <span className="text-[13px] font-medium text-muted">você</span>}
               <span className="text-[13px] text-muted">desde {desde(u.created_at)}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">

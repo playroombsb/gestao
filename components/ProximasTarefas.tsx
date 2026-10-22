@@ -38,14 +38,14 @@ export default function ProximasTarefas({ inicial, total }: { inicial: Tarefa[];
                   onClick={() => concluir(t)} className="flex h-9 w-9 shrink-0 items-center justify-center toque:h-11 toque:w-11">
                   <span className="h-5 w-5 rounded-full border-2 border-line hover:border-red" />
                 </button>
-                <span className="min-w-0 flex-1 text-[15px] font-semibold">{t.titulo}</span>
-                <span className={`shrink-0 text-[13px] font-semibold ${r.tom === "atrasada" ? "text-red" : r.tom === "sem" ? "text-apagado" : "text-ink"}`}>{r.t}</span>
+                <span className="min-w-0 flex-1 text-[15px] font-medium">{t.titulo}</span>
+                <span className={`shrink-0 text-[13px] font-medium ${r.tom === "atrasada" ? "text-red" : r.tom === "sem" ? "text-apagado" : "text-ink"}`}>{r.t}</span>
               </li>
             );
           })}
         </ul>
       )}
-      {erro && <p role="alert" className="text-[13px] font-semibold text-red">{erro}</p>}
+      {erro && <p role="alert" className="text-[13px] font-medium text-red">{erro}</p>}
     </section>
   );
 }

@@ -12,13 +12,22 @@ body {
   - Títulos: página 28 a 40, seção 18, cartão 15.
   - Alturas: 40 no mouse, 44 no toque (variante toque:, ponteiro grosso).
   - Cantos: botões e campos 8px, filtros e setas em pílula, cartões 16px.
+  - Pesos (decidido em 22/10/2026, para o negrito voltar a destacar):
+    800 só no título da página; 700 nos números de destaque; 600 em títulos de seção e de cartão, botões,
+    itens principais do menu, selos e contadores; 500 em rótulos, nomes de lista, subitens do menu e filtros
+    não marcados; 400 no resto (texto, campos, valores).
 */
+@layer base {
+  b, strong {
+    font-weight: 600;
+  }
+}
 @layer components {
   .rotulo {
-    @apply text-[12px] font-bold uppercase tracking-[0.12em] text-muted;
+    @apply text-[12px] font-medium uppercase tracking-[0.12em] text-muted;
   }
   .titulo-secao {
-    @apply text-[18px] font-bold tracking-tight;
+    @apply text-[18px] font-semibold tracking-tight;
   }
 
   /* Campo sem caixa, para editar texto dentro de cartões */
@@ -31,7 +40,7 @@ body {
   }
 
   .btn {
-    @apply inline-flex min-h-[40px] shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-[14px] font-bold transition-[filter,background-color,color,border-color] duration-150 disabled:opacity-60 toque:min-h-[44px];
+    @apply inline-flex min-h-[40px] shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-[14px] font-semibold transition-[filter,background-color,color,border-color] duration-150 disabled:opacity-60 toque:min-h-[44px];
   }
   .btn-1 {
     @apply btn bg-red text-white hover:brightness-110;
@@ -51,10 +60,10 @@ body {
 
   /* Filtros em pílula */
   .pilula {
-    @apply inline-flex min-h-[36px] items-center gap-2 rounded-full border-[1.5px] border-line bg-paper px-3.5 text-[13px] font-bold text-ink transition-colors hover:border-ink toque:min-h-[44px];
+    @apply inline-flex min-h-[36px] items-center gap-2 rounded-full border-[1.5px] border-line bg-paper px-3.5 text-[13px] font-medium text-ink transition-colors hover:border-ink toque:min-h-[44px];
   }
   .pilula[aria-pressed="true"] {
-    @apply border-ink bg-ink text-white;
+    @apply border-ink bg-ink font-semibold text-white;
   }
 
   /* Alternador (Kanban/Lista, Todos/Sessões/Aluguéis) */
@@ -62,17 +71,17 @@ body {
     @apply inline-flex shrink-0 rounded-full border-[1.5px] border-ink bg-paper p-[3px];
   }
   .segmento > button {
-    @apply min-h-[34px] rounded-full px-4 text-[13px] font-bold transition-colors hover:bg-bg toque:min-h-[44px];
+    @apply min-h-[34px] rounded-full px-4 text-[13px] font-medium transition-colors hover:bg-bg toque:min-h-[44px];
   }
   .segmento > button[aria-pressed="true"] {
-    @apply bg-ink text-white hover:bg-ink;
+    @apply bg-ink font-semibold text-white hover:bg-ink;
   }
 
   .cartao {
     @apply rounded-2xl border border-line-soft bg-paper p-5 shadow-[0_1px_2px_rgba(13,10,10,0.05)] md:p-6;
   }
   .selo {
-    @apply inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[12px] font-bold;
+    @apply inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[12px] font-semibold;
   }
 }
 

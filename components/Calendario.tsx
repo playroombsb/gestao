@@ -102,7 +102,7 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
   }
 
   function chip(i: Item, compacto: boolean) {
-    const cls = `flex w-full min-w-0 items-center gap-1 rounded-md px-1.5 py-[3px] text-left text-[12px] font-semibold leading-tight ${COR_AGENDA[i.tipo].cor} ${
+    const cls = `flex w-full min-w-0 items-center gap-1 rounded-md px-1.5 py-[3px] text-left text-[12px] font-medium leading-tight ${COR_AGENDA[i.tipo].cor} ${
       i.crm?.etapa === "proposta" ? "opacity-60" : ""}`;
     const texto = <><span className="shrink-0 tabular-nums opacity-80">{horaBR(i.inicio)}</span><span className="truncate">{i.titulo}</span></>;
     if (compacto) return <span key={i.id} aria-hidden className={`h-2 w-2 rounded-full ${COR_AGENDA[i.tipo].ponto}`} />;
@@ -119,9 +119,9 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
         texto="Sessões e aluguéis vêm do CRM. Workshops, eventos e o resto você cria aqui."
         acoes={<>
           <nav aria-label="Mês" className="flex items-center rounded-full border-[1.5px] border-ink bg-paper">
-            <Link href={`/calendario?mes=${somaMes(mes, -1)}`} aria-label="Mês anterior" className="flex h-[38px] w-10 items-center justify-center rounded-full text-lg font-bold hover:bg-bg toque:h-11 toque:w-11">‹</Link>
-            <span className="min-w-[140px] px-1 text-center text-[14px] font-bold">{nomeMes(mes)}</span>
-            <Link href={`/calendario?mes=${somaMes(mes, 1)}`} aria-label="Próximo mês" className="flex h-[38px] w-10 items-center justify-center rounded-full text-lg font-bold hover:bg-bg toque:h-11 toque:w-11">›</Link>
+            <Link href={`/calendario?mes=${somaMes(mes, -1)}`} aria-label="Mês anterior" className="flex h-[38px] w-10 items-center justify-center rounded-full text-lg font-semibold hover:bg-bg toque:h-11 toque:w-11">‹</Link>
+            <span className="min-w-[140px] px-1 text-center text-[14px] font-semibold">{nomeMes(mes)}</span>
+            <Link href={`/calendario?mes=${somaMes(mes, 1)}`} aria-label="Próximo mês" className="flex h-[38px] w-10 items-center justify-center rounded-full text-lg font-semibold hover:bg-bg toque:h-11 toque:w-11">›</Link>
           </nav>
           <button type="button" className="btn-1" onClick={() => novo()}>+ Novo compromisso</button>
         </>} />
@@ -159,13 +159,13 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
                   fora ? "bg-bg/60" : ""} ${sel ? "outline outline-2 -outline-offset-2 outline-red" : "hover:bg-bg"}`}>
                 <button type="button" onClick={(e) => { e.stopPropagation(); setDia(d); }} aria-pressed={sel}
                   aria-label={`${nomeDia(d)}${xs.length ? `, ${xs.length} na agenda` : ""}`}
-                  className={`flex h-8 w-8 items-center justify-center self-center rounded-full text-[13px] font-bold md:self-start toque:h-11 toque:w-11 ${
-                    d === hoje() ? "bg-red text-white" : fora ? "text-apagado" : ""}`}>
+                  className={`flex h-8 w-8 items-center justify-center self-center rounded-full text-[13px] md:self-start toque:h-11 toque:w-11 ${
+                    d === hoje() ? "bg-red font-semibold text-white" : fora ? "text-apagado" : "font-medium"}`}>
                   {Number(d.slice(8))}
                 </button>
                 <div className="hidden min-w-0 flex-col gap-0.5 md:flex">
                   {xs.slice(0, 3).map((i) => chip(i, false))}
-                  {xs.length > 3 && <span className="px-1 text-[12px] font-bold text-muted">+{xs.length - 3}</span>}
+                  {xs.length > 3 && <span className="px-1 text-[12px] font-semibold text-muted">+{xs.length - 3}</span>}
                 </div>
                 <div className="flex flex-wrap justify-center gap-0.5 md:hidden">{xs.slice(0, 4).map((i) => chip(i, true))}</div>
               </div>
@@ -186,16 +186,16 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
             {doDia.map((i) => {
               const conteudo = (
                 <>
-                  <span className="w-14 shrink-0 text-[14px] font-bold tabular-nums">{horaBR(i.inicio)}</span>
+                  <span className="w-14 shrink-0 text-[14px] font-semibold tabular-nums">{horaBR(i.inicio)}</span>
                   <span className={`shrink-0 selo ${COR_AGENDA[i.tipo].cor}`}>
                     {COR_AGENDA[i.tipo].um}
                   </span>
-                  <span className="min-w-0 flex-1 text-[14px] font-semibold">
+                  <span className="min-w-0 flex-1 text-[14px] font-medium">
                     {i.titulo}
-                    {i.crm?.etapa === "proposta" && <span className="ml-2 text-[12px] font-semibold text-muted">· a confirmar</span>}
+                    {i.crm?.etapa === "proposta" && <span className="ml-2 text-[12px] font-medium text-muted">· a confirmar</span>}
                     {i.evento?.local && <span className="ml-2 text-[12px] font-normal text-muted">· {i.evento.local}</span>}
                   </span>
-                  {i.crm?.valor != null && <span className="text-[14px] font-bold tabular-nums">{brl(i.crm.valor)}</span>}
+                  {i.crm?.valor != null && <span className="text-[14px] font-semibold tabular-nums">{brl(i.crm.valor)}</span>}
                 </>
               );
               const cls = "-mx-2 flex w-[calc(100%+1rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-2 py-2.5 text-left hover:bg-bg";
@@ -224,7 +224,7 @@ export default function Calendario({ mes, dias, eventos: inicial, contatos }: {
             </div>
             <label className="flex flex-col gap-1">
               <span className="rotulo">Título</span>
-              <input id="evento-titulo" className={`caixa font-semibold`} value={atual.titulo} placeholder="ex: Workshop de spanking"
+              <input id="evento-titulo" className={`caixa font-medium`} value={atual.titulo} placeholder="ex: Workshop de spanking"
                 onChange={(e) => alterar(atual.id, { titulo: e.target.value })} />
             </label>
             <div role="group" aria-label="Tipo" className="flex flex-wrap gap-1.5">

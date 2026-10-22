@@ -32,7 +32,7 @@ function Ico({ nome }: { nome: Icone }) {
 }
 
 const Selo = ({ n, on }: { n: number; on?: boolean }) => (
-  <span className={`ml-auto min-w-[22px] rounded-full px-1.5 py-0.5 text-center text-[12px] font-bold ${on ? "bg-white text-red" : "bg-red text-white"}`}>{n}</span>
+  <span className={`ml-auto min-w-[22px] rounded-full px-1.5 py-0.5 text-center text-[12px] font-semibold ${on ? "bg-white text-red" : "bg-red text-white"}`}>{n}</span>
 );
 
 const GUARDA = "menu-secoes-abertas";
@@ -83,14 +83,14 @@ export default function Nav({ nome, novas, conversas, admin }: { nome: string; n
     });
   }
 
-  const principal = "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 text-[15px] font-bold transition-colors";
+  const principal = "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 text-[15px] font-semibold transition-colors";
 
   return (
     <aside className="z-20 shrink-0 bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_35%,#0d0a0a_70%)] pt-[env(safe-area-inset-top)] text-white md:sticky md:top-0 md:flex md:h-screen md:w-64 md:flex-col md:overflow-y-auto md:pt-0">
       <div className="flex items-center justify-between px-4 py-3 md:px-7 md:pb-6 md:pt-8">
-        <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-red-vivo">Playroom</span>
+        <span className="text-[12px] font-semibold uppercase tracking-[0.2em] text-red-vivo">Playroom</span>
         <button type="button" onClick={() => setAberto((a) => !a)} aria-expanded={aberto} aria-controls="menu-principal"
-          className="min-h-[44px] rounded-lg px-3 text-[14px] font-bold hover:bg-white/10 md:hidden">
+          className="min-h-[44px] rounded-lg px-3 text-[14px] font-semibold hover:bg-white/10 md:hidden">
           {aberto ? "Fechar" : "Menu"}
         </button>
       </div>
@@ -131,7 +131,7 @@ export default function Nav({ nome, novas, conversas, admin }: { nome: string; n
                     <li key={href}>
                       <Link href={href} aria-current={on ? "page" : undefined}
                         className={`flex min-h-[38px] items-center gap-2 rounded-lg px-3 text-[14px] transition-colors toque:min-h-[44px] ${
-                          on ? "bg-red font-bold text-white" : "font-medium text-side-text hover:bg-white/5 hover:text-white"}`}>
+                          on ? "bg-red font-semibold text-white" : "font-medium text-side-text hover:bg-white/5 hover:text-white"}`}>
                         {t}
                         {!!badge && <Selo n={badge} on={on} />}
                       </Link>
@@ -145,10 +145,10 @@ export default function Nav({ nome, novas, conversas, admin }: { nome: string; n
 
         <form action={sair} className="mt-auto flex items-center justify-between gap-2 border-t border-side-line pt-3 text-[14px]">
           <Link href="/conta" aria-current={atual === "/conta" ? "page" : undefined}
-            className={`flex min-h-[40px] min-w-0 flex-1 items-center truncate rounded-lg px-3 hover:bg-white/5 hover:text-white toque:min-h-[44px] ${atual === "/conta" ? "bg-white/10 font-bold text-white" : "text-side-text"}`}>
+            className={`flex min-h-[40px] min-w-0 flex-1 items-center truncate rounded-lg px-3 hover:bg-white/5 hover:text-white toque:min-h-[44px] ${atual === "/conta" ? "bg-white/10 font-semibold text-white" : "text-side-text"}`}>
             {nome}
           </Link>
-          <button type="submit" className="min-h-[40px] rounded-lg px-3 font-bold text-white hover:bg-white/10 hover:text-red-vivo toque:min-h-[44px]">Sair</button>
+          <button type="submit" className="min-h-[40px] rounded-lg px-3 font-semibold text-white hover:bg-white/10 hover:text-red-vivo toque:min-h-[44px]">Sair</button>
         </form>
       </nav>
     </aside>

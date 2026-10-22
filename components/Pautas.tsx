@@ -72,7 +72,7 @@ export default function Pautas({ inicial }: { inicial: Pauta[] }) {
           return (
             <button key={s} type="button" aria-pressed={filtro === s} onClick={() => setFiltro(s)}
               className="pilula">
-              {s} <span className="font-semibold opacity-70">{n}</span>
+              {s} <span className="font-medium opacity-70">{n}</span>
             </button>
           );
         })}
@@ -86,7 +86,7 @@ export default function Pautas({ inicial }: { inicial: Pauta[] }) {
         <ul className="flex flex-col">
           {visiveis.map((p) => (
             <li key={p.id} className="grid grid-cols-2 gap-x-3 gap-y-2 border-b border-line-soft py-3 last:border-0 md:grid-cols-[minmax(0,2.4fr)_repeat(4,minmax(0,1fr))_minmax(0,1.1fr)_36px] md:items-center">
-              <input id={`pauta-${p.id}`} className="campo col-span-2 font-semibold md:col-span-1" value={p.titulo}
+              <input id={`pauta-${p.id}`} className="campo col-span-2 font-medium md:col-span-1" value={p.titulo}
                 placeholder="Pauta" aria-label="Pauta" onChange={(e) => alterar(p.id, { titulo: e.target.value })} />
               <input className="campo" value={p.pilar} placeholder="Pilar" aria-label="Pilar"
                 onChange={(e) => alterar(p.id, { pilar: e.target.value })} />
@@ -97,13 +97,13 @@ export default function Pautas({ inicial }: { inicial: Pauta[] }) {
                 {FUNIL.map((f) => <option key={f}>{f}</option>)}
               </select>
               <select value={p.status} aria-label="Status" onChange={(e) => alterar(p.id, { status: e.target.value }, true)}
-                className={`min-h-[32px] w-full rounded-full border-[1.5px] px-2.5 text-base font-semibold outline-none focus:outline-2 focus:outline-red md:text-[12px] toque:min-h-[40px] ${COR_STATUS[p.status] ?? "border-line"}`}>
+                className={`min-h-[32px] w-full rounded-full border-[1.5px] px-2.5 text-base font-medium outline-none focus:outline-2 focus:outline-red md:text-[12px] toque:min-h-[40px] ${COR_STATUS[p.status] ?? "border-line"}`}>
                 {STATUS.map((s) => <option key={s}>{s}</option>)}
               </select>
               <input type="date" className="campo" value={p.data ?? ""} aria-label="Data de publicação"
                 onChange={(e) => alterar(p.id, { data: e.target.value || null }, true)} />
               <button type="button" onClick={() => apagar(p.id)} aria-label={`Remover ${p.titulo || "pauta"}`}
-                className={armado === p.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white" : "btn-icone text-lg"}>
+                className={armado === p.id ? "rounded-full bg-red px-3 py-1 text-[12px] font-semibold text-white" : "btn-icone text-lg"}>
                 {armado === p.id ? "Remover?" : "×"}
               </button>
             </li>

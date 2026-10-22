@@ -24,7 +24,7 @@ function Numero({ rotulo, valor, antes, nota }: { rotulo: string; valor: string;
   return (
     <div className="flex flex-[1_1_170px] flex-col gap-1 bg-paper p-4 md:p-5">
       <span className="rotulo">{rotulo}</span>
-      <span className="text-[28px] font-extrabold leading-none tracking-tight tabular-nums">{valor}</span>
+      <span className="text-[28px] font-bold leading-none tracking-tight tabular-nums">{valor}</span>
       {antes && <span className="text-[12px] text-muted">antes: {antes}</span>}
       {nota && <span className="text-[12px] text-muted">{nota}</span>}
     </div>
@@ -91,7 +91,7 @@ export default async function Page({ searchParams }: { searchParams: { p?: strin
             <ol className="flex flex-col gap-2.5">
               {etapas.map((e) => (
                 <li key={e.k} className="grid grid-cols-[110px_1fr_auto] items-center gap-3 text-[13px]">
-                  <span className="font-semibold">{e.t}</span>
+                  <span className="font-medium">{e.t}</span>
                   <span className="h-3 rounded-full bg-bg">
                     <span className="block h-3 rounded-full bg-red" style={{ width: `${Math.max(e.n ? 2 : 0, (e.n / topo) * 100)}%` }} />
                   </span>
@@ -108,7 +108,7 @@ export default async function Page({ searchParams }: { searchParams: { p?: strin
               <h2 id="t-insta" className="titulo-secao">Seguidores no Instagram</h2>
               <p className="text-[13px] text-muted">Uma coleta por semana, desde o início.</p>
             </div>
-            <a href={`https://www.instagram.com/${PERFIL}/`} target="_blank" rel="noreferrer" className="btn-3 -mr-3 font-semibold">@{PERFIL}</a>
+            <a href={`https://www.instagram.com/${PERFIL}/`} target="_blank" rel="noreferrer" className="btn-3 -mr-3 font-medium">@{PERFIL}</a>
           </div>
           <GraficoSeguidores serie={serie} />
         </section>
@@ -126,17 +126,17 @@ export default async function Page({ searchParams }: { searchParams: { p?: strin
             <table className="w-full min-w-[520px] text-left text-[14px]">
               <thead>
                 <tr className="border-b border-line-soft">
-                  <th scope="col" className="rotulo px-1 pb-2 font-bold">Origem</th>
-                  <th scope="col" className="rotulo px-1 pb-2 text-right font-bold">Contatos</th>
-                  <th scope="col" className="rotulo px-1 pb-2 text-right font-bold">Realizados</th>
-                  <th scope="col" className="rotulo px-1 pb-2 text-right font-bold">Conversão</th>
-                  <th scope="col" className="rotulo px-1 pb-2 text-right font-bold">Receita</th>
+                  <th scope="col" className="rotulo px-1 pb-2 font-semibold">Origem</th>
+                  <th scope="col" className="rotulo px-1 pb-2 text-right font-semibold">Contatos</th>
+                  <th scope="col" className="rotulo px-1 pb-2 text-right font-semibold">Realizados</th>
+                  <th scope="col" className="rotulo px-1 pb-2 text-right font-semibold">Conversão</th>
+                  <th scope="col" className="rotulo px-1 pb-2 text-right font-semibold">Receita</th>
                 </tr>
               </thead>
               <tbody>
                 {origens.map((o) => (
                   <tr key={o.origem} className="border-b border-line-soft last:border-0">
-                    <th scope="row" className="px-1 py-2.5 font-semibold">{o.origem}</th>
+                    <th scope="row" className="px-1 py-2.5 font-medium">{o.origem}</th>
                     <td className="px-1 py-2.5 text-right tabular-nums">{o.contatos}</td>
                     <td className="px-1 py-2.5 text-right tabular-nums">{o.realizados}</td>
                     <td className="px-1 py-2.5 text-right tabular-nums">{pct(o.conversao)}</td>

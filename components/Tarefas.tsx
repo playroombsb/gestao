@@ -107,7 +107,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
   function titulo(t: Tarefa) {
     return (
       <textarea ref={ajustar} rows={1} value={t.titulo} aria-label="Tarefa" placeholder="Tarefa sem nome"
-        className={`w-full resize-none overflow-hidden rounded bg-transparent text-base font-semibold leading-snug outline-none focus:bg-bg md:text-[15px] ${
+        className={`w-full resize-none overflow-hidden rounded bg-transparent text-base font-medium leading-snug outline-none focus:bg-bg md:text-[15px] ${
           t.status === "feito" ? "text-muted" : "text-ink"}`}
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.blur(); } }}
         onChange={(e) => { ajustar(e.target); alterar(t.id, { titulo: e.target.value.replace(/\n/g, " ") }); }} />
@@ -117,7 +117,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
   function etiqueta(t: Tarefa) {
     const e = ETIQUETA[t.etiqueta ?? "nenhuma"];
     return (
-      <label className={`relative inline-flex min-h-[28px] items-center gap-1.5 self-start rounded-full px-2.5 text-[12px] font-semibold toque:min-h-[32px] ${e.fundo}`}>
+      <label className={`relative inline-flex min-h-[28px] items-center gap-1.5 self-start rounded-full px-2.5 text-[12px] font-medium toque:min-h-[32px] ${e.fundo}`}>
         <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${e.ponto}`} />
         {t.etiqueta ? ETIQUETAS.find((x) => x.k === t.etiqueta)!.t : "Etiqueta"}
         <select value={t.etiqueta ?? ""} aria-label={`Etiqueta de ${t.titulo}`}
@@ -135,7 +135,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
     return (
       <label className="relative flex h-9 w-9 shrink-0 items-center justify-center toque:h-11 toque:w-11" title={p ? p.nome : "Escolher responsável"}>
         {p ? (
-          <span className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-extrabold text-white ${corDe(p.id)}`}>{iniciais(p.nome)}</span>
+          <span className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold text-white ${corDe(p.id)}`}>{iniciais(p.nome)}</span>
         ) : (
           <span className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-dashed border-[#c9bfbd] text-[14px] text-apagado">+</span>
         )}
@@ -153,7 +153,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
     const r = prazoCurto(t.prazo, t.status === "feito");
     return (
       <label className="relative flex min-h-[36px] min-w-0 cursor-pointer items-center toque:min-h-[44px]">
-        <span className={`text-[13px] font-semibold ${r.tom === "atrasada" ? "text-red" : r.tom === "sem" ? "text-apagado" : "text-ink"}`}>{r.t}</span>
+        <span className={`text-[13px] font-medium ${r.tom === "atrasada" ? "text-red" : r.tom === "sem" ? "text-apagado" : "text-ink"}`}>{r.t}</span>
         <input type="date" value={t.prazo ?? ""} aria-label={`Prazo de ${t.titulo}`}
           onChange={(e) => alterar(t.id, { prazo: e.target.value || null }, true)}
           className="absolute inset-0 cursor-pointer text-base opacity-0" />
@@ -163,7 +163,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
 
   function remover(t: Tarefa, cls = "") {
     return armado === t.id ? (
-      <button type="button" onClick={() => apagar(t.id)} className={`shrink-0 rounded-full bg-red px-3 py-1 text-[12px] font-bold text-white ${cls}`}>Remover?</button>
+      <button type="button" onClick={() => apagar(t.id)} className={`shrink-0 rounded-full bg-red px-3 py-1 text-[12px] font-semibold text-white ${cls}`}>Remover?</button>
     ) : (
       <button type="button" onClick={() => apagar(t.id)} aria-label={`Remover ${t.titulo}`} className={`btn-icone ${cls}`}>
         <svg aria-hidden width="12" height="12" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
@@ -222,7 +222,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
         <div className="flex flex-wrap items-center gap-2">
           <label className="relative">
             <select value={t.status} aria-label={`Status de ${t.titulo}`} onChange={(e) => mover(t.id, e.target.value as StatusTarefa)}
-              className="min-h-[28px] appearance-none rounded-full border-[1.5px] border-line bg-paper pl-3 pr-8 text-base font-semibold outline-none focus:border-ink md:text-[12px] toque:min-h-[32px]">
+              className="min-h-[28px] appearance-none rounded-full border-[1.5px] border-line bg-paper pl-3 pr-8 text-base font-medium outline-none focus:border-ink md:text-[12px] toque:min-h-[32px]">
               {STATUS_TAREFA.map((s) => <option key={s.k} value={s.k}>{s.t}</option>)}
             </select>
             {SETA}
@@ -237,7 +237,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
   }
 
   const contagem = (s: StatusTarefa) => (
-    <span className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[12px] font-bold text-white ${s === "feito" ? "bg-red" : "bg-ink"}`}>
+    <span className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[12px] font-semibold text-white ${s === "feito" ? "bg-red" : "bg-ink"}`}>
       {doStatus(s).length}
     </span>
   );
@@ -290,7 +290,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
             <label key={f.rotulo} className="relative flex min-h-[40px] flex-[1_1_200px] items-center gap-3 rounded-full border-[1.5px] border-line bg-paper pl-4 pr-10 text-[13px] focus-within:border-ink sm:flex-none toque:min-h-[44px]">
               <span className="text-muted">{f.rotulo}</span>
               <select value={f.valor} onChange={(e) => f.set(e.target.value)} aria-label={f.aria}
-                className="min-w-0 flex-1 appearance-none self-stretch bg-transparent text-base font-bold text-ink outline-none md:text-[14px]">
+                className="min-w-0 flex-1 appearance-none self-stretch bg-transparent text-base font-semibold text-ink outline-none md:text-[14px]">
                 {f.opcoes.map(([k, t]) => <option key={k} value={k}>{t}</option>)}
               </select>
               {SETA}
@@ -316,7 +316,7 @@ export default function Tarefas({ inicial, pessoas }: { inicial: Tarefa[]; pesso
                   <section key={s} aria-label={NOME_STATUS[s]}
                     className={`${coluna === s ? "flex" : "hidden"} flex-col gap-2.5 rounded-3xl border border-line-soft bg-[#efebe9] p-2.5 lg:flex`}>
                     <div className="hidden items-center justify-between px-2.5 pt-1.5 lg:flex">
-                      <h2 className="text-[15px] font-bold">{NOME_STATUS[s]}</h2>
+                      <h2 className="text-[15px] font-semibold">{NOME_STATUS[s]}</h2>
                       {contagem(s)}
                     </div>
                     {xs.map(cartao)}
