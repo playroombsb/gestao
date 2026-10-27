@@ -90,3 +90,9 @@ body {
     transition: width 0.35s ease;
   }
 }
+
+/* Exportar em PDF (Posicionamento): folha A4, fundo branco, sem o menu */
+@media print {
+  @page { size: A4; margin: 18mm 16mm; }
+  body { background: #fff !important; }
+}

@@ -3,18 +3,13 @@ import { exigirLogin } from "@/lib/auth";
 import Aviso from "@/components/Aviso";
 import Cabecalho, { PAGINA } from "@/components/Cabecalho";
 import Secoes from "@/components/Secoes";
+import { ARQUETIPO } from "@/lib/posicionamento";
 
 export const dynamic = "force-dynamic";
 
-// Notas do teste de arquétipo de marca. O posicionamento usa Governante e Amante (decisão da Ana em 20/10/2026);
-// o Rebelde, que liderou o teste, entra como tempero.
-const NOTAS = [
-  { nome: "Rebelde", n: 89, cor: "bg-side-label" },
-  { nome: "Amante", n: 85, cor: "bg-white" },
-  { nome: "Cuidador", n: 85, cor: "bg-side-label" },
-  { nome: "Explorador", n: 75, cor: "bg-side-label" },
-  { nome: "Governante", n: 75, cor: "bg-red" },
-];
+const NOTAS = ARQUETIPO.notas.map((x) => ({
+  ...x, cor: x.nome === "Governante" ? "bg-red" : x.nome === "Amante" ? "bg-white" : "bg-side-label",
+}));
 
 export default async function Page() {
   await exigirLogin();
@@ -23,7 +18,11 @@ export default async function Page() {
 
   return (
     <main className={PAGINA}>
-      <Cabecalho rotulo="Marketing · Posicionamento" titulo={<>Quem a casa <span className="text-red">é</span></>} />
+      <Cabecalho rotulo="Marketing · Posicionamento" titulo={<>Quem a casa <span className="text-red">é</span></>}
+        acoes={<>
+          <a href="/api/posicionamento" className="btn-2" download>Exportar .md</a>
+          <a href="/posicionamento/pdf" target="_blank" rel="noreferrer" className="btn-2">Exportar PDF</a>
+        </>} />
 
       <section aria-labelledby="t-arq" className="flex flex-wrap gap-8 rounded-2xl bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_45%,#0d0a0a_80%)] p-6 text-white md:p-8">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-3">
