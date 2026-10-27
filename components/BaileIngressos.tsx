@@ -17,14 +17,14 @@ export default function BaileIngressos({ encerrado, promo, topo, lateral }: {
   lateral: React.ReactNode;
 }) {
   return (
-    <section id="ingressos" className={`relative scroll-mt-4 overflow-hidden px-5 pb-24 pt-20 md:px-[clamp(20px,5vw,60px)] md:pb-[120px] md:pt-[110px] ${FUNDO}`}>
+    <section id="ingressos" className={`relative scroll-mt-4 overflow-hidden px-5 pb-16 pt-14 md:px-[clamp(20px,5vw,60px)] md:py-20 ${FUNDO}`}>
       {/* Mão em chamas à direita (trocada com as mãos da segunda dobra, pedidos da Ana em 27/10/2026). No celular
           fica pequena atrás dos cards; no computador ocupa a altura toda da dobra e some pela esquerda e pelas pontas. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/baile/espera.webp" alt="" aria-hidden width={1034} height={1520}
         className="pointer-events-none absolute -bottom-10 -right-16 w-[min(80vw,320px)] select-none opacity-35 [mask-image:radial-gradient(ellipse_at_50%_60%,#000_10%,rgba(0,0,0,.55)_34%,transparent_62%)] md:inset-y-0 md:bottom-auto md:right-0 md:h-full md:w-auto md:max-w-[48vw] md:object-cover md:object-[50%_40%] md:opacity-90 md:[-webkit-mask-composite:source-in] md:[mask-composite:intersect] md:[mask-image:linear-gradient(90deg,transparent,#000_58%),linear-gradient(180deg,transparent,#000_10%,#000_82%,transparent)]" />
       {/* No computador o conteúdo vai um pouco para a esquerda, abrindo espaço para a mão */}
-      <div className="relative mx-auto flex max-w-[930px] flex-col items-center gap-14 md:-translate-x-[clamp(30px,7vw,120px)]">
+      <div className="relative mx-auto flex max-w-[930px] flex-col items-center gap-10 md:-translate-x-[clamp(30px,7vw,120px)]">
         {topo}
         <div className="flex w-full max-w-[460px] flex-col gap-[30px]">
           {INGRESSOS_BAILE.map((t, i) => {

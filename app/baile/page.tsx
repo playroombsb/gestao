@@ -90,14 +90,14 @@ export default async function Page() {
     <>
 
       {/* 1. Hero */}
-      <section className={`relative flex min-h-[680px] flex-col overflow-hidden ${FUNDO}`}>
+      <section className={`relative flex min-h-[600px] flex-col overflow-hidden md:min-h-[640px] ${FUNDO}`}>
         {/* Arte espelhada para ela olhar para o texto; presa no topo para não cortar a cabeça */}
         <Arte src={FOTOS.hero} lado="dir" foco="object-top" focoMd="md:object-top" />
         <header className="relative flex items-center justify-between gap-4 px-5 py-7 md:px-[clamp(20px,3vw,38px)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/baile/logo-branco.png" alt="Playroom" className="block h-16 w-auto" />
         </header>
-        <div className={`relative flex max-w-[760px] flex-1 flex-col justify-center gap-[26px] pb-20 pt-10 md:box-content ${PADDING_ESQ} ${PADDING_DIR}`}>
+        <div className={`relative flex max-w-[760px] flex-1 flex-col justify-center gap-[26px] pb-14 pt-6 md:box-content md:pb-16 md:pt-8 ${PADDING_ESQ} ${PADDING_DIR}`}>
           <p className="m-0 text-[13px] font-semibold tracking-[.14em] text-[#ff2a44] md:text-[15px] md:tracking-[.2em]">
             PLAY PARTY{q ? ` · ${q.dia} ${q.mes} · ${q.hora}` : ""} · 18+
           </p>
@@ -123,7 +123,7 @@ export default async function Page() {
 
       {/* 2. O que te espera */}
       {/* Mãos e texto lado a lado, o conjunto centralizado (pedido da Ana em 27/10/2026); no celular as mãos ficam atrás do texto */}
-      <section className={`relative flex min-h-[680px] flex-col overflow-hidden md:flex-row md:items-stretch md:justify-center md:gap-[clamp(28px,4vw,64px)] md:px-[clamp(40px,5vw,80px)] ${FUNDO}`}>
+      <section className={`relative flex flex-col overflow-hidden md:min-h-[600px] md:flex-row md:items-stretch md:justify-center md:gap-[clamp(28px,4vw,64px)] md:px-[clamp(40px,5vw,80px)] ${FUNDO}`}>
         {FOTOS.espera && (
           <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-16 w-[min(95vw,420px)] opacity-30 md:relative md:bottom-auto md:left-auto md:flex md:w-auto md:flex-none md:items-end md:opacity-85">
             {/* No computador as mãos sobem da base até perto do topo da dobra */}
@@ -132,7 +132,7 @@ export default async function Page() {
               className="block w-full select-none [mask-image:linear-gradient(to_top,#000_55%,transparent)] md:h-[86%] md:w-auto md:max-w-[50vw] md:-mb-6 md:object-contain md:object-bottom md:[mask-image:linear-gradient(to_top,#000_82%,transparent)]" />
           </div>
         )}
-        <div className="relative flex max-w-[420px] flex-col justify-center gap-[22px] pb-24 pl-[60px] pr-5 pt-20 md:px-0 md:py-[110px]">
+        <div className="relative flex max-w-[420px] flex-col justify-center gap-[22px] pb-16 pl-[60px] pr-5 pt-14 md:px-0 md:py-20">
           <h2 className="m-0 text-[46px] font-normal leading-[1.05]">O que te espera</h2>
           <p className="m-0 text-[17px] font-light leading-[1.65] text-[#9a9ea6]">
             Um ambiente seguro, inclusivo e acolhedor, onde todas as pessoas são bem-vindas. Local no Lago Norte.
@@ -173,8 +173,8 @@ export default async function Page() {
       )}
 
       {/* 4. Regras da casa */}
-      <section className="relative overflow-hidden bg-white px-5 pb-24 pt-20 text-[#111] md:pb-[120px] md:pt-[110px] md:px-[clamp(20px,5vw,60px)]">
-        <div className="relative z-[1] mx-auto flex max-w-[960px] flex-col items-center gap-12">
+      <section className="relative overflow-hidden bg-white px-5 pb-16 pt-14 text-[#111] md:py-20 md:px-[clamp(20px,5vw,60px)]">
+        <div className="relative z-[1] mx-auto flex max-w-[960px] flex-col items-center gap-10">
           <div className="flex flex-col items-center gap-8 text-center">
             <div className="flex flex-col items-center gap-4">
               <h2 className="m-0 text-[clamp(38px,5vw,46px)] font-normal leading-[1.05]">Regras da casa</h2>
@@ -211,7 +211,7 @@ export default async function Page() {
       {/* 5. Organizado por */}
       {/* Foto da Mistress Sandra em círculo à esquerda do texto, colorida e do ombro para cima; o conjunto fica
           centralizado na página (pedidos da Ana em 27/10/2026) */}
-      <section className={`relative flex min-h-[600px] flex-col items-center justify-center gap-10 overflow-hidden border-t border-[#1a1a1a] px-5 pb-24 pt-20 text-center md:flex-row md:gap-[clamp(40px,6vw,90px)] md:px-[clamp(60px,8vw,120px)] md:py-[110px] md:text-left ${FUNDO}`}>
+      <section className={`relative flex flex-col items-center justify-center gap-10 overflow-hidden border-t border-[#1a1a1a] px-5 pb-16 pt-14 text-center md:flex-row md:gap-[clamp(40px,6vw,90px)] md:px-[clamp(60px,8vw,120px)] md:py-20 md:text-left ${FUNDO}`}>
         {FOTOS.sandra && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={FOTOS.sandra} alt="Mistress Sandra" width={560} height={560}
