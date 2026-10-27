@@ -61,7 +61,7 @@ export default function Financeiro({ mes, anterior, inicial, receitaAnterior, pr
   }, [itens]);
 
   const categorias = form.grupo === "receita"
-    ? [...new Set(["Sessões", "Aluguéis", ...produtos, ...calc.de("receita").map((l) => l.categoria)])]
+    ? [...new Set(["Sessões", "Aluguéis", "Eventos", ...produtos, ...calc.de("receita").map((l) => l.categoria)])]
     : [...new Set([...CATEGORIAS[form.grupo], ...calc.de(form.grupo).map((l) => l.categoria)])].filter(Boolean);
 
   async function salvarNovo(e: React.FormEvent) {

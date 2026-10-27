@@ -12,15 +12,22 @@ const ok = <T,>(data: T) => ({ ok: true as const, data });
 
 // CRM
 
-const COLS_CONTATO = "id,apelido,contato,tipo,etapa,data_hora,duracao,valor,sinal,origem,motivo_perda,observacoes,created_at";
+// Colunas de antes da migração 0011 (eventos e formulário). Enquanto ela não roda no banco, o CRM lê só estas.
+const COLS_CONTATO_ANTIGAS = "id,apelido,contato,tipo,etapa,data_hora,duracao,valor,sinal,origem,motivo_perda,observacoes,created_at";
+const COLS_CONTATO = "id,apelido,contato,tipo,evento_id,etapa,email,pronome,ingressos,respostas,data_hora,duracao,valor,sinal,origem,motivo_perda,observacoes,created_at";
 const PERMITIDOS_CONTATO: (keyof ContatoPatch)[] = [
-  "apelido", "contato", "tipo", "etapa", "data_hora", "duracao", "valor", "sinal", "origem", "motivo_perda", "observacoes",
+  "apelido", "contato", "tipo", "evento_id", "etapa", "email", "pronome", "ingressos", "data_hora", "duracao", "valor", "sinal", "origem", "motivo_perda", "observacoes",
 ];
 
 const contato = (r: Record<string, unknown>): Contato => ({
   id: txt(r.id), apelido: txt(r.apelido), contato: txt(r.contato),
-  tipo: r.tipo === "aluguel" ? "aluguel" : "sessao",
+  tipo: r.tipo === "aluguel" ? "aluguel" : r.tipo === "evento" ? "evento" : "sessao",
+  evento_id: r.evento_id ? txt(r.evento_id) : null,
   etapa: txt(r.etapa) as Contato["etapa"],
+  email: txt(r.email), pronome: txt(r.pronome), ingressos: num(r.ingressos),
+  respostas: Array.isArray(r.respostas)
+    ? (r.respostas as Record<string, unknown>[]).map((x) => ({ pergunta: txt(x?.pergunta), resposta: txt(x?.resposta) }))
+    : [],
   data_hora: r.data_hora ? txt(r.data_hora) : null,
   duracao: txt(r.duracao), valor: num(r.valor),
   sinal: (txt(r.sinal) || "sem") as Contato["sinal"],
@@ -30,21 +37,28 @@ const contato = (r: Record<string, unknown>): Contato => ({
 
 export async function listarContatos(): Promise<Res<Contato[]>> {
   if (!(await sessao())) return negar();
-  const { data, error } = await db().from("contatos").select(COLS_CONTATO).order("created_at", { ascending: false });
-  return error ? falha("Não foi possível carregar o CRM.") : ok((data ?? []).map(contato));
+  const ler = (cols: string) => db().from("contatos").select(cols).order("created_at", { ascending: false });
+  let r = await ler(COLS_CONTATO);
+  if (r.error) r = await ler(COLS_CONTATO_ANTIGAS);
+  return r.error ? falha("Não foi possível carregar o CRM.") : ok(((r.data ?? []) as unknown as Record<string, unknown>[]).map(contato));
 }
 
 export async function salvarContato(id: string, patch: ContatoPatch): Promise<Res<null>> {
   if (!(await sessao())) return negar();
   const limpo = filtrar(patch, PERMITIDOS_CONTATO);
   if ("data_hora" in limpo && !limpo.data_hora) limpo.data_hora = null;
+  if ("evento_id" in limpo && !limpo.evento_id) limpo.evento_id = null;
+  if ("ingressos" in limpo && ![1, 2, 3].includes(Number(limpo.ingressos))) limpo.ingressos = null;
   const { error } = await db().from("contatos").update(limpo).eq("id", id);
   return error ? falha("Não salvou. Tente de novo.") : ok(null);
 }
 
-export async function adicionarContato(): Promise<Res<Contato>> {
+/** Novo contato. No pipeline de evento já nasce ligado ao evento escolhido. */
+export async function adicionarContato(inicial: { tipo?: Contato["tipo"]; evento_id?: string | null } = {}): Promise<Res<Contato>> {
   if (!(await sessao())) return negar();
-  const { data, error } = await db().from("contatos").insert({}).select(COLS_CONTATO).single();
+  const tipo = inicial.tipo && ["sessao", "aluguel", "evento"].includes(inicial.tipo) ? inicial.tipo : "sessao";
+  const linha = tipo === "evento" ? { tipo, evento_id: inicial.evento_id || null } : { tipo };
+  const { data, error } = await db().from("contatos").insert(linha).select(COLS_CONTATO).single();
   return error || !data ? falha("Não foi possível adicionar.") : ok(contato(data));
 }
 
@@ -199,6 +213,15 @@ export async function listarAgenda(de: string, ate: string): Promise<Res<Evento[
   if (!(await sessao())) return negar();
   const { data, error } = await db().from("agenda").select(COLS_EVENTO).gte("inicio", de).lt("inicio", ate).order("inicio");
   return error ? falha("Não foi possível carregar o calendário.") : ok((data ?? []).map(evento));
+}
+
+/** Eventos e workshops do calendário que podem ter pipeline no CRM: dos últimos 90 dias em diante. */
+export async function listarEventosCrm(): Promise<Res<Evento[]>> {
+  if (!(await sessao())) return negar();
+  const desde = new Date(Date.now() - 90 * 86_400_000).toISOString();
+  const { data, error } = await db().from("agenda").select(COLS_EVENTO)
+    .in("tipo", ["evento", "workshop"]).gte("inicio", desde).order("inicio");
+  return error ? falha("Não foi possível carregar os eventos.") : ok((data ?? []).map(evento));
 }
 
 export async function adicionarEvento(inicio: string, tipo: Evento["tipo"] = "evento"): Promise<Res<Evento>> {

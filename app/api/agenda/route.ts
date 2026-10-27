@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   const ate = new Date(Date.now() + 365 * 86_400_000).toISOString();
   const [c, e] = await Promise.all([
     db().from("contatos").select("id,apelido,tipo,etapa,data_hora,duracao,valor")
-      .in("etapa", ["proposta", "agendado", "realizado"]).gte("data_hora", de).lt("data_hora", ate),
+      .in("etapa", ["proposta", "agendado", "realizado"]).neq("tipo", "evento").gte("data_hora", de).lt("data_hora", ate),
     db().from("agenda").select("id,titulo,tipo,inicio,fim,local,observacoes").gte("inicio", de).lt("inicio", ate),
   ]);
   if (c.error || e.error) return new Response("erro ao carregar a agenda", { status: 500 });

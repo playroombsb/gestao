@@ -30,7 +30,7 @@ export default async function Page({ searchParams }: { searchParams: { mes?: str
   if (!agenda.ok) return <Aviso titulo="O calendário não carregou." texto={agenda.erro} />;
   if (!contatos.ok) return <Aviso titulo="O calendário não carregou." texto={contatos.erro} />;
 
-  const doCrm = contatos.data.filter((c) => c.data_hora && ["proposta", "agendado", "realizado"].includes(c.etapa)
+  const doCrm = contatos.data.filter((c) => c.tipo !== "evento" && c.data_hora && ["proposta", "agendado", "realizado"].includes(c.etapa)
     && c.data_hora >= de && c.data_hora < ate);
 
   return <Calendario key={mes} mes={mes} dias={dias} eventos={agenda.data} contatos={doCrm} />;

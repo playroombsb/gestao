@@ -46,7 +46,7 @@ export default function Nav({ nome, novas, conversas, admin }: { nome: string; n
     { id: "inicio", t: "Início", icone: "inicio", href: "/" },
     ...(admin ? [{ id: "conversas", t: "Conversas", icone: "conversas" as const, href: "/conversas", badge: conversas }] : []),
     { id: "calendario", t: "Calendário", icone: "calendario", href: "/calendario" },
-    { id: "crm", t: "CRM", icone: "crm", href: "/crm" },
+    { id: "crm", t: "CRM", icone: "crm", itens: [{ href: "/crm", t: "Pipeline" }, { href: "/crm/contatos", t: "Contatos" }] },
     { id: "operacao", t: "Operação", icone: "operacao", itens: [
       { href: "/tarefas", t: "Tarefas" }, { href: "/aplicacoes", t: "Aplicações", badge: novas },
     ] },
@@ -60,7 +60,10 @@ export default function Nav({ nome, novas, conversas, admin }: { nome: string; n
     ...(admin ? [{ id: "admin", t: "Admin", icone: "admin" as const, itens: [{ href: "/admin/usuarios", t: "Usuários" }, { href: "/admin/integracoes", t: "Integrações" }] }] : []),
   ];
 
-  const ativo = (href: string) => (href === "/" ? atual === "/" : atual === href || atual.startsWith(href + "/"));
+  // Página ativa: a entrada mais específica ganha (em /crm/contatos, "Contatos" acende e "Pipeline" não)
+  const todos = menu.flatMap((p) => [p.href, ...(p.itens ?? []).map((i) => i.href)]).filter((h): h is string => !!h);
+  const casa = (href: string) => (href === "/" ? atual === "/" : atual === href || atual.startsWith(href + "/"));
+  const ativo = (href: string) => casa(href) && !todos.some((h) => h !== href && h.startsWith(href + "/") && casa(h));
   const dentro = (p: Principal) => !!p.itens?.some((i) => ativo(i.href));
 
   // Seções abertas: lembradas neste navegador; a seção da página atual sempre abre ao chegar nela
@@ -86,7 +89,7 @@ export default function Nav({ nome, novas, conversas, admin }: { nome: string; n
   const principal = "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 text-[15px] font-semibold transition-colors";
 
   return (
-    <aside className="z-20 shrink-0 bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_35%,#0d0a0a_70%)] pt-[env(safe-area-inset-top)] text-white md:sticky md:top-0 md:flex md:h-screen md:w-64 md:flex-col md:overflow-y-auto md:pt-0">
+    <aside className="z-20 shrink-0 print:hidden bg-ink bg-[linear-gradient(165deg,#2b1216_0%,#150c0d_35%,#0d0a0a_70%)] pt-[env(safe-area-inset-top)] text-white md:sticky md:top-0 md:flex md:h-screen md:w-64 md:flex-col md:overflow-y-auto md:pt-0">
       <div className="flex items-center justify-between px-4 py-3 md:px-7 md:pb-6 md:pt-8">
         <span className="text-[12px] font-semibold uppercase tracking-[0.2em] text-red-vivo">Playroom</span>
         <button type="button" onClick={() => setAberto((a) => !a)} aria-expanded={aberto} aria-controls="menu-principal"

@@ -46,8 +46,10 @@ export default async function Page({ searchParams }: { searchParams: { p?: strin
   ]);
   if (!contatos.ok) return <Aviso titulo="As métricas não carregaram." texto={contatos.erro} />;
 
-  const doPeriodo = contatos.data.filter((c) => c.created_at >= desde);
-  const doAnterior = contatos.data.filter((c) => c.created_at >= antesDe && c.created_at < desde);
+  // Eventos têm pipeline próprio no CRM e ficam fora deste funil
+  const atendimentos = contatos.data.filter((c) => c.tipo !== "evento");
+  const doPeriodo = atendimentos.filter((c) => c.created_at >= desde);
+  const doAnterior = atendimentos.filter((c) => c.created_at >= antesDe && c.created_at < desde);
   const etapas = funil(doPeriodo);
   const topo = etapas[0].n;
   const origens = porOrigem(doPeriodo);

@@ -74,7 +74,7 @@ export default async function Page() {
 
   const abertas = tarefas.ok ? ordenar(tarefas.data.filter((t) => t.status !== "feito")) : [];
   const doCrm = contatos.ok
-    ? contatos.data.filter((c) => c.data_hora && c.data_hora >= de && c.data_hora < ate && ["proposta", "agendado", "realizado"].includes(c.etapa))
+    ? contatos.data.filter((c) => c.tipo !== "evento" && c.data_hora && c.data_hora >= de && c.data_hora < ate && ["proposta", "agendado", "realizado"].includes(c.etapa))
     : [];
   const data = new Date().toLocaleDateString("pt-BR", { timeZone: TZ, weekday: "long", day: "numeric", month: "long" });
 

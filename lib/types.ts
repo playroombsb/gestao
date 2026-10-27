@@ -51,14 +51,33 @@ export const ETAPAS = [
   { k: "realizado", t: "Realizado" },
   { k: "perdido", t: "Perdido" },
 ] as const;
-export type Etapa = (typeof ETAPAS)[number]["k"];
+/** "endereco" e "nao_aprovado" só existem no pipeline de evento (migração 0012). */
+export type Etapa = (typeof ETAPAS)[number]["k"] | "endereco" | "nao_aprovado";
+
+/** As mesmas etapas, com os nomes do pipeline de evento. */
+export const ETAPAS_EVENTO: readonly { k: Etapa; t: string }[] = [
+  { k: "novo", t: "Aplicação" },
+  { k: "conversa", t: "Conversa" },
+  { k: "proposta", t: "Link enviado" },
+  { k: "agendado", t: "Pago" },
+  { k: "endereco", t: "Endereço enviado" },
+  { k: "realizado", t: "Compareceu" },
+  { k: "nao_aprovado", t: "Não aprovados" },
+  { k: "perdido", t: "Não foi" },
+];
+export const etapasDo = (tipo: Contato["tipo"]): readonly { k: Etapa; t: string }[] => (tipo === "evento" ? ETAPAS_EVENTO : ETAPAS);
 
 export type Contato = {
   id: string;
   apelido: string;
   contato: string;
-  tipo: "sessao" | "aluguel";
+  tipo: "sessao" | "aluguel" | "evento";
+  evento_id: string | null; // evento do calendário, só no tipo evento
   etapa: Etapa;
+  email: string;
+  pronome: string; // gênero e pronome de tratamento, como a pessoa escreveu
+  ingressos: number | null; // 1 individual, 2 dupla, 3 trio (eventos)
+  respostas: Resposta[]; // respostas do formulário de aplicação, só leitura
   data_hora: string | null; // ISO
   duracao: string;
   valor: number | null;
@@ -68,7 +87,14 @@ export type Contato = {
   observacoes: string;
   created_at: string;
 };
-export type ContatoPatch = Partial<Omit<Contato, "id" | "created_at">>;
+export type ContatoPatch = Partial<Omit<Contato, "id" | "created_at" | "respostas">>;
+
+export const INGRESSOS = [
+  { n: 1, t: "Individual" },
+  { n: 2, t: "Dupla" },
+  { n: 3, t: "Trio" },
+] as const;
+export const nomeIngressos = (n: number | null) => INGRESSOS.find((x) => x.n === n)?.t ?? "";
 
 export type Resposta = { pergunta: string; resposta: string };
 export type StatusAplicacao = "nova" | "analise" | "aprovada" | "recusada";
