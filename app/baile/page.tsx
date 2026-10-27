@@ -89,20 +89,21 @@ export default async function Page() {
   return (
     <>
 
-      {/* 1. Hero */}
-      <section className={`relative flex min-h-[600px] flex-col overflow-hidden md:min-h-[640px] ${FUNDO}`}>
+      {/* 1. Hero. No celular ocupa a tela exata (svh, descontando as barras do navegador) e mostra tudo até o botão
+          do formulário sem rolar, até no iPhone pequeno (pedido da Ana em 27/10/2026) */}
+      <section className={`relative flex min-h-[100svh] flex-col overflow-hidden md:min-h-[640px] ${FUNDO}`}>
         {/* Arte espelhada para ela olhar para o texto; presa no topo para não cortar a cabeça */}
         <Arte src={FOTOS.hero} lado="dir" foco="object-top" focoMd="md:object-top" />
-        <header className="relative flex items-center justify-between gap-4 px-5 py-7 md:px-[clamp(20px,3vw,38px)]">
+        <header className="relative flex items-center justify-between gap-4 px-5 py-4 md:px-[clamp(20px,3vw,38px)] md:py-7">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/baile/logo-branco.png" alt="Playroom" className="block h-16 w-auto" />
+          <img src="/baile/logo-branco.png" alt="Playroom" className="block h-12 w-auto md:h-16" />
         </header>
-        <div className={`relative flex max-w-[760px] flex-1 flex-col justify-center gap-[26px] pb-14 pt-6 md:box-content md:pb-16 md:pt-8 ${PADDING_ESQ} ${PADDING_DIR}`}>
+        <div className={`relative flex max-w-[760px] flex-1 flex-col justify-center gap-[18px] pb-12 pt-2 md:box-content md:gap-[26px] md:pb-16 md:pt-8 ${PADDING_ESQ} ${PADDING_DIR}`}>
           <p className="m-0 text-[13px] font-semibold tracking-[.14em] text-[#ff2a44] md:text-[15px] md:tracking-[.2em]">
             PLAY PARTY{q ? ` · ${q.dia} ${q.mes} · ${q.hora}` : ""} · 18+
           </p>
-          <h1 className="m-0 text-[clamp(52px,7vw,84px)] font-semibold leading-none tracking-[-.01em]">O Baile dos Condenados.</h1>
-          <p className="m-0 max-w-[400px] text-[17px] font-semibold leading-[1.6]">
+          <h1 className="m-0 text-[clamp(40px,12vw,52px)] font-semibold md:text-[clamp(52px,7vw,84px)] leading-none tracking-[-.01em]">O Baile dos Condenados.</h1>
+          <p className="m-0 max-w-[400px] text-[16px] font-semibold leading-[1.5] md:text-[17px] md:leading-[1.6]">
             Uma festa dançante com performances e dinâmicas de integração: BDSM, fetiches e desejo em um só lugar.
           </p>
           <a href="/aplicacao" className="group flex max-w-full items-center gap-4 text-white transition-colors hover:text-[#ff2a44]">
