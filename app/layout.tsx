@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Inter } from "next/font/google";
 import { sessao } from "@/lib/auth";
 import { db } from "@/lib/supabase";
@@ -29,6 +30,14 @@ async function contarConversas() {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Site público da festa (baile.*): não tem menu nem login, então pula as consultas do sistema
+  if (/^baile\./i.test(headers().get("host") ?? "")) {
+    return (
+      <html lang="pt-BR" className={inter.variable}>
+        <body className="bg-bg font-sans text-ink antialiased">{children}</body>
+      </html>
+    );
+  }
   // As consultas em paralelo: as contagens são descartadas se não houver sessão
   const [s, novas, conversas] = await Promise.all([sessao(), contarNovas().catch(() => 0), contarConversas().catch(() => 0)]);
   return (

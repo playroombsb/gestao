@@ -16,6 +16,8 @@ ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 RUN addgroup -S app && adduser -S app -G app
 COPY --from=build --chown=app:app /app/.next/standalone ./
 COPY --from=build --chown=app:app /app/.next/static ./.next/static
+# Imagens do site da festa (public/baile); o standalone não leva a pasta public sozinho
+COPY --from=build --chown=app:app /app/public ./public
 USER app
 EXPOSE 3000
 CMD ["node", "server.js"]

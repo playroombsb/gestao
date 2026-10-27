@@ -8,7 +8,7 @@ services:
     # rótulos, atende o domínio e emite o certificado HTTPS. Nenhuma porta é publicada no host.
     labels:
       - traefik.enable=true
-      - traefik.http.routers.studio-sm.rule=Host(`gestao.playroombsb.com.br`)
+      - traefik.http.routers.studio-sm.rule=Host(`gestao.playroombsb.com.br`) || Host(`baile.playroombsb.com.br`)
       - traefik.http.routers.studio-sm.entrypoints=websecure
       - traefik.http.routers.studio-sm.tls.certresolver=letsencrypt
       - traefik.http.services.studio-sm.loadbalancer.server.port=3000
