@@ -6,7 +6,7 @@ import { useAutosave } from "@/lib/useAutosave";
 import type { Pauta, PautaPatch } from "@/lib/types";
 import StatusSalvo from "./StatusSalvo";
 
-const FORMATOS = ["Reels", "Carrossel", "Stories", "Foto", "Live", "Blog"];
+const FORMATOS = ["Reels", "Carrossel", "Stories", "Foto", "Live", "E-mail", "Blog"];
 const FUNIL = ["Topo", "Meio", "Fundo"];
 const STATUS = ["Ideia", "Roteiro", "Produção", "Agendado", "Publicado"];
 
